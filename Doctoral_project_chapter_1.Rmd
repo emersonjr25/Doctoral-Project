@@ -76,7 +76,29 @@ if (!verify_config(config)) {
 
 ### MODIFICATIONS IN CONFIG ###
 
-config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, config) {
+config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
+  save_species()
+  save_traits()
+  save_phylogeny()
+  #plot_richness(data$all_species, data$landscape)
+
+}
+
+#########################################################
+rep <- 2
+
+plasti <- seq(0.01, 0.02, 0.01)
+
+finalresult <- data.frame(plasticidade = runif(rep * length(plasti), 0, 0),
+                          replications = runif(rep * length(plasti), 0, 0),
+                          speciation = runif(rep * length(plasti), 0, 0),
+                          extinction = runif(rep * length(plasti), 0, 0),
+                          diversif = runif(rep * length(plasti), 0, 0),
+                          traitevolution = runif(rep * length(plasti), 0, 0))
+
+for(p in 1:length(plasti)){
+
+  config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, config) {
   abundance_scale = 10
   abundance_threshold = 1
   #abundance threshold
@@ -95,7 +117,7 @@ config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, c
   plasticity2 <- function(x, land) {
     min(abs(x - land))
   }
-    traits_sub <- lapply(traits[, 'temp'], plasticity, plast = 0.02)
+    traits_sub <- lapply(traits[, 'temp'], plasticity, plast = plasti[p])
     traits_sub2 <- sapply(traits_sub, plasticity2, land = landscape[,'temp'])
   abundance <- ((1 - traits_sub2)*abundance_scale)*as.numeric(survive)
   
@@ -117,26 +139,10 @@ config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, c
     abundance[!alive] <- 0
   }
   return(abundance)
-}
+  }  
+  
+    for(r in 1:rep){
 
-config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
-  save_species()
-  save_traits()
-  save_phylogeny()
-  #plot_richness(data$all_species, data$landscape)
-
-}
-
-#########################################################
-rep <- 3
-
-finalresult <- data.frame(replications = runif(rep, 0, 0),
-                          speciation = runif(rep, 0, 0),
-                          extinction = runif(rep, 0, 0),
-                          diversif = runif(rep, 0, 0),
-                          traitevolution = runif(rep, 0, 0))
-
-for(r in 1:rep){
 
 val <- list(data = list(),
             vars = list(),
@@ -149,21 +155,6 @@ val <- setup_landscape(val$config, val$data, val$vars)
 val$data$landscape$id <- val$data$landscape$id + 1
 val <- init_attribute_ancestor_distribution(val$config,
                                             val$data, val$vars)
-
-#state <- "lowtemp"
-#state <- "mediumtemp"
-# 
-#   if (state == "lowtemp") {
-#   val$data$landscape$environment[, 1] <-  val$data$landscape$environment[, 1] + 0.3
-#   val$data$inputs$environments$temp  <- val$data$inputs$environments$temp + 0.3} else {
-#     print("there is not any state low")
-#   }
-# 
-# if (state == "mediumtemp") {
-#   val$data$landscape$environment[, 1] <-  val$data$landscape$environment[, 1] + 0.6
-#   val$data$inputs$environments$temp  <- val$data$inputs$environments$temp + 0.6} else {
-#     print("there is not state medium")
-#   }
 
 val <- init_simulation(val$config, val$data, val$vars)
 val <- init_summary_statistics(val$data, val$vars, val$config)
@@ -191,15 +182,26 @@ if (!is.na(timestep_restart)) {
   val <- restore_state(val, timestep_restart)
 }
 
- for (ti in val$vars$steps) {
+for (ti in val$vars$steps) {
 
-state <- "hightemp"
-
+##########################################################  
+  
+# state <- "hightemp"
 # if(val$vars$steps[ti] == 10){
 #   if(state == "hightemp"){
-#   val$data$landscape$environment[, 1] <-  val$data$landscape$environment[, 1] + 0.9
-# val$data$inputs$environments$temp  <- val$data$inputs$environments$temp + 0.9 }
-#   }
+#     val$data$landscape$environment[, 1] <-  val$data$landscape$environment[, 1] + 0.9
+#     val$data$inputs$environments$temp  <- val$data$inputs$environments$temp + 0.9 }
+# }
+
+#val$data$inputs$environments$temp <- sapply(val$data$inputs$environments$temp, FUN = function(dados){
+  #return(dados + abs(rnorm(1, 0.3, 0.1)))
+#})
+
+#val$data$landscape$environment[, 1] <- sapply(val$data$landscape$environment[, 1], FUN = function(dados){
+ # return(dados + abs(rnorm(1, 0.3, 0.1)))
+#})
+
+#######################################################
 
   val$vars$n_new_sp_ti <- 0
   val$vars$n_ext_sp_ti <- 0
@@ -301,28 +303,9 @@ if (verbose >= 1) {
 }
 #plot_summary(sgen3sis)
 
-ratespeciation <- sum(sgen3sis$summary$phylo_summary[, 3]) / val$vars$steps[[1]]
-
-rateextinction <- sum(sgen3sis$summary$phylo_summary[, 4]) / val$vars$steps[[1]]
-
-diversification <- ratespeciation - rateextinction
-
-finalresult$replications[r] <- r
-finalresult$speciation[r] <- ratespeciation
-finalresult$extinction[r] <- rateextinction
-finalresult$diversif[r] <- diversification
-
-rm(val, sgen3sis, rateextinction, ratespeciation, diversification)
-#rm(list=ls())
-
-}
-
-write.csv2(finalresult, file = "finalresult.csv", row.names = FALSE)
-saveRDS(finalresult, file = "finalresult.RDS" )
-
 ################## TRAIT EVOLUTION #####################
 
-##### PATHWAY ####
+##### PATHWAY TO TRAITS DATA####
 setwd("C:/Users/Emerson Júnior/Google Drive/Doutorado/R/Doctotal Project/WorldCenter/output/config_worldcenter/traits")
 
 caminho <- "C:/Users/Emerson Júnior/Google Drive/Doutorado/R/Doctotal Project/WorldCenter/output/config_worldcenter/traits"
@@ -332,7 +315,7 @@ listfiles <- list.files("C:/Users/Emerson Júnior/Google Drive/Doutorado/R/Docto
 filestoread <- length(list.files("C:/Users/Emerson Júnior/Google Drive/Doutorado/R/Doctotal Project/WorldCenter/output/config_worldcenter/traits"))
 
 
-#### Organizing pathway ####
+#### Organizing selection of trait files ####
 cam <- 0
 for(l in 1:filestoread){
   cam[l] <- caminho
@@ -366,16 +349,9 @@ colunatemp <- function(dados){
   return(dados[, 1])
 }
 
-### lapply to select only temp column in group of data ###
-coluna <- function(dados, colu){
-  result <- lapply(dados, colu)
-  return(result)
-}
-
 ### only values of species temperature ###
-
 for(i in 1:length(datafinal)){
-  datafinal[[i]] <- coluna(datafinal[[i]], colunatemp)
+  datafinal[[i]] <- lapply(datafinal[[i]], colunatemp)
 }
 
 for(i in 1:length(datafinal)){
@@ -387,8 +363,60 @@ for(i in 1:length(datafinal)){
   datafinal[[i]] <- datafinal[[i]][which(result == FALSE)]
 }
 
-###meantraitevolution
+####### FINAL MEAN PER TIME STEP #######
+datafinal <- lapply(datafinal, as.numeric)
+datafinal <- lapply(datafinal, mean)
 
-#### loop utilizando lista dentro de lista, como fazer? subscripts out of bounds ## perguntar a bruno || outra coisa, problema no loop com mudança de temperatura
+
+traitevolution <- exp(mean(log(as.numeric(datafinal)))) / length(datafinal)
+
+##### SPECIATION AND EXTINCTION ####
+
+ratespeciation <- sum(sgen3sis$summary$phylo_summary[, 3]) / val$vars$steps[[1]]
+
+rateextinction <- sum(sgen3sis$summary$phylo_summary[, 4]) / val$vars$steps[[1]]
+
+diversification <- ratespeciation - rateextinction
+
+finalresult$plasticidade[p] <- plasti[p]
+finalresult$replications[r] <- r
+finalresult$speciation[r] <- ratespeciation
+finalresult$extinction[r] <- rateextinction
+finalresult$diversif[r] <- diversification
+finalresult$traitevolution[r] <- traitevolution
+
+#rm(val, sgen3sis, rateextinction, ratespeciation, diversification, result, datafinal)
+#rm(list=ls())
+}
+}
+
+
+setwd("C:/Users/Emerson Júnior/Google Drive/Doutorado/R/Doctotal Project/WorldCenter/output/config_worldcenter")
+write.csv2(finalresult, file = "finalresult.csv", row.names = FALSE)
+saveRDS(finalresult, file = "finalresult.RDS" )
+
+
+
+
+#############################################################
+rep <- 2
+
+plasti <- seq(0.01, 0.02, 0.01)
+
+finalresult <- data.frame(plasticidade = runif(rep * length(plasti), 0, 0),
+                          replications = runif(rep * length(plasti), 0, 0),
+                          speciation = runif(rep * length(plasti), 0, 0),
+                          extinction = runif(rep * length(plasti), 0, 0),
+                          diversif = runif(rep * length(plasti), 0, 0),
+                          traitevolution = runif(rep * length(plasti), 0, 0))
+
+finalresult$plasticidade[p] <- plasti[p]
+finalresult$replications[r] <- r
+finalresult$speciation[r] <- ratespeciation
+finalresult$extinction[r] <- rateextinction
+finalresult$diversif[r] <- diversification
+finalresult$traitevolution[r] <- traitevolution
+
 
 ```
+

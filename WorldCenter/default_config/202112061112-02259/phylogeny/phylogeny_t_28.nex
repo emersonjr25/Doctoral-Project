@@ -1,0 +1,5 @@
+#NEXUS
+begin trees;
+tree = ((((((((species1:16,(species9:1,species12:1):15):0,species8:16):0,(species7:12,species10:12):4):0,species6:16):0,species5:16):0,species4:16):0,(species3:8,species11:3):8):0,(species2:0,species13:0):16):6;
+end;
+[!Tree generated with the General Allele Simulation Model (GaSM), following convention of TreeSim and TreeSimGM r-packages]

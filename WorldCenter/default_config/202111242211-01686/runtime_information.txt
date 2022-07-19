@@ -1,0 +1,52 @@
+runtime: 0.006568689 hours
+
+
+ R Version Information:
+
+               _                           
+platform       x86_64-w64-mingw32          
+arch           x86_64                      
+os             mingw32                     
+system         x86_64, mingw32             
+status                                     
+major          4                           
+minor          0.2                         
+year           2020                        
+month          06                          
+day            22                          
+svn rev        78730                       
+language       R                           
+version.string R version 4.0.2 (2020-06-22)
+nickname       Taking Off Again            
+
+
+ Session Information: 
+
+R version 4.0.2 (2020-06-22)
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+Running under: Windows 10 x64 (build 19042)
+
+Matrix products: default
+
+locale:
+[1] LC_COLLATE=Portuguese_Brazil.1252  LC_CTYPE=Portuguese_Brazil.1252   
+[3] LC_MONETARY=Portuguese_Brazil.1252 LC_NUMERIC=C                      
+[5] LC_TIME=Portuguese_Brazil.1252    
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] truncnorm_1.0-8 raster_3.3-13   sp_1.4-2        gen3sis_1.2    
+
+loaded via a namespace (and not attached):
+ [1] compiler_4.0.2   magrittr_2.0.1   Matrix_1.2-18    tools_4.0.2     
+ [5] igraph_1.2.5     Rcpp_1.0.5       stringi_1.4.6    codetools_0.2-18
+ [9] grid_4.0.2       stringr_1.4.0    gdistance_1.3-6  pkgconfig_2.0.3 
+[13] lattice_0.20-44 
+
+
+ System: 
+
+  sysname 
+"Windows" 
