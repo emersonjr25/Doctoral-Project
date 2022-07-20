@@ -36,6 +36,11 @@ directories <- prepare_directories(
   input_directory = landscape,
   output_directory = output_directory
 )
+
+pathway <- paste(datapath, "output/config_worldcenter/phy_res", sep = "/", collapse = "--")
+dir.create(pathway,  showWarnings = FALSE)
+
+
 if (is.na(config)[1]) {
   stop("please provide either a config file or a config object")
 } else if (class(config) == "gen3sis_config") {
@@ -62,9 +67,11 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 }
 
 #########################################################
-rep <- 2
+rep <- 1
 
 plasti <- seq(0.01, 0.02, 0.01)
+
+pos <- 0
 
 finalresult <- data.frame(plasticidade = runif(rep * length(plasti), 0, 0),
                           replications = runif(rep * length(plasti), 0, 0),
@@ -171,7 +178,7 @@ for(p in 1:length(plasti)){
       # }
       
       #val$data$inputs$environments$temp <- sapply(val$data$inputs$environments$temp, FUN = function(dados){
-      #return(dados + abs(rnorm(1, 0.3, 0.1)))
+      #return(dados + abs(rnorm(1, 2, 0.1)))
       #})
       
       #val$data$landscape$environment[, 1] <- sapply(val$data$landscape$environment[, 1], FUN = function(dados){
@@ -258,15 +265,15 @@ for(p in 1:length(plasti)){
     val <- update.phylo(val$config, val$data, val$vars)
     write.table(
       val$data$phy,
-      file = file.path(val$config$directories$output,
-                       "phy.txt"),
+      file = file.path(pathway,
+                       paste0("phy", "plast", p, "rep", r, ".txt")),
       sep = "\t"
     )
     write_nex(
       phy = val$data$phy,
       label = "species",
-      file.path(output_location = val$config$directories$output,
-                "phy.nex")
+      file.path(output_location = pathway,
+                paste0("phy", "plast", p, "rep", r, ".nex"))
     )
     system_time_stop <- Sys.time()
     total_runtime <- difftime(system_time_stop, system_time_start,
@@ -355,42 +362,26 @@ for(p in 1:length(plasti)){
     
     diversification <- ratespeciation - rateextinction
     
-    finalresult$plasticidade[p] <- plasti[p]
-    finalresult$replications[r] <- r
-    finalresult$speciation[r] <- ratespeciation
-    finalresult$extinction[r] <- rateextinction
-    finalresult$diversif[r] <- diversification
-    finalresult$traitevolution[r] <- traitevolution
+    pos <- pos + 1
     
-    #rm(val, sgen3sis, rateextinction, ratespeciation, diversification, result, datafinal)
+    finalresult$plasticidade[pos] <- plasti[p]
+    finalresult$replications[pos] <- r
+    finalresult$speciation[pos] <- ratespeciation
+    finalresult$extinction[pos] <- rateextinction
+    finalresult$diversif[pos] <- diversification
+    finalresult$traitevolution[pos] <- traitevolution
+    
+    rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal)
     #rm(list=ls())
   }
 }
-
 
 setwd("C:/Users/Emerson Júnior/Google Drive/Doutorado/R/Doctoral Project/WorldCenter/output/config_worldcenter")
 write.csv2(finalresult, file = "finalresult.csv", row.names = FALSE)
 saveRDS(finalresult, file = "finalresult.RDS" )
 
+#for(i in 1:length(finalresult$plasticidade)){ 
+ # }
 
-
-
-  #############################################################
-rep <- 2
-
-plasti <- seq(0.01, 0.02, 0.01)
-
-finalresult <- data.frame(plasticidade = runif(rep * length(plasti), 0, 0),
-                          replications = runif(rep * length(plasti), 0, 0),
-                          speciation = runif(rep * length(plasti), 0, 0),
-                          extinction = runif(rep * length(plasti), 0, 0),
-                          diversif = runif(rep * length(plasti), 0, 0),
-                          traitevolution = runif(rep * length(plasti), 0, 0))
-
-finalresult$plasticidade[p] <- plasti[p]
-finalresult$replications[r] <- r
-finalresult$speciation[r] <- ratespeciation
-finalresult$extinction[r] <- rateextinction
-finalresult$diversif[r] <- diversification
-finalresult$traitevolution[r] <- traitevolution
-
+plot(finalresult$diversif ~ finalresult$plasticidade)
+plot(finalresult$traitevolution ~ finalresult$plasticidade)
