@@ -4,6 +4,7 @@
 #install.packages("igraph")
 #install.packages("stringi")
 #install.packages("truncnorm")
+#install.packages("here")
 
 ###### Effect of plasticity on adaptive evolution - chapter I #####################
 ########## AUTHOR: EMERSON CAMPOS BARBOSA JUNIOR ############
@@ -13,10 +14,11 @@ library(stringi)
 library(gen3sis)
 library(raster)
 library(truncnorm)
+library(here)
 
 #### SIMULATION ####
-#datapath <- setwd("C:/Users/Guest/Documents/Emerson/Doutorado/R/WorldCenter")
-datapath <- setwd("/home/bvilela/Documents/Emerson/Doctoral Project/WorldCenter")
+
+datapath <- here("WorldCenter")
 attach(loadNamespace('gen3sis'), name = 'gen3sis_all')
 config = file.path(datapath, "config/config_worldcenter.R")
 landscape = file.path(datapath, "landscape")
@@ -38,8 +40,8 @@ directories <- prepare_directories(
   output_directory = output_directory
 )
 
-pathway <- paste(datapath, "output/config_worldcenter/phy_res", sep = "/", collapse = "--")
-dir.create(pathway,  showWarnings = FALSE)
+#pathway <- paste(datapath, "output/config_worldcenter/phy_res", sep = "/", collapse = "--")
+#dir.create(pathway,  showWarnings = FALSE)
 
 
 if (is.na(config)[1]) {
@@ -60,9 +62,8 @@ if (!verify_config(config)) {
 ### MODIFICATIONS IN CONFIG ###
 
 config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
-  save_species()
+  #save_species()
   save_traits()
-  save_phylogeny()
   #plot_richness(data$all_species, data$landscape)
   
 }
@@ -265,18 +266,18 @@ for(p in 1:length(plasti)){
       cat("Simulation finished. Early abort due to exceeding max number of co-occuring species")
     }
     val <- update.phylo(val$config, val$data, val$vars)
-    write.table(
-      val$data$phy,
-      file = file.path(pathway,
-                       paste0("phy", "plast", p, "rep", r, ".txt")),
-      sep = "\t"
-    )
-    write_nex(
-      phy = val$data$phy,
-      label = "species",
-      file.path(output_location = pathway,
-                paste0("phy", "plast", p, "rep", r, ".nex"))
-    )
+   # write.table(
+    #  val$data$phy,
+     # file = file.path(pathway,
+       #                paste0("phy", "plast", p, "rep", r, ".txt")),
+     # sep = "\t"
+   # )
+    #write_nex(
+    #  phy = val$data$phy,
+    #  label = "species",
+    #  file.path(output_location = pathway,
+           #     paste0("phy", "plast", p, "rep", r, ".nex"))
+   # )
     system_time_stop <- Sys.time()
     total_runtime <- difftime(system_time_stop, system_time_start,
                               units = "hours")[[1]]
@@ -292,13 +293,12 @@ for(p in 1:length(plasti)){
     ################## TRAIT EVOLUTION #####################
     
     ##### PATHWAY TO TRAITS DATA####
-    setwd("/home/bvilela/Documents/Emerson/Doctoral Project/WorldCenter/output/config_worldcenter/traits")
+
+    caminho <- here("WorldCenter", "output", "config_worldcenter", "traits")
     
-    caminho <- "/home/bvilela/Documents/Emerson/Doctoral Project/WorldCenter/output/config_worldcenter/traits"
+    listfiles <- list.files("WorldCenter/output/config_worldcenter/traits")
     
-    listfiles <- list.files("/home/bvilela/Documents/Emerson/Doctoral Project/WorldCenter/output/config_worldcenter/traits")
-    
-    filestoread <- length(list.files("/home/bvilela/Documents/Emerson/Doctoral Project/WorldCenter/output/config_worldcenter/traits"))
+    filestoread <- length(list.files("WorldCenter/output/config_worldcenter/traits"))
     
     
     #### Organizing selection of trait files ####
@@ -378,8 +378,7 @@ for(p in 1:length(plasti)){
   }
 }
 
-setwd("/home/bvilela/Documents/Emerson/Doctoral Project/WorldCenter/output/config_worldcenter")
-write.csv2(finalresult, file = "finalresult .csv", row.names = FALSE)
+write.csv2(finalresult, file = "finalresult.csv", row.names = FALSE)
 saveRDS(finalresult, file = "finalresult.RDS" )
 
 #for(i in 1:length(finalresult$plasticidade)){ 
