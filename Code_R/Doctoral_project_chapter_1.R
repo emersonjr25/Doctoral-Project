@@ -3,6 +3,7 @@
 #install.packages("raster")
 #install.packages("igraph")
 #install.packages("stringi")
+#install.packages("truncnorm")
 
 ###### Effect of plasticity on adaptive evolution - chapter I #####################
 ########## AUTHOR: EMERSON CAMPOS BARBOSA JUNIOR ############
@@ -15,7 +16,7 @@ library(truncnorm)
 
 #### SIMULATION ####
 #datapath <- setwd("C:/Users/Guest/Documents/Emerson/Doutorado/R/WorldCenter")
-datapath <- setwd("C:/Users/Emerson Júnior/Google Drive/Doutorado/R/Doctoral Project/WorldCenter")
+datapath <- setwd("/home/bvilela/Documents/Emerson/Doctoral Project/WorldCenter")
 attach(loadNamespace('gen3sis'), name = 'gen3sis_all')
 config = file.path(datapath, "config/config_worldcenter.R")
 landscape = file.path(datapath, "landscape")
@@ -95,7 +96,7 @@ for(p in 1:length(plasti)){
     # plast = 0, means no plasticity
     
     plasticity <- function(x, plast) {
-      seq(x - plast, x + plast, 0.001)
+      seq((x * plast) - plast, (x * plast) + plast, 0.01)
     }
     
     plasticity2 <- function(x, land) {
@@ -108,7 +109,8 @@ for(p in 1:length(plasti)){
     
     #abundance threshold
     abundance[abundance<abundance_threshold] <- 0
-    k <- ((landscape[,'area']*(landscape[,'arid']+0.1)*(landscape[,'temp']+0.1))*abundance_scale^2)
+    k <- ((landscape[,'area']*(landscape[,'arid']+0.1)*(landscape[,'temp']+0.1))
+          *abundance_scale^2)
     total_ab <- sum(abundance)
     subtract <- total_ab-k
     if (subtract > 0) {
@@ -290,13 +292,13 @@ for(p in 1:length(plasti)){
     ################## TRAIT EVOLUTION #####################
     
     ##### PATHWAY TO TRAITS DATA####
-    setwd("C:/Users/Emerson Júnior/Google Drive/Doutorado/R/Doctoral Project/WorldCenter/output/config_worldcenter/traits")
+    setwd("/home/bvilela/Documents/Emerson/Doctoral Project/WorldCenter/output/config_worldcenter/traits")
     
-    caminho <- "C:/Users/Emerson Júnior/Google Drive/Doutorado/R/Doctoral Project/WorldCenter/output/config_worldcenter/traits"
+    caminho <- "/home/bvilela/Documents/Emerson/Doctoral Project/WorldCenter/output/config_worldcenter/traits"
     
-    listfiles <- list.files("C:/Users/Emerson Júnior/Google Drive/Doutorado/R/Doctoral Project/WorldCenter/output/config_worldcenter/traits")
+    listfiles <- list.files("/home/bvilela/Documents/Emerson/Doctoral Project/WorldCenter/output/config_worldcenter/traits")
     
-    filestoread <- length(list.files("C:/Users/Emerson Júnior/Google Drive/Doutorado/R/Doctoral Project/WorldCenter/output/config_worldcenter/traits"))
+    filestoread <- length(list.files("/home/bvilela/Documents/Emerson/Doctoral Project/WorldCenter/output/config_worldcenter/traits"))
     
     
     #### Organizing selection of trait files ####
@@ -359,7 +361,7 @@ for(p in 1:length(plasti)){
     ratespeciation <- sum(sgen3sis$summary$phylo_summary[, 3]) / val$vars$steps[[1]]
     
     rateextinction <- sum(sgen3sis$summary$phylo_summary[, 4]) / val$vars$steps[[1]]
-    
+    traitevolution
     diversification <- ratespeciation - rateextinction
     
     pos <- pos + 1
@@ -376,12 +378,12 @@ for(p in 1:length(plasti)){
   }
 }
 
-setwd("C:/Users/Emerson Júnior/Google Drive/Doutorado/R/Doctoral Project/WorldCenter/output/config_worldcenter")
-write.csv2(finalresult, file = "finalresult.csv", row.names = FALSE)
+setwd("/home/bvilela/Documents/Emerson/Doctoral Project/WorldCenter/output/config_worldcenter")
+write.csv2(finalresult, file = "finalresult .csv", row.names = FALSE)
 saveRDS(finalresult, file = "finalresult.RDS" )
 
 #for(i in 1:length(finalresult$plasticidade)){ 
- # }
+# }
 
 plot(finalresult$diversif ~ finalresult$plasticidade)
 plot(finalresult$traitevolution ~ finalresult$plasticidade)
