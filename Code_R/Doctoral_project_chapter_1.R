@@ -41,7 +41,7 @@ directories <- prepare_directories(
 )
 
 #pathway <- paste(datapath, "output/config_worldcenter/phy_res", sep = "/", collapse = "--")
-#dir.create(pathway,  showWarnings = FALSE)
+#dir.create(pathway, showWarnings = FALSE)
 
 
 if (is.na(config)[1]) {
@@ -62,8 +62,8 @@ if (!verify_config(config)) {
 ### MODIFICATIONS IN CONFIG ###
 
 config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
-  #save_species()
   save_traits()
+  #save_species()
   #plot_richness(data$all_species, data$landscape)
   
 }
@@ -71,7 +71,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 #########################################################
 rep <- 1
 
-plasti <- seq(0.01, 0.02, 0.01)
+plasti <- seq(0.1, 0.2, 0.1)
 
 pos <- 0
 
@@ -129,8 +129,6 @@ for(p in 1:length(plasti)){
   }  
   
   for(r in 1:rep){
-    
-    
     val <- list(data = list(),
                 vars = list(),
                 config = config)
