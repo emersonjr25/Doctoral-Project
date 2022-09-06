@@ -1,4 +1,4 @@
-runtime: 0.02207008 hours
+runtime: 0.001911304 hours
 
 
  R Version Information:
@@ -37,13 +37,19 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] here_1.0.1      truncnorm_1.0-8 raster_3.3-13   sp_1.4-2       
-[5] gen3sis_1.2     stringi_1.4.6   igraph_1.2.5   
+[1] stringr_1.4.0   dplyr_1.0.7     here_1.0.1      truncnorm_1.0-8
+[5] raster_3.3-13   sp_1.4-2        gen3sis_1.2     stringi_1.4.6  
+[9] igraph_1.2.5   
 
 loaded via a namespace (and not attached):
- [1] Rcpp_1.0.5       lattice_0.20-44  codetools_0.2-18 rprojroot_2.0.2 
- [5] grid_4.0.2       magrittr_2.0.1   Matrix_1.2-18    tools_4.0.2     
- [9] stringr_1.4.0    compiler_4.0.2   pkgconfig_2.0.3  gdistance_1.3-6 
+ [1] Rcpp_1.0.5       rstudioapi_0.13  magrittr_2.0.1   pkgload_1.2.1   
+ [5] tidyselect_1.1.1 lattice_0.20-44  R6_2.5.0         rlang_0.4.11    
+ [9] fansi_0.4.2      tools_4.0.2      grid_4.0.2       gdistance_1.3-6 
+[13] utf8_1.2.1       cli_2.5.0        withr_2.4.2      ellipsis_0.3.2  
+[17] rprojroot_2.0.2  tibble_3.1.1     lifecycle_1.0.0  crayon_1.4.1    
+[21] Matrix_1.2-18    purrr_0.3.4      vctrs_0.3.8      codetools_0.2-18
+[25] testthat_3.0.2   glue_1.4.2       compiler_4.0.2   pillar_1.6.0    
+[29] desc_1.3.0       generics_0.1.0   pkgconfig_2.0.3 
 
 
  System: 

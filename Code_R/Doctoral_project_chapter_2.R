@@ -1,22 +1,21 @@
-#### DOCTORAL ANALYSIS ###
-dados <- read.csv("C:/Users/Emerson J?nior/Google Drive/Doutorado/Base de Dados/Database.csv", header = TRUE, sep = ",")
-metadado <- read.csv("C:/Users/Emerson J?nior/Google Drive/Doutorado/Base de Dados/Metadata.csv", header = TRUE, sep = ",")
-metadado2 <- read.csv2("C:/Users/Emerson J?nior/Google Drive/Doutorado/Base de Dados/Metadata.csv")
-write.csv2(metadado, file = "metadado.csv")
-getwd()
-View(dados)
-View(metadado)
-View(metadado2)
-unique(dados$country)
+############ DOCTORAL CHAPTER 2 #################
+##### EMERSON CAMPOS BARBOSA JÚNIOR ####
 
-install.packages("stringr")
-library("stringr")
+### PACKAGES ####
+library(dplyr)
+library(stringr)
 
-plot(dados$mean ~ dados$T)
-unique(dados$state_province)
-unique(dados$species)
-count(dados$species)
+dados <- read.csv("Database.csv", header = TRUE, sep = ",")
 
-str_count(dados$species, "nubila")
-sum(str_count(dados$species, "nubila"))
-str_length(dados$species)
+subdata <- select(dados, paper_no, first_author_surname, pub_year, genus, species, population, source, trait_cat, simp_trait, T, mean)
+
+new <- 0
+
+for(i in 1:length(subdata$paper_no)){
+  if(unique(subdata$paper_no[i] == subdata$paper_no))
+   new[i] <- unique(subdata$paper_no)
+}
+
+data.frame()
+unique(subdata$paper_no)
+filter()
