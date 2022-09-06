@@ -40,6 +40,66 @@ directories <- prepare_directories(
   output_directory = output_directory
 )
 
+
+# temperatura <- landscapes$temp[, 3:52]
+# for(i in 1:1000){
+#   temperatura2[i] <- list(i = 1)
+# }
+# opa <- 1000:1
+# for(i in 1:1000){
+#   names(temperatura2)[[i]] <- paste0(opa[i], "Ma")
+# }
+# 
+# for(i in 1:length(temperatura2)){
+#   temperatura2[[i]] <- temperatura[[i]]
+# }
+# 
+#   temperatura
+# landscape2 <- list(temp = NA, arid = NA, area = NA)
+# 
+# # get path containing example rasters
+# datapath <- system.file(file.path("extdata", "WorldCenter"), package="gen3sis")
+# # create raster bricks
+# temperature_brick <- brick(file.path(datapath, "input_rasters/temp_rasters.grd"))
+# aridity_brick <- brick(file.path(datapath, "input_rasters/arid_rasters.grd"))
+# area_brick <- brick(file.path(datapath, "input_rasters/area_rasters.grd"))
+# # create sub-list of environmental variables for fast example
+# # (i.e. 4 time-steps)
+# landscapes_sub_list <- list(temp=NULL, arid=NULL, area=NULL)
+# for(i in 1:4){
+#   landscapes_sub_list$temp <- c(landscapes_sub_list$temp, temperature_brick[[i]])
+#   landscapes_sub_list$arid <- c(landscapes_sub_list$arid, aridity_brick[[i]])
+#   landscapes_sub_list$area <- c(landscapes_sub_list$area, area_brick[[i]])
+# }
+# # define cost function, crossing water as double as land sites
+# cost_function_water <- function(source, habitable_src, dest, habitable_dest) {
+#   if(!all(habitable_src, habitable_dest)) {
+#     return(2/1000)
+#   } else {
+#     return(1/1000)
+#   }
+# }
+# 
+# # create input landscape ready for gen3sis from sub-list
+# # (i.e. 10 time-steps) and only local-distances.
+# create_input_landscape(
+#   landscapes = landscapes_sub_list,
+#   cost_function = cost_function_water,
+#   output_directory = file.path(tempdir(), "landscape_sub"),
+#   directions = 8, # surrounding sites for each site
+#   timesteps = paste0(round(1000:1,2), "Ma"),
+#   calculate_full_distance_matrices = FALSE) # full distance matrix
+# # create list of all environmental variables available
+# landscapes_list <- list(temp=NULL, arid=NULL, area=NULL)
+# for(i in 1:nlayers(temperature_brick)){
+#   landscapes_list$temp <- c(landscapes_list$temp, temperature_brick[[i]])
+#   landscapes_list$arid <- c(landscapes_list$arid, aridity_brick[[i]])
+#   landscapes_list$area <- c(landscapes_list$area, area_brick[[i]])
+# }
+# 
+# 
+
+
 #pathway <- paste(datapath, "output/config_worldcenter/phy_res", sep = "/", collapse = "--")
 #dir.create(pathway, showWarnings = FALSE)
 
@@ -79,7 +139,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 #########################################################
 rep <- 1
 
-plasti <- seq(0.1, 0.1, 0.1)
+plasti <- seq(0.1, 0.2, 0.1)
 
 pos <- 0
 
@@ -287,15 +347,15 @@ for(p in 1:length(plasti)){
         system_time_stop <- Sys.time()
         total_runtime <- difftime(system_time_stop, system_time_start,
                                   units = "hours")[[1]]
-        write_runtime_statisitics(val$data, val$vars, val$config,
-                                  total_runtime)
+        #write_runtime_statisitics(val$data, val$vars, val$config,
+        #                          total_runtime)
         sgen3sis <- make_summary(val$config, val$data, val$vars,
                                  total_runtime, save_file = TRUE)
         #plot_summary(sgen3sis)
         
-        if (verbose >= 1) {
-          cat("Simulation runtime:", total_runtime, "hours\n")
-        }
+       # if (verbose >= 1) {
+       #  cat("Simulation runtime:", total_runtime, "hours\n")
+       # }
         ################## TRAIT EVOLUTION #####################
         
         ##### PATHWAY TO TRAITS DATA####
@@ -372,11 +432,22 @@ for(p in 1:length(plasti)){
         
         pos <- pos + 1
       
-        sequence <- sort(seq(from = config$gen3sis$general$end_time, to = config$gen3sis$general$start_time, by = 5), decreasing = TRUE)
-       
-        #### OPTION 1 ####
-         for(seque in 1:(length(sequence))){
-          if(val$vars$steps[ti] == sequence[seque]) {
+        # sequence <- sort(seq(from = config$gen3sis$general$end_time, to = config$gen3sis$general$start_time, by = 5), decreasing = TRUE)
+        # 
+        # #### OPTION 1 ####
+        #  for(seque in 1:(length(sequence))){
+        #   if(val$vars$steps[ti] == sequence[seque]) {
+        #     finalresult$plasticidade[pos] <- plasti[p]
+        #     finalresult$replications[pos] <- r
+        #     finalresult$speciation[pos] <- ratespeciation
+        #     finalresult$extinction[pos] <- rateextinction
+        #     finalresult$diversif[pos] <- diversification
+        #     finalresult$traitevolution[pos] <- traitevolution
+        #     finalresult$timesimulation[pos] <- ti
+        #   }
+        #  }
+        #### OPTION 2 ###
+          if(ti %% 2 == 1) {
             finalresult$plasticidade[pos] <- plasti[p]
             finalresult$replications[pos] <- r
             finalresult$speciation[pos] <- ratespeciation
@@ -385,28 +456,14 @@ for(p in 1:length(plasti)){
             finalresult$traitevolution[pos] <- traitevolution
             finalresult$timesimulation[pos] <- ti
           }
-         }
-        #### OPTION 2 ###
-          # if(ti %% 2 == 0) {
-          #   finalresult$plasticidade[pos] <- plasti[p]
-          #   finalresult$replications[pos] <- r
-          #   finalresult$speciation[pos] <- ratespeciation
-          #   finalresult$extinction[pos] <- rateextinction
-          #   finalresult$diversif[pos] <- diversification
-          #   finalresult$traitevolution[pos] <- traitevolution
-          #   finalresult$timesimulation[pos] <- ti
-          # }
-      
-  
-        #rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal)
-        #rm(list=ls())
-      } 
-    }
+    } 
   }
+  rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal)
+}
 
-
-write.csv2(finalresult, file = "finalresult.csv", row.names = FALSE)
-saveRDS(finalresult, file = "finalresult.RDS" )
+write.csv2(finalresult, file = ("finalresult_alongtime.csv"), row.names = FALSE)
+#write.csv2(finalresult, file = "finalresult.csv", row.names = FALSE)
+#saveRDS(finalresult, file = "finalresult.RDS" )
 
 #for(i in 1:length(finalresult$plasticidade)){ 
 # }
@@ -415,3 +472,5 @@ plot(finalresult$traitevolution ~ finalresult$timesimulation)
 
 plot(finalresult$diversif ~ finalresult$plasticidade)
 plot(finalresult$traitevolution ~ finalresult$plasticidade)
+
+#val$data$inputs$environments$temp[1, ]
