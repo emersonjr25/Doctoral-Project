@@ -63,12 +63,6 @@ if (!verify_config(config)) {
 
 ### MODIFICATIONS IN CONFIG ###
 
-config$gen3sis$general$start_time <- 3
-
-config$gen3sis$general$end_time <- 0
-
-timesteps_total <- length(config$gen3sis$general$start_time:config$gen3sis$general$end_time) - 1
-
 config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
   save_traits()
   #save_species()
@@ -77,19 +71,18 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 }
 
 #########################################################
-rep <- 1
+rep <- 10
 
-plasti <- seq(0.1, 0.1, 0.1)
+plasti <- seq(0.1, 0.2, 0.1)
 
 pos <- 0
 
-finalresult <- data.frame(plasticidade = runif(rep * length(plasti) * timesteps_total, 0, 0),
-                          replications = runif(rep * length(plasti) * timesteps_total, 0, 0),
-                          speciation = runif(rep * length(plasti) * timesteps_total, 0, 0),
-                          extinction = runif(rep * length(plasti) * timesteps_total, 0, 0),
-                          diversif = runif(rep * length(plasti) * timesteps_total, 0, 0),
-                          traitevolution = runif(rep * length(plasti) * timesteps_total, 0, 0),
-                          timesimulation = runif(rep * length(plasti) * timesteps_total, 0, 0))
+finalresult <- data.frame(plasticidade = runif(rep * length(plasti), 0, 0),
+                          replications = runif(rep * length(plasti), 0, 0),
+                          speciation = runif(rep * length(plasti), 0, 0),
+                          extinction = runif(rep * length(plasti), 0, 0),
+                          diversif = runif(rep * length(plasti), 0, 0),
+                          traitevolution = runif(rep * length(plasti), 0, 0))
 
 for(p in 1:length(plasti)){
   
@@ -373,13 +366,12 @@ for(p in 1:length(plasti)){
     
     pos <- pos + 1
     
-    finalresult$plasticidade[ti] <- plasti[p]
-    finalresult$replications[ti] <- r
-    finalresult$speciation[ti] <- ratespeciation
-    finalresult$extinction[ti] <- rateextinction
-    finalresult$diversif[ti] <- diversification
-    finalresult$traitevolution[ti] <- traitevolution
-    finalresult$timesimulation[ti] <- pos
+    finalresult$plasticidade[pos] <- plasti[p]
+    finalresult$replications[pos] <- r
+    finalresult$speciation[pos] <- ratespeciation
+    finalresult$extinction[pos] <- rateextinction
+    finalresult$diversif[pos] <- diversification
+    finalresult$traitevolution[pos] <- traitevolution
   
     rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal)
     #rm(list=ls())
