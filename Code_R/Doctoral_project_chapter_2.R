@@ -287,10 +287,71 @@ for(i in seq_along(hedge_effect)){
   hedge_effect_mean_mean <- lapply(hedge_effect_out_na, mean)
 }
 
+pos <- 0
+posicao_final <- list()
+
+for(i in 1:length(unicos)){
+  pos <- which(unicos[i] == subdata$paper_no)
+  posicao_final[[i]] <- pos[1]
+}
+
+posicao_final <- unlist(posicao_final)
+
+names_species <- subdata$species_complete[posicao_final]
+
+names(hedge_effect_mean_mean) <- names_species
+
 #### ORGANIZING TO USE HEDGE's G ###
 
-data_hedges <- do.call(rbind.data.frame, hedge_effect_mean_mean)
+data_hedges <- do.call(cbind.data.frame, hedge_effect_mean_mean)
 
+L <- split.default(data_hedges, f = gsub("(.*)\\..*", "\\1", names(data_hedges)))
 
-#pos <- which(number_species == 1)
-#hedge_effect_final <- hedge_effect[pos]
+L2 <- list()
+
+L2 <- lapply(L, as.numeric)
+
+L3 <- list()
+
+L3 <- lapply(L2, is.infinite)
+
+L4 <- list()
+
+for(i in seq_along(L2)){
+  pos <- which(L3[[i]] == FALSE)
+  L4[[i]] <- L2[[i]][pos]
+}
+
+L5 <- list()
+
+L5 <- lapply(L2, FUN = function(dados){
+    return(is.na(dados))
+})
+
+L6 <- list()
+
+for(i in seq_along(L3)){
+  pos <- which(L5[[i]] == FALSE)
+  L6[[i]] <- L4[[i]][pos]
+}
+
+L7 <- list()
+L7 <- lapply(L6, mean)
+
+L8 <- list()
+L8 <- lapply(L7, is.na)
+
+final_list_hedges <- list()
+
+for(i in seq_along(L3)){
+  pos <- which(L8[[i]] == FALSE)
+  final_list_hedges[[i]] <- L7[[i]][pos]
+}
+
+names(final_list_hedges) <- names(L2)
+
+final_list_hedges2 <- final_list_hedges[lapply(final_list_hedges, length) > 0]
+
+final_list_hedges3 <- final_list_hedges2[final_list_hedges2 != 0]
+
+hedges_g_to_use <- do.call(cbind.data.frame, final_list_hedges3)
