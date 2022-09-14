@@ -80,43 +80,105 @@ for(i in 1:length(species_per_study)){
     number_species[[i]] <- length(species_per_study[[i]])
   }
 }
-#  only_species_with_more_1 <- 0
-# 
-#  for(i in 1:length(number_species)){
-#    if(number_species[[i]] == 1){
-#      only_species_with_more_1[[i]] <- 0
-#    } else {
-#      only_species_with_more_1[i] <- number_species[[i]]
-#    }
-#  }
-#  
-#  only_species_with_more_1 <- only_species_with_more_1 != 0
-# 
-#  for(i in 1:length(only_species_with_more_1)){
-#    if(only_species_with_more_1[i] == TRUE){
-#      only_species_with_more_1[i] <- 1
-#   } else {
-#      only_species_with_more_1[i] <- 0
-#    }
-#  }
-# 
-# pos_species <- list()
-# 
-# for(i in 1:length(species_per_study)){
-#   pos_species[[i]] <- vector("list", length(species_per_study[[i]]))
-# }
-# 
-# for(i in 1:length(species_per_study)){
-#   for(j in seq_along(species_per_study[[i]])){
-#     pos_species[[i]][[j]] <- which(species_per_study[[i]][[j]] == separated_list[[i]][["species_complete"]])
-#   }
-# }
-# 
-# pos_species_per_trait <- list()
-# 
-# for(i in 1:length(species_per_study)){
-#   pos_species_per_trait[[i]] <- vector("list", length(species_per_study[[i]]))
-# }
+ only_species_with_more_1 <- 0
+
+ for(i in 1:length(number_species)){
+   if(number_species[[i]] == 1){
+     only_species_with_more_1[[i]] <- 0
+   } else {
+     only_species_with_more_1[i] <- number_species[[i]]
+   }
+ }
+
+ only_species_with_more_1 <- only_species_with_more_1 != 0
+
+ for(i in 1:length(only_species_with_more_1)){
+   if(only_species_with_more_1[i] == TRUE){
+     only_species_with_more_1[i] <- 1
+  } else {
+     only_species_with_more_1[i] <- 0
+   }
+ }
+
+pos_species <- list()
+
+for(i in 1:length(species_per_study)){
+  pos_species[[i]] <- vector("list", length(species_per_study[[i]]))
+}
+
+for(i in 1:length(species_per_study)){
+  for(j in seq_along(species_per_study[[i]])){
+    pos_species[[i]][[j]] <- which(species_per_study[[i]][[j]] == separated_list[[i]][["species_complete"]])
+  }
+}
+
+####### TRY SEPARATE TRAIT PER SPECIES PER STUDY #####
+
+pos_species_in_study <- list()
+
+for(i in 1:length(pos_species)){
+  pos_species_in_study[[i]] <- vector("list", length(pos_species[[i]]))
+}
+
+for(i in seq_along(pos_species_in_study)){
+  names(pos_species_in_study[[i]]) <- species_per_study[[i]]
+}
+
+for(i in seq_along(pos_species_in_study)){
+  for(j in seq_along(pos_species_in_study[[i]])){
+    pos_species_in_study[[i]][[j]] <- lapply(name_traits[[i]], names)
+  }
+}
+
+for(i in seq_along(pos_species_in_study)){
+  for(j in seq_along(pos_species_in_study[[i]])){
+    names(pos_species_in_study[[i]][[j]]) <- name_traits[[i]]
+  }
+}
+
+for(i in seq_along(pos_species_in_study)){
+  for(j in seq_along(pos_species_in_study[[i]])){
+    pos_each_paper <- which(unicos[i] == subdata$paper_no)
+    pos_species_in_study[[i]][[j]] <- which(subdata$species_complete[pos_each_paper] == species_per_study[[i]][[j]])
+  } 
+}
+
+pos_trait_per_specie <- list()
+
+for(i in 1:length(species_per_study)){
+  pos_trait_per_specie[[i]] <- vector("list", length(species_per_study[[i]]))
+}
+names(pos_trait_per_specie) <- unique(subdata$paper_no)
+
+for(i in seq_along(pos_trait_per_specie)){
+  names(pos_trait_per_specie[[i]]) <- species_per_study[[i]]
+}
+
+for(i in seq_along(pos_trait_per_specie)){
+  for(j in seq_along(pos_trait_per_specie[[i]])){
+    pos_trait_per_specie[[i]][[j]] <- lapply(name_traits[[i]], names)
+  }
+}
+
+for(i in seq_along(pos_trait_per_specie)){
+  for(j in seq_along(pos_trait_per_specie[[i]])){
+    names(pos_trait_per_specie[[i]][[j]]) <- name_traits[[i]]
+  }
+}
+
+species_in_time <- 0
+
+for(i in seq_along(pos_trait)){
+  for(j in seq_along(pos_trait[[i]])){
+    for(k in seq_along(pos_trait_per_specie[[i]][[j]])){
+      species_in_time <-
+      pos_trait_per_specie[[i]][[j]][[k]] <- pos_trait[[i]][[j]][pos_species_in_study[[i]][[j]]]
+    }
+  }
+}
+
+
+pos_trait[[6]][[1]][pos_species_in_study[[6]][[1]]]
 
 
 ### FILTERING TO FIND HEDGE's per species in studies ###
@@ -355,3 +417,4 @@ final_list_hedges2 <- final_list_hedges[lapply(final_list_hedges, length) > 0]
 final_list_hedges3 <- final_list_hedges2[final_list_hedges2 != 0]
 
 hedges_g_to_use <- do.call(cbind.data.frame, final_list_hedges3)
+
