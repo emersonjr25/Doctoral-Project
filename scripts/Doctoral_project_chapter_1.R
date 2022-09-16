@@ -6,15 +6,6 @@
 ##### Methods: Computational simulation #############
 ##### Script to input, modify and run model #########
 
-#### INSTALLING PACKAGES USED ####
-#install.packages("gen3sis")
-#install.packages("raster")
-#install.packages("igraph")
-#install.packages("stringi")
-#install.packages("truncnorm")
-#install.packages("here")
-
-#### CARRYNG PACKAGES ####
 library(igraph)
 library(stringi)
 library(gen3sis)
@@ -24,7 +15,7 @@ library(here)
 
 #### SIMULATION ####
 
-datapath <- here("data/raw/WorldCenter")
+datapath <- here("WorldCenter")
 attach(loadNamespace('gen3sis'), name = 'gen3sis_all')
 config = file.path(datapath, "config/config_worldcenter.R")
 landscape = file.path(datapath, "landscape")
@@ -45,6 +36,66 @@ directories <- prepare_directories(
   input_directory = landscape,
   output_directory = output_directory
 )
+
+
+# temperatura <- landscapes$temp[, 3:52]
+# for(i in 1:1000){
+#   temperatura2[i] <- list(i = 1)
+# }
+# opa <- 1000:1
+# for(i in 1:1000){
+#   names(temperatura2)[[i]] <- paste0(opa[i], "Ma")
+# }
+# 
+# for(i in 1:length(temperatura2)){
+#   temperatura2[[i]] <- temperatura[[i]]
+# }
+# 
+#   temperatura
+# landscape2 <- list(temp = NA, arid = NA, area = NA)
+# 
+# # get path containing example rasters
+# datapath <- system.file(file.path("extdata", "WorldCenter"), package="gen3sis")
+# # create raster bricks
+# temperature_brick <- brick(file.path(datapath, "input_rasters/temp_rasters.grd"))
+# aridity_brick <- brick(file.path(datapath, "input_rasters/arid_rasters.grd"))
+# area_brick <- brick(file.path(datapath, "input_rasters/area_rasters.grd"))
+# # create sub-list of environmental variables for fast example
+# # (i.e. 4 time-steps)
+# landscapes_sub_list <- list(temp=NULL, arid=NULL, area=NULL)
+# for(i in 1:4){
+#   landscapes_sub_list$temp <- c(landscapes_sub_list$temp, temperature_brick[[i]])
+#   landscapes_sub_list$arid <- c(landscapes_sub_list$arid, aridity_brick[[i]])
+#   landscapes_sub_list$area <- c(landscapes_sub_list$area, area_brick[[i]])
+# }
+# # define cost function, crossing water as double as land sites
+# cost_function_water <- function(source, habitable_src, dest, habitable_dest) {
+#   if(!all(habitable_src, habitable_dest)) {
+#     return(2/1000)
+#   } else {
+#     return(1/1000)
+#   }
+# }
+# 
+# # create input landscape ready for gen3sis from sub-list
+# # (i.e. 10 time-steps) and only local-distances.
+# create_input_landscape(
+#   landscapes = landscapes_sub_list,
+#   cost_function = cost_function_water,
+#   output_directory = file.path(tempdir(), "landscape_sub"),
+#   directions = 8, # surrounding sites for each site
+#   timesteps = paste0(round(1000:1,2), "Ma"),
+#   calculate_full_distance_matrices = FALSE) # full distance matrix
+# # create list of all environmental variables available
+# landscapes_list <- list(temp=NULL, arid=NULL, area=NULL)
+# for(i in 1:nlayers(temperature_brick)){
+#   landscapes_list$temp <- c(landscapes_list$temp, temperature_brick[[i]])
+#   landscapes_list$arid <- c(landscapes_list$arid, aridity_brick[[i]])
+#   landscapes_list$area <- c(landscapes_list$area, area_brick[[i]])
+# }
+# 
+# 
+
 
 #pathway <- paste(datapath, "output/config_worldcenter/phy_res", sep = "/", collapse = "--")
 #dir.create(pathway, showWarnings = FALSE)
@@ -69,6 +120,12 @@ if (!verify_config(config)) {
 
 ### MODIFICATIONS IN CONFIG ###
 
+config$gen3sis$general$start_time <- 1000
+
+config$gen3sis$general$end_time <- 1
+
+timesteps_total <- length(config$gen3sis$general$start_time:config$gen3sis$general$end_time)
+
 config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
   save_traits()
   #save_species()
@@ -83,12 +140,13 @@ plasti <- seq(0.1, 0.2, 0.1)
 
 pos <- 0
 
-finalresult <- data.frame(plasticidade = runif(rep * length(plasti), 0, 0),
-                          replications = runif(rep * length(plasti), 0, 0),
-                          speciation = runif(rep * length(plasti), 0, 0),
-                          extinction = runif(rep * length(plasti), 0, 0),
-                          diversif = runif(rep * length(plasti), 0, 0),
-                          traitevolution = runif(rep * length(plasti), 0, 0))
+finalresult <- data.frame(plasticidade = runif(rep * length(plasti) * timesteps_total, 0, 0),
+                          replications = runif(rep * length(plasti) * timesteps_total, 0, 0),
+                          speciation = runif(rep * length(plasti) * timesteps_total, 0, 0),
+                          extinction = runif(rep * length(plasti) * timesteps_total, 0, 0),
+                          diversif = runif(rep * length(plasti) * timesteps_total, 0, 0),
+                          traitevolution = runif(rep * length(plasti) * timesteps_total, 0, 0),
+                          timesimulation = runif(rep * length(plasti) * timesteps_total, 0, 0))
 
 for(p in 1:length(plasti)){
   
@@ -258,137 +316,158 @@ for(p in 1:length(plasti)){
         break
       }
       val <- loop_ecology(val$config, val$data, val$vars)
-      if (val$vars$flag == "max_number_coexisting_species") {
-        print("max number of coexisting species reached, breaking loop")
-        break
-      } 
-    }
-    if (verbose >= 0 & val$vars$flag == "OK") {
-      cat("Simulation finished. All OK \n")
-    } else if (verbose >= 0 & val$vars$flag == "max_number_species") {
-      cat("Simulation finished. Early abort due to exceeding max number of species")
-    } else if (verbose >= 0 &
-               val$vars$flag == "max_number_coexisting_species") {
-      cat("Simulation finished. Early abort due to exceeding max number of co-occuring species")
-    }
-    val <- update.phylo(val$config, val$data, val$vars)
-   # write.table(
-    #  val$data$phy,
-     # file = file.path(pathway,
-       #                paste0("phy", "plast", p, "rep", r, ".txt")),
-     # sep = "\t"
-   # )
-    #write_nex(
-    #  phy = val$data$phy,
-    #  label = "species",
-    #  file.path(output_location = pathway,
-           #     paste0("phy", "plast", p, "rep", r, ".nex"))
-   # )
-    system_time_stop <- Sys.time()
-    total_runtime <- difftime(system_time_stop, system_time_start,
-                              units = "hours")[[1]]
-    write_runtime_statisitics(val$data, val$vars, val$config,
-                              total_runtime)
-    sgen3sis <- make_summary(val$config, val$data, val$vars,
-                             total_runtime, save_file = TRUE)
-    if (verbose >= 1) {
-      cat("Simulation runtime:", total_runtime, "hours\n")
-    }
-    #plot_summary(sgen3sis)
-    
-    ################## TRAIT EVOLUTION #####################
-    
-    ##### PATHWAY TO TRAITS DATA####
-
-    caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", "traits")
-    
-    listfiles <- list.files("data/raw/WorldCenter/output/config_worldcenter/traits")
-    
-    filestoread <- length(list.files("data/raw/WorldCenter/output/config_worldcenter/traits"))
-    
-    
-    #### Organizing selection of trait files ####
-    cam <- 0
-    for(l in 1:filestoread){
-      cam[l] <- caminho
-    }
-    cam
-    
-    camatualizado <- 0
-    for(k in 1:length(cam)){
-      camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
-    }
-    
-    # SORT #
-    camatualizado <- camatualizado[order(as.numeric(gsub("[^0-9]+", "", camatualizado)))]
-    
-    
-    # READ FILES #
-    datafinal <- list()
-    for(d in 1:filestoread){
-      datafinal[[d]] <- readRDS(camatualizado[[d]])
-    }
-    
-    #### CALCULATING MEAN TRAIT PER TIME STEP #####
-    
-    ### change name of list ###
-    for(i in 1:length(datafinal)){
-      names(datafinal) <- paste0("timestep", 1:length(datafinal))
-    }
-    
-    #### function to return column ###
-    colunatemp <- function(dados){
-      return(dados[, 1])
-    }
-    
-    ### only values of species temperature ###
-    for(i in 1:length(datafinal)){
-      datafinal[[i]] <- lapply(datafinal[[i]], colunatemp)
-    }
-    
-    for(i in 1:length(datafinal)){
-      datafinal[[i]] <- lapply(datafinal[[i]], mean)
-    }
-    
-    for(i in 1:length(datafinal)){
-      result <- lapply(datafinal[[i]], is.nan)
-      datafinal[[i]] <- datafinal[[i]][which(result == FALSE)]
-    }
-    
-    ####### FINAL MEAN PER TIME STEP #######
-    datafinal <- lapply(datafinal, as.numeric)
-    datafinal <- lapply(datafinal, mean)
-    
-    
-    traitevolution <- exp(mean(log(as.numeric(datafinal)))) / length(datafinal)
-    
-    ##### SPECIATION AND EXTINCTION ####
-    
-    ratespeciation <- sum(sgen3sis$summary$phylo_summary[, 3]) / val$vars$steps[[1]]
-    
-    rateextinction <- sum(sgen3sis$summary$phylo_summary[, 4]) / val$vars$steps[[1]]
-    
-    diversification <- ratespeciation - rateextinction
-    
-    pos <- pos + 1
-    
-    finalresult$plasticidade[pos] <- plasti[p]
-    finalresult$replications[pos] <- r
-    finalresult$speciation[pos] <- ratespeciation
-    finalresult$extinction[pos] <- rateextinction
-    finalresult$diversif[pos] <- diversification
-    finalresult$traitevolution[pos] <- traitevolution
-  
-    rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal)
-    #rm(list=ls())
+      #if (val$vars$flag == "max_number_coexisting_species") {
+      # print("max number of coexisting species reached, breaking loop")
+      # break
+      
+      if (verbose >= 0 & val$vars$flag == "OK") {
+        cat("Simulation finished. All OK \n")
+      } else if (verbose >= 0 & val$vars$flag == "max_number_species") {
+        cat("Simulation finished. Early abort due to exceeding max number of species")
+      } else if (verbose >= 0 &
+                 val$vars$flag == "max_number_coexisting_species") {
+        cat("Simulation finished. Early abort due to exceeding max number of co-occuring species")
+      }
+      val <- update.phylo(val$config, val$data, val$vars)
+      # write.table(
+      #  val$data$phy,
+      # file = file.path(pathway,
+      #                paste0("phy", "plast", p, "rep", r, ".txt")),
+      # sep = "\t"
+      # )
+      #write_nex(
+      #  phy = val$data$phy,
+      #  label = "species",
+      #  file.path(output_location = pathway,
+      #     paste0("phy", "plast", p, "rep", r, ".nex"))
+      # )
+      system_time_stop <- Sys.time()
+      total_runtime <- difftime(system_time_stop, system_time_start,
+                                units = "hours")[[1]]
+      #write_runtime_statisitics(val$data, val$vars, val$config,
+      #                          total_runtime)
+      sgen3sis <- make_summary(val$config, val$data, val$vars,
+                               total_runtime, save_file = TRUE)
+      #plot_summary(sgen3sis)
+      
+      # if (verbose >= 1) {
+      #  cat("Simulation runtime:", total_runtime, "hours\n")
+      # }
+      ################## TRAIT EVOLUTION #####################
+      
+      ##### PATHWAY TO TRAITS DATA####
+      
+      caminho <- here("WorldCenter", "output", "config_worldcenter", "traits")
+      
+      listfiles <- list.files("WorldCenter/output/config_worldcenter/traits")
+      
+      filestoread <- length(list.files("WorldCenter/output/config_worldcenter/traits"))
+      
+      
+      #### Organizing selection of trait files ####
+      cam <- 0
+      for(l in 1:filestoread){
+        cam[l] <- caminho
+      }
+      cam
+      
+      camatualizado <- 0
+      for(k in 1:length(cam)){
+        camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
+      }
+      
+      # SORT #
+      camatualizado <- camatualizado[order(as.numeric(gsub("[^0-9]+", "", camatualizado)))]
+      
+      
+      # READ FILES #
+      datafinal <- list()
+      for(d in 1:filestoread){
+        datafinal[[d]] <- readRDS(camatualizado[[d]])
+      }
+      
+      #### CALCULATING MEAN TRAIT PER TIME STEP #####
+      
+      ### change name of list ###
+      for(i in 1:length(datafinal)){
+        names(datafinal) <- paste0("timestep", 1:length(datafinal))
+      }
+      
+      #### function to return column ###
+      colunatemp <- function(dados){
+        return(dados[, 1])
+      }
+      
+      ### only values of species temperature ###
+      for(i in 1:length(datafinal)){
+        datafinal[[i]] <- lapply(datafinal[[i]], colunatemp)
+      }
+      
+      for(i in 1:length(datafinal)){
+        datafinal[[i]] <- lapply(datafinal[[i]], mean)
+      }
+      
+      for(i in 1:length(datafinal)){
+        result <- lapply(datafinal[[i]], is.nan)
+        datafinal[[i]] <- datafinal[[i]][which(result == FALSE)]
+      }
+      
+      ####### FINAL MEAN PER TIME STEP #######
+      datafinal <- lapply(datafinal, as.numeric)
+      datafinal <- lapply(datafinal, mean)
+      
+      
+      traitevolution <- exp(mean(log(as.numeric(datafinal)))) / length(datafinal)
+      
+      ##### SPECIATION AND EXTINCTION ####
+      
+      ratespeciation <- sum(sgen3sis$summary$phylo_summary[, 3]) / val$vars$steps[[1]]
+      
+      rateextinction <- sum(sgen3sis$summary$phylo_summary[, 4]) / val$vars$steps[[1]]
+      traitevolution
+      diversification <- ratespeciation - rateextinction
+      
+      pos <- pos + 1
+      
+      # sequence <- sort(seq(from = config$gen3sis$general$end_time, to = config$gen3sis$general$start_time, by = 5), decreasing = TRUE)
+      # 
+      # #### OPTION 1 ####
+      #  for(seque in 1:(length(sequence))){
+      #   if(val$vars$steps[ti] == sequence[seque]) {
+      #     finalresult$plasticidade[pos] <- plasti[p]
+      #     finalresult$replications[pos] <- r
+      #     finalresult$speciation[pos] <- ratespeciation
+      #     finalresult$extinction[pos] <- rateextinction
+      #     finalresult$diversif[pos] <- diversification
+      #     finalresult$traitevolution[pos] <- traitevolution
+      #     finalresult$timesimulation[pos] <- ti
+      #   }
+      #  }
+      #### OPTION 2 ###
+      if(ti %% 2 == 1) {
+        finalresult$plasticidade[pos] <- plasti[p]
+        finalresult$replications[pos] <- r
+        finalresult$speciation[pos] <- ratespeciation
+        finalresult$extinction[pos] <- rateextinction
+        finalresult$diversif[pos] <- diversification
+        finalresult$traitevolution[pos] <- traitevolution
+        finalresult$timesimulation[pos] <- ti
+      }
+    } 
   }
+  rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal)
 }
-path <- here("output")
-write.csv2(finalresult, file.path(path, "finalresult.csv"), row.names = FALSE)
-saveRDS(finalresult, file.path(path, "finalresult.RDS"))
 
+write.csv2(finalresult, file = ("finalresult_alongtime.csv"), row.names = FALSE)
+#write.csv2(finalresult, file = "finalresult.csv", row.names = FALSE)
+#saveRDS(finalresult, file = "finalresult.RDS" )
 
-#### ANALYSIS ####
+#for(i in 1:length(finalresult$plasticidade)){ 
+# }
+plot(finalresult$diversif ~ finalresult$timesimulation)
+plot(finalresult$traitevolution ~ finalresult$timesimulation)
 
 plot(finalresult$diversif ~ finalresult$plasticidade)
 plot(finalresult$traitevolution ~ finalresult$plasticidade)
+
+#val$data$inputs$environments$temp[1, ]
