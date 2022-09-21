@@ -15,13 +15,10 @@ library(here)
 
 #### SIMULATION ####
 
-datapath <- here("WorldCenter")
+datapath <- here("data/raw/WorldCenter")
 attach(loadNamespace('gen3sis'), name = 'gen3sis_all')
 config = file.path(datapath, "config/config_worldcenter.R")
-landscape = file.path(datapath, "landscape")
-
-
-output_directory = NA
+landscape = file.path(datapath, "landscape2")
 
 timestep_restart = NA
 save_state = NA
@@ -37,70 +34,79 @@ directories <- prepare_directories(
   output_directory = output_directory
 )
 
+datapath <- system.file(file.path("extdata", "WorldCenter"), package="gen3sis")
+# create raster bricks
+temperature_brick <- brick(file.path(datapath, "input_rasters/temp_rasters.grd"))
 
-# temperatura <- landscapes$temp[, 3:52]
-# for(i in 1:1000){
-#   temperatura2[i] <- list(i = 1)
-# }
-# opa <- 1000:1
-# for(i in 1:1000){
-#   names(temperatura2)[[i]] <- paste0(opa[i], "Ma")
-# }
-# 
-# for(i in 1:length(temperatura2)){
-#   temperatura2[[i]] <- temperatura[[i]]
-# }
-# 
-#   temperatura
-# landscape2 <- list(temp = NA, arid = NA, area = NA)
-# 
-# # get path containing example rasters
-# datapath <- system.file(file.path("extdata", "WorldCenter"), package="gen3sis")
-# # create raster bricks
-# temperature_brick <- brick(file.path(datapath, "input_rasters/temp_rasters.grd"))
-# aridity_brick <- brick(file.path(datapath, "input_rasters/arid_rasters.grd"))
-# area_brick <- brick(file.path(datapath, "input_rasters/area_rasters.grd"))
-# # create sub-list of environmental variables for fast example
-# # (i.e. 4 time-steps)
-# landscapes_sub_list <- list(temp=NULL, arid=NULL, area=NULL)
-# for(i in 1:4){
-#   landscapes_sub_list$temp <- c(landscapes_sub_list$temp, temperature_brick[[i]])
-#   landscapes_sub_list$arid <- c(landscapes_sub_list$arid, aridity_brick[[i]])
-#   landscapes_sub_list$area <- c(landscapes_sub_list$area, area_brick[[i]])
-# }
-# # define cost function, crossing water as double as land sites
-# cost_function_water <- function(source, habitable_src, dest, habitable_dest) {
-#   if(!all(habitable_src, habitable_dest)) {
-#     return(2/1000)
-#   } else {
-#     return(1/1000)
-#   }
-# }
-# 
-# # create input landscape ready for gen3sis from sub-list
-# # (i.e. 10 time-steps) and only local-distances.
-# create_input_landscape(
-#   landscapes = landscapes_sub_list,
-#   cost_function = cost_function_water,
-#   output_directory = file.path(tempdir(), "landscape_sub"),
-#   directions = 8, # surrounding sites for each site
-#   timesteps = paste0(round(1000:1,2), "Ma"),
-#   calculate_full_distance_matrices = FALSE) # full distance matrix
-# # create list of all environmental variables available
-# landscapes_list <- list(temp=NULL, arid=NULL, area=NULL)
-# for(i in 1:nlayers(temperature_brick)){
-#   landscapes_list$temp <- c(landscapes_list$temp, temperature_brick[[i]])
-#   landscapes_list$arid <- c(landscapes_list$arid, aridity_brick[[i]])
-#   landscapes_list$area <- c(landscapes_list$area, area_brick[[i]])
-# }
-# 
-# 
+temperature_brick <- addLayer(temperature_brick )
+
+s <- stack(temperature_brick, temperature_brick, temperature_brick, temperature_brick,
+           temperature_brick, temperature_brick, temperature_brick, temperature_brick,
+           temperature_brick, temperature_brick, temperature_brick, temperature_brick,
+           temperature_brick, temperature_brick, temperature_brick, temperature_brick,
+           temperature_brick, temperature_brick, temperature_brick, temperature_brick)
+
+nlayers(s)
+
+landscapes_list <- list(temp=NULL)
+for(i in 1:nlayers(s)){
+  landscapes_list$temp <- c(landscapes_list$temp, s[[i]])
+}
+# define cost function, crossing water as double as land sites
+cost_function_water <- function(source, habitable_src, dest, habitable_dest) {
+  if(!all(habitable_src, habitable_dest)) {
+    return(2/1000)
+  } else {
+    return(1/1000)
+  }
+}
+library(gen3sis)
+
+create_input_landscape(
+  landscapes = landscapes_list,
+  cost_function = cost_function_water,
+  output_directory = file.path("C:/Users/Emerson Júnior/Downloads", "landscape_WorldCe"),
+  directions = 8, # surrounding sites for each site
+  timesteps = paste0(round(1020:1,2), "Ma"),
+  crs="+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0",
+  calculate_full_distance_matrices = FALSE) # full distance matrix
+
+
+#### WAY 1 ####
+library(raster)
+# get path containing example rasters
+datapath <- system.file(file.path("extdata", "WorldCenter"), package="gen3sis")
+# create raster bricks
+temperature_brick <- brick(file.path(datapath, "input_rasters/temp_rasters.grd"))
+aridity_brick <- brick(file.path(datapath, "input_rasters/arid_rasters.grd"))
+area_brick <- brick(file.path(datapath, "input_rasters/area_rasters.grd"))
+
+landscapes_list <- list(temp=NULL, arid=NULL, area=NULL)
+for(i in 1:nlayers(temperature_brick)){
+  landscapes_list$temp <- c(landscapes_list$temp, temperature_brick[[i]])
+  landscapes_list$arid <- c(landscapes_list$arid, aridity_brick[[i]])
+  landscapes_list$area <- c(landscapes_list$area, area_brick[[i]])
+}
+# define cost function, crossing water as double as land sites
+cost_function_water <- function(source, habitable_src, dest, habitable_dest) {
+  if(!all(habitable_src, habitable_dest)) {
+    return(2/1000)
+  } else {
+    return(1/1000)
+  }
+}
+create_input_landscape(
+  landscapes = landscapes_list,
+  cost_function = cost_function_water,
+  output_directory = file.path(tempdir(), "landscape_WorldCenter_5"),
+  directions = 8, # surrounding sites for each site
+  timesteps = paste0(round(150:100,2), "Ma"),
+  crs="+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0",
+  calculate_full_distance_matrices = FALSE) # full distance matrix
 
 
 #pathway <- paste(datapath, "output/config_worldcenter/phy_res", sep = "/", collapse = "--")
 #dir.create(pathway, showWarnings = FALSE)
-
-
 if (is.na(config)[1]) {
   stop("please provide either a config file or a config object")
 } else if (class(config) == "gen3sis_config") {
@@ -357,11 +363,11 @@ for(p in 1:length(plasti)){
       
       ##### PATHWAY TO TRAITS DATA####
       
-      caminho <- here("WorldCenter", "output", "config_worldcenter", "traits")
+      caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", "traits")
       
-      listfiles <- list.files("WorldCenter/output/config_worldcenter/traits")
+      listfiles <- list.files("data/raw/WorldCenter/output/config_worldcenter/traits")
       
-      filestoread <- length(list.files("WorldCenter/output/config_worldcenter/traits"))
+      filestoread <- length(list.files("data/raw/WorldCenter/output/config_worldcenter/traits"))
       
       
       #### Organizing selection of trait files ####
@@ -458,9 +464,10 @@ for(p in 1:length(plasti)){
   rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal)
 }
 
-write.csv2(finalresult, file = ("finalresult_alongtime.csv"), row.names = FALSE)
+path <- here("output")
+write.csv2(finalresult, file.path(path, "finalresult.csv"), row.names = FALSE)
 #write.csv2(finalresult, file = "finalresult.csv", row.names = FALSE)
-#saveRDS(finalresult, file = "finalresult.RDS" )
+#saveRDS(finalresult, file.path(path, "finalresult.RDS"))
 
 #for(i in 1:length(finalresult$plasticidade)){ 
 # }
