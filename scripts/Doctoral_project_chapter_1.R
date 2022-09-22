@@ -65,7 +65,7 @@ config$gen3sis$general$end_time <- 1
 
 timesteps_total <- length(config$gen3sis$general$start_time:config$gen3sis$general$end_time)
 
-config$gen3sis$general$max_number_of_species <- 10000
+config$gen3sis$general$max_number_of_species <- 5000
 
 config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
   save_traits()
@@ -73,7 +73,6 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
   #plot_richness(data$all_species, data$landscape)
   
 }
-
 
 #########################################################
 rep <- 1
@@ -135,7 +134,7 @@ for(p in 1:length(plasti)){
     }
     return(abundance)
   }  
-  
+
   for(r in 1:rep){
     val <- list(data = list(),
                 vars = list(),
