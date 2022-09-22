@@ -65,12 +65,15 @@ config$gen3sis$general$end_time <- 1
 
 timesteps_total <- length(config$gen3sis$general$start_time:config$gen3sis$general$end_time)
 
+config$gen3sis$general$max_number_of_species <- 10000
+
 config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
   save_traits()
   #save_species()
   #plot_richness(data$all_species, data$landscape)
   
 }
+
 
 #########################################################
 rep <- 1
