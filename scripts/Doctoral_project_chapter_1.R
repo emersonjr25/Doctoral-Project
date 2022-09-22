@@ -6,6 +6,7 @@
 ##### Methods: Computational simulation #############
 ##### Script to input, modify and run model #########
 
+#### PACKAGES ####
 library(igraph)
 library(stringi)
 library(gen3sis)
@@ -13,12 +14,15 @@ library(raster)
 library(truncnorm)
 library(here)
 
+
 #### SIMULATION ####
 
 datapath <- here("data/raw/WorldCenter")
 attach(loadNamespace('gen3sis'), name = 'gen3sis_all')
 config = file.path(datapath, "config/config_worldcenter.R")
-landscape = file.path(datapath, "landscape2")
+landscape = file.path(datapath, "landscape_new")
+
+output_directory = NA
 
 timestep_restart = NA
 save_state = NA
@@ -33,77 +37,6 @@ directories <- prepare_directories(
   input_directory = landscape,
   output_directory = output_directory
 )
-
-datapath <- system.file(file.path("extdata", "WorldCenter"), package="gen3sis")
-# create raster bricks
-temperature_brick <- brick(file.path(datapath, "input_rasters/temp_rasters.grd"))
-
-temperature_brick <- addLayer(temperature_brick )
-
-s <- stack(temperature_brick, temperature_brick, temperature_brick, temperature_brick,
-           temperature_brick, temperature_brick, temperature_brick, temperature_brick,
-           temperature_brick, temperature_brick, temperature_brick, temperature_brick,
-           temperature_brick, temperature_brick, temperature_brick, temperature_brick,
-           temperature_brick, temperature_brick, temperature_brick, temperature_brick)
-
-nlayers(s)
-
-landscapes_list <- list(temp=NULL)
-for(i in 1:nlayers(s)){
-  landscapes_list$temp <- c(landscapes_list$temp, s[[i]])
-}
-# define cost function, crossing water as double as land sites
-cost_function_water <- function(source, habitable_src, dest, habitable_dest) {
-  if(!all(habitable_src, habitable_dest)) {
-    return(2/1000)
-  } else {
-    return(1/1000)
-  }
-}
-library(gen3sis)
-
-create_input_landscape(
-  landscapes = landscapes_list,
-  cost_function = cost_function_water,
-  output_directory = file.path("C:/Users/Emerson Júnior/Downloads", "landscape_WorldCe"),
-  directions = 8, # surrounding sites for each site
-  timesteps = paste0(round(1020:1,2), "Ma"),
-  crs="+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0",
-  calculate_full_distance_matrices = FALSE) # full distance matrix
-
-
-#### WAY 1 ####
-library(raster)
-# get path containing example rasters
-datapath <- system.file(file.path("extdata", "WorldCenter"), package="gen3sis")
-# create raster bricks
-temperature_brick <- brick(file.path(datapath, "input_rasters/temp_rasters.grd"))
-aridity_brick <- brick(file.path(datapath, "input_rasters/arid_rasters.grd"))
-area_brick <- brick(file.path(datapath, "input_rasters/area_rasters.grd"))
-
-landscapes_list <- list(temp=NULL, arid=NULL, area=NULL)
-for(i in 1:nlayers(temperature_brick)){
-  landscapes_list$temp <- c(landscapes_list$temp, temperature_brick[[i]])
-  landscapes_list$arid <- c(landscapes_list$arid, aridity_brick[[i]])
-  landscapes_list$area <- c(landscapes_list$area, area_brick[[i]])
-}
-# define cost function, crossing water as double as land sites
-cost_function_water <- function(source, habitable_src, dest, habitable_dest) {
-  if(!all(habitable_src, habitable_dest)) {
-    return(2/1000)
-  } else {
-    return(1/1000)
-  }
-}
-create_input_landscape(
-  landscapes = landscapes_list,
-  cost_function = cost_function_water,
-  output_directory = file.path(tempdir(), "landscape_WorldCenter_5"),
-  directions = 8, # surrounding sites for each site
-  timesteps = paste0(round(150:100,2), "Ma"),
-  crs="+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0",
-  calculate_full_distance_matrices = FALSE) # full distance matrix
-
 
 #pathway <- paste(datapath, "output/config_worldcenter/phy_res", sep = "/", collapse = "--")
 #dir.create(pathway, showWarnings = FALSE)
@@ -142,7 +75,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 #########################################################
 rep <- 1
 
-plasti <- seq(0.1, 0.2, 0.1)
+plasti <- seq(0.1, 1, 0.1)
 
 pos <- 0
 
