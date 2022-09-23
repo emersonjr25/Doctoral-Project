@@ -59,7 +59,7 @@ if (!verify_config(config)) {
 
 ### MODIFICATIONS IN CONFIG ###
 
-config$gen3sis$general$start_time <- 1000
+config$gen3sis$general$start_time <- 300
 
 config$gen3sis$general$end_time <- 1
 
@@ -365,7 +365,7 @@ for(p in 1:length(plasti)){
       ratespeciation <- sum(sgen3sis$summary$phylo_summary[, 3]) / val$vars$steps[[1]]
       
       rateextinction <- sum(sgen3sis$summary$phylo_summary[, 4]) / val$vars$steps[[1]]
-      traitevolution
+      
       diversification <- ratespeciation - rateextinction
       
       pos <- pos + 1
