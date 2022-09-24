@@ -59,7 +59,7 @@ if (!verify_config(config)) {
 
 ### MODIFICATIONS IN CONFIG ###
 
-config$gen3sis$general$start_time <- 300
+config$gen3sis$general$start_time <- 5
 
 config$gen3sis$general$end_time <- 1
 
@@ -288,7 +288,7 @@ for(p in 1:length(plasti)){
       #write_runtime_statisitics(val$data, val$vars, val$config,
       #                          total_runtime)
       sgen3sis <- make_summary(val$config, val$data, val$vars,
-                               total_runtime, save_file = TRUE)
+                               total_runtime, save_file = FALSE)
       #plot_summary(sgen3sis)
       
       # if (verbose >= 1) {
@@ -358,17 +358,17 @@ for(p in 1:length(plasti)){
       datafinal <- lapply(datafinal, mean)
       
       
-      traitevolution <- exp(mean(log(as.numeric(datafinal)))) / length(datafinal)
+      traitevolution <- round(exp(mean(log(as.numeric(datafinal)))) / length(datafinal), digits = 2)
       
       ##### SPECIATION AND EXTINCTION ####
+      pos <- pos + 1
       
-      ratespeciation <- sum(sgen3sis$summary$phylo_summary[, 3]) / val$vars$steps[[1]]
+      ratespeciation <- round(sum(sgen3sis$summary$phylo_summary[, 3]) / pos, digits = 2)
       
-      rateextinction <- sum(sgen3sis$summary$phylo_summary[, 4]) / val$vars$steps[[1]]
+      rateextinction <- round(sum(sgen3sis$summary$phylo_summary[, 4]) / pos, digits = 2)
       
       diversification <- ratespeciation - rateextinction
       
-      pos <- pos + 1
       
       # sequence <- sort(seq(from = config$gen3sis$general$end_time, to = config$gen3sis$general$start_time, by = 5), decreasing = TRUE)
       # 
@@ -396,6 +396,18 @@ for(p in 1:length(plasti)){
       }
     } 
   }
+  caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", "traits")
+  listfiles <- list.files("data/raw/WorldCenter/output/config_worldcenter/traits")
+  filestoread <- length(list.files("data/raw/WorldCenter/output/config_worldcenter/traits"))
+  cam <- 0
+  for(l in 1:filestoread){
+    cam[l] <- caminho
+  }
+  camatualizado <- 0
+  for(k in 1:length(cam)){
+    camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
+  }
+  file.remove(camatualizado)  
   rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal)
 }
 
