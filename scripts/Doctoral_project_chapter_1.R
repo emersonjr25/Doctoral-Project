@@ -59,7 +59,7 @@ if (!verify_config(config)) {
 
 ### MODIFICATIONS IN CONFIG ###
 
-config$gen3sis$general$start_time <- 5
+config$gen3sis$general$start_time <- 300
 
 config$gen3sis$general$end_time <- 1
 
@@ -88,6 +88,19 @@ finalresult <- data.frame(plasticidade = runif(rep * length(plasti) * timesteps_
                           diversif = runif(rep * length(plasti) * timesteps_total, 0, 0),
                           traitevolution = runif(rep * length(plasti) * timesteps_total, 0, 0),
                           timesimulation = runif(rep * length(plasti) * timesteps_total, 0, 0))
+#### REMOVING TRAITS OF ANTERIOR SIMULATIONS ####
+caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", "traits")
+listfiles <- list.files("data/raw/WorldCenter/output/config_worldcenter/traits")
+filestoread <- length(list.files("data/raw/WorldCenter/output/config_worldcenter/traits"))
+cam <- 0
+for(l in 1:filestoread){
+  cam[l] <- caminho
+}
+camatualizado <- 0
+for(k in 1:length(cam)){
+  camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
+}
+file.remove(camatualizado)  
 
 for(p in 1:length(plasti)){
   
