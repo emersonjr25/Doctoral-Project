@@ -80,6 +80,7 @@ rep <- 1
 plasti <- seq(0.1, 1, 0.1)
 
 pos <- 0
+pos2 <- 0
 
 finalresult <- data.frame(plasticidade = runif(rep * length(plasti) * timesteps_total, 0, 0),
                           replications = runif(rep * length(plasti) * timesteps_total, 0, 0),
@@ -375,10 +376,11 @@ for(p in 1:length(plasti)){
       
       ##### SPECIATION AND EXTINCTION ####
       pos <- pos + 1
+      pos2 <- pos2 + 1
       
-      ratespeciation <- round(sum(sgen3sis$summary$phylo_summary[, 3]) / pos, digits = 2)
+      ratespeciation <- round(sum(sgen3sis$summary$phylo_summary[, 3]) / pos2, digits = 2)
       
-      rateextinction <- round(sum(sgen3sis$summary$phylo_summary[, 4]) / pos, digits = 2)
+      rateextinction <- round(sum(sgen3sis$summary$phylo_summary[, 4]) / pos2, digits = 2)
       
       diversification <- ratespeciation - rateextinction
       
@@ -409,6 +411,7 @@ for(p in 1:length(plasti)){
       }
     } 
   }
+  pos2 <- 0
   caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", "traits")
   listfiles <- list.files("data/raw/WorldCenter/output/config_worldcenter/traits")
   filestoread <- length(list.files("data/raw/WorldCenter/output/config_worldcenter/traits"))
