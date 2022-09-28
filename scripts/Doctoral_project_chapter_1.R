@@ -59,7 +59,7 @@ if (!verify_config(config)) {
 
 ### MODIFICATIONS IN CONFIG ###
 
-config$gen3sis$general$start_time <- 300
+config$gen3sis$general$start_time <- 5
 
 config$gen3sis$general$end_time <- 1
 
@@ -88,6 +88,7 @@ finalresult <- data.frame(plasticidade = runif(rep * length(plasti) * timesteps_
                           extinction = runif(rep * length(plasti) * timesteps_total, 0, 0),
                           diversif = runif(rep * length(plasti) * timesteps_total, 0, 0),
                           traitevolution = runif(rep * length(plasti) * timesteps_total, 0, 0),
+                          timestep = runif(rep * length(plasti) * timesteps_total, 0, 0),
                           timesimulation = runif(rep * length(plasti) * timesteps_total, 0, 0))
 #### REMOVING TRAITS OF ANTERIOR SIMULATIONS ####
 caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", "traits")
@@ -372,7 +373,7 @@ for(p in 1:length(plasti)){
       datafinal <- lapply(datafinal, mean)
       
       
-      traitevolution <- round(exp(mean(log(as.numeric(datafinal)))) / length(datafinal), digits = 2)
+      traitevolution <- exp(mean(log(as.numeric(datafinal)))) / length(datafinal)
       
       ##### SPECIATION AND EXTINCTION ####
       pos <- pos + 1
@@ -407,7 +408,8 @@ for(p in 1:length(plasti)){
         finalresult$extinction[pos] <- rateextinction
         finalresult$diversif[pos] <- diversification
         finalresult$traitevolution[pos] <- traitevolution
-        finalresult$timesimulation[pos] <- ti
+        finalresult$timestep[pos] <- ti
+        finalresult$timesimulation[pos] <- pos2
       }
     } 
   }
@@ -431,13 +433,3 @@ path <- here("output")
 write.csv2(finalresult, file.path(path, "finalresult.csv"), row.names = FALSE)
 #write.csv2(finalresult, file = "finalresult.csv", row.names = FALSE)
 #saveRDS(finalresult, file.path(path, "finalresult.RDS"))
-
-#for(i in 1:length(finalresult$plasticidade)){ 
-# }
-plot(finalresult$diversif ~ finalresult$timesimulation)
-plot(finalresult$traitevolution ~ finalresult$timesimulation)
-
-plot(finalresult$diversif ~ finalresult$plasticidade)
-plot(finalresult$traitevolution ~ finalresult$plasticidade)
-
-#val$data$inputs$environments$temp[1, ]
