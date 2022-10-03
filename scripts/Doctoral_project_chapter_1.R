@@ -369,6 +369,19 @@ for(p in 1:length(plasti)){
       }
       
       ####### FINAL MEAN PER TIME STEP #######
+      datafinal2 <- datafinal
+      list_difference <- list()
+      
+    
+      for(i in 1:length(datafinal)){
+        i + 1
+        pos <- which(names(datafinal[[1]][1]) == names(datafinal2[[2]]))
+      }
+      
+      pos <- which(names(datafinal[[1]][1]) == names(datafinal2[[2]]))
+      list_difference[[1]] <- abs(as.numeric(datafinal[[1]][1]) - as.numeric(datafinal[[2]][pos]))
+      list_difference[[2]] <- abs(as.numeric(datafinal[[2]][1]) - as.numeric(datafinal[[3]][pos]))
+      
       datafinal <- lapply(datafinal, as.numeric)
       datafinal <- lapply(datafinal, mean)
       
