@@ -371,14 +371,20 @@ for(p in 1:length(plasti)){
       ####### FINAL MEAN PER TIME STEP #######
       datafinal2 <- datafinal
       list_difference <- list()
-      
-    
+      i <- 1
+      k <- 1
+      l <- 1
       for(i in 1:length(datafinal)){
-        i + 1
-        pos <- which(names(datafinal[[1]][1]) == names(datafinal2[[2]]))
+        for(k in seq_along(datafinal[[i]])){
+          #i <- 1
+          # k <- 2
+          l <- i + 1
+          pos <- which(names(datafinal[[i]][k]) == names(datafinal2[[l]]))
+          list_difference[[k]] <- abs(as.numeric(datafinal[[i]][k]) - as.numeric(datafinal[[l]][pos]))
+        }
       }
       
-      pos <- which(names(datafinal[[1]][1]) == names(datafinal2[[2]]))
+      pos <- which(names(datafinal[[1]][[1]]) == names(datafinal2[[2]]))
       list_difference[[1]] <- abs(as.numeric(datafinal[[1]][1]) - as.numeric(datafinal[[2]][pos]))
       list_difference[[2]] <- abs(as.numeric(datafinal[[2]][1]) - as.numeric(datafinal[[3]][pos]))
       
