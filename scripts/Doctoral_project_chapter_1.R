@@ -457,7 +457,7 @@ for(p in 1:length(plasti)){
     camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
   }
   file.remove(camatualizado)  
-  rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal)
+  rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, datafinal2, datafinal3, list_difference, list_difference2)
 }
 
 path <- here("output")

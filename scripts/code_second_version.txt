@@ -1,0 +1,37 @@
+ datafinal2 <- datafinal
+       datafinal3 <- datafinal
+       #datafinal2 <- datafinal[-length(datafinal)]
+       #datafinal3 <- datafinal[-1]
+       list_difference <- list()
+       list_difference <- vector("list", sum(lengths(datafinal2[-length(datafinal2)])))
+       time <- 0
+       k <- 1
+       i <- 1
+       #l <- i + 1
+       for(i in head(1:length(datafinal2), -1)){
+         for(k in seq_along(datafinal2[[i]])){
+           time <- time + 1
+           #k <- 1
+           #i <- 1
+           l <- i + 1
+           posicao <- which(names(datafinal2[[i]][k]) == names(datafinal3[[l]]))
+           list_difference[[time]] <- abs(as.numeric(datafinal2[[i]][k]) - as.numeric(datafinal3[[l]][posicao]))
+         }
+       }
+       time <- 0
+       pos <- which(names(datafinal2[[1]][1]) == names(datafinal3[[l]]))
+       list_difference[[1]] <- abs(as.numeric(datafinal[[12]][21]) - as.numeric(datafinal[[12]][pos]))
+       list_difference[[2]] <- abs(as.numeric(datafinal[[2]][1]) - as.numeric(datafinal[[3]][pos]))
+       
+       
+       list_difference2 <- list()
+       for(i in 1:length(list_difference)){
+         if(length(list_difference[[i]]) == 1) {
+           list_difference2[[i]] <- list_difference[[i]]
+         } else {
+           list_difference2[[i]] <- NULL
+         }
+       }
+       final <- unlist(list_difference2)
+       
+       traitevolution <- mean(final) / sum(length(datafinal) + 1)
