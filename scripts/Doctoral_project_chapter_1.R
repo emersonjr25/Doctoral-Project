@@ -333,7 +333,7 @@ for(p in 1:length(plasti)){
       }
       
       # SORT #
-      camatualizado <- camatualizado[order(as.numeric(gsub("[^0-9]+", "", camatualizado)))]
+      camatualizado <- camatualizado[order(as.numeric(gsub("[^0-9]+", "", camatualizado)), decreasing = TRUE)]
       
       
       # READ FILES #
@@ -346,7 +346,7 @@ for(p in 1:length(plasti)){
       
       ### change name of list ###
       for(i in 1:length(datafinal)){
-        names(datafinal) <- paste0("timestep", 1:length(datafinal))
+        names(datafinal) <- paste0("timestep", length(datafinal):1)
       }
       
       #### function to return column ###
@@ -375,7 +375,7 @@ for(p in 1:length(plasti)){
        datafinal2 <- datafinal[-length(datafinal)]
        datafinal3 <- datafinal3[-1]
        list_difference <- list()
-       list_difference <- vector("list", sum(lengths(datafinal)))
+       list_difference <- vector("list", sum(lengths(datafinal2)))
        time <- 0
        for(i in 1:length(datafinal2)){
          for(k in seq_along(datafinal2[[i]])){
