@@ -59,7 +59,7 @@ if (!verify_config(config)) {
 
 ### MODIFICATIONS IN CONFIG ###
 
-config$gen3sis$general$start_time <- 20
+config$gen3sis$general$start_time <- 5
 
 config$gen3sis$general$end_time <- 1
 
@@ -75,9 +75,9 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 }
 
 #########################################################
-rep <- 1
+rep <- 2
 
-plasti <- seq(0.1, 0.1, 0.1)
+plasti <- seq(0.1, 1, 0.1)
 
 pos <- 0
 pos2 <- 0
@@ -188,7 +188,7 @@ for(p in 1:length(plasti)){
     if (!is.na(timestep_restart)) {
       val <- restore_state(val, timestep_restart)
     }
-    
+    pos2 <- 0
     for (ti in val$vars$steps) {
       
       ##########################################################  
@@ -396,7 +396,7 @@ for(p in 1:length(plasti)){
        }
        final <- unlist(list_difference2)
        
-       traitevolution <- mean(final) / sum(length(datafinal) + 1)
+       traitevolution <- mean(final) / sum(length(datafinal2) + 1)
        
        #pos <- which(names(datafinal[[12]][21]) == names(datafinal2[[12]]))
        #list_difference[[1]] <- abs(as.numeric(datafinal[[12]][21]) - as.numeric(datafinal[[12]][pos]))
