@@ -57,9 +57,9 @@ if (!verify_config(config)) {
 
 
 
-### MODIFICATIONS IN CONFIG ###
+#### MODIFICATIONS IN CONFIG ####
 
-config$gen3sis$general$start_time <- 5
+config$gen3sis$general$start_time <- 300
 
 config$gen3sis$general$end_time <- 1
 
@@ -75,7 +75,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 }
 
 #########################################################
-rep <- 2
+rep <- 1
 
 plasti <- seq(0.1, 1, 0.1)
 
