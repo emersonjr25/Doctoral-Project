@@ -13,7 +13,7 @@ library(here)
 
 
 #### data ####
-dados <- read.csv2("output/finalresult.csv")
+dados <- read.csv2("output/2_final_simulation/finalresult.csv")
 dados <- dados %>% filter(replications != 0)
 path <- here("output")
 
@@ -127,6 +127,7 @@ for(i in unique(dados$plasticidade)){
 }
 
 #### plot trait evolution ####
+#subdata_final <- dados %>% filter(timesimulation >= 100)
 
 general_plot_4 <- ggplot(data = dados, aes(timesimulation, traitevolution, color = plasticidade)) + 
   geom_point() + labs(title = paste("Trait evolution along time with plasticity - all data")) + theme_bw() +
@@ -161,4 +162,5 @@ for(i in unique(dados$plasticidade)){
           axis.title = element_text(size = 14)))
   dev.off()
 }
+
 
