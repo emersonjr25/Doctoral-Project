@@ -119,7 +119,10 @@ for(p in 1:length(plasti)){
     # plast = 0, means no plasticity
     
     plasticity <- function(x, plast) {
-      seq((x * plast) - plast, (x * plast) + plast, 0.01)
+      seq((0.5 * 0.1) - 0.1, (0.5 * 0.1) + 0.1, 0.01)
+    }
+    plasticity <- function(x, plast) {
+      seq(0.5 - 0.5, 0.5 + 0.5, 0.01)
     }
     
     plasticity2 <- function(x, land) {

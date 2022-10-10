@@ -59,7 +59,7 @@ if (!verify_config(config)) {
 
 #### MODIFICATIONS IN CONFIG ####
 
-config$gen3sis$general$start_time <- 300
+config$gen3sis$general$start_time <- 600
 
 config$gen3sis$general$end_time <- 1
 
