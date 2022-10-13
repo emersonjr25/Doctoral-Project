@@ -7,11 +7,7 @@
 ##### Script to input, modify and run model #########
 
 #### PACKAGES ####
-library(igraph)
-library(stringi)
 library(gen3sis)
-library(raster)
-library(truncnorm)
 library(here)
 
 
@@ -119,12 +115,9 @@ for(p in 1:length(plasti)){
     # plast = 0, means no plasticity
     
     plasticity <- function(x, plast) {
-      seq((0.5 * 0.1) - 0.1, (0.5 * 0.1) + 0.1, 0.01)
+      return(seq(x - (x * plast), x + (x * plast), 0.01))
     }
-    plasticity <- function(x, plast) {
-      seq(0.5 - 0.5, 0.5 + 0.5, 0.01)
-    }
-    
+   
     plasticity2 <- function(x, land) {
       min(abs(x - land))
     }

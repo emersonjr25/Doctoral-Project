@@ -13,7 +13,7 @@ library(here)
 
 
 #### data ####
-dados <- read.csv2("output/2_final_simulation/finalresult.csv")
+dados <- read.csv2("output/finalresult.csv")
 dados <- dados %>% filter(replications != 0)
 path <- here("output")
 

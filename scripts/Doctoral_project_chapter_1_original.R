@@ -7,11 +7,7 @@
 ##### Script to input, modify and run model #########
 
 #### PACKAGES ####
-library(igraph)
-library(stringi)
 library(gen3sis)
-library(raster)
-library(truncnorm)
 library(here)
 
 
@@ -59,7 +55,7 @@ if (!verify_config(config)) {
 
 #### MODIFICATIONS IN CONFIG ####
 
-config$gen3sis$general$start_time <- 600
+config$gen3sis$general$start_time <- 300
 
 config$gen3sis$general$end_time <- 1
 
@@ -119,7 +115,7 @@ for(p in 1:length(plasti)){
     # plast = 0, means no plasticity
     
     plasticity <- function(x, plast) {
-      seq((x * plast) - plast, (x * plast) + plast, 0.01)
+      return(seq(x - (x * plast), x + (x * plast), 0.01))
     }
     
     plasticity2 <- function(x, land) {
@@ -305,6 +301,7 @@ for(p in 1:length(plasti)){
       sgen3sis <- make_summary(val$config, val$data, val$vars,
                                total_runtime, save_file = FALSE)
       #plot_summary(sgen3sis)
+      
       
       # if (verbose >= 1) {
       #  cat("Simulation runtime:", total_runtime, "hours\n")
