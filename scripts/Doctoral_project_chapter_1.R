@@ -15,6 +15,8 @@
 #install.packages("here")
 
 #### CARRYNG PACKAGES ####
+
+# SEE USED PACKAGES#
 library(igraph)
 library(stringi)
 library(gen3sis)
@@ -105,7 +107,7 @@ for(p in 1:length(plasti)){
     # plast = 0, means no plasticity
     
     plasticity <- function(x, plast) {
-      seq((x * plast) - plast, (x * plast) + plast, 0.01)
+      return(seq(x - (x * plast), x + (x * plast), 0.01))
     }
     
     plasticity2 <- function(x, land) {
