@@ -145,7 +145,7 @@ for(p in 1:length(plasti)){
     }
     return(abundance)
   }  
-
+  
   for(r in 1:rep){
     val <- list(data = list(),
                 vars = list(),
@@ -366,44 +366,44 @@ for(p in 1:length(plasti)){
       }
       
       ####### FINAL MEAN PER TIME STEP #######
-     if(ti <= (val$vars$steps[1] - 1)){
-       datafinal2 <- datafinal
-       datafinal3 <- datafinal
-       datafinal2 <- datafinal[-length(datafinal)]
-       datafinal3 <- datafinal3[-1]
-       list_difference <- list()
-       list_difference <- vector("list", sum(lengths(datafinal2)))
-       time <- 0
-       for(i in 1:length(datafinal2)){
-         for(k in seq_along(datafinal2[[i]])){
-           time <- time + 1
-           posicao <- which(names(datafinal2[[i]][k]) == names(datafinal3[[i]]))
-           list_difference[[time]] <- abs(as.numeric(datafinal2[[i]][k]) - as.numeric(datafinal3[[i]][posicao]))
-         }
-       }
-       time <- 0
-       
-       list_difference2 <- list()
-       for(i in 1:length(list_difference)){
-         if(length(list_difference[[i]]) == 1) {
-           list_difference2[[i]] <- list_difference[[i]]
-         } else {
-           list_difference2[[i]] <- NULL
-         }
-       }
-       final <- unlist(list_difference2)
-       
-       traitevolution <- mean(final) / sum(length(datafinal2) + 1)
-       
-       #pos <- which(names(datafinal[[12]][21]) == names(datafinal2[[12]]))
-       #list_difference[[1]] <- abs(as.numeric(datafinal[[12]][21]) - as.numeric(datafinal[[12]][pos]))
-       #list_difference[[2]] <- abs(as.numeric(datafinal[[2]][1]) - as.numeric(datafinal[[3]][pos]))
+      if(ti <= (val$vars$steps[1] - 1)){
+        datafinal2 <- datafinal
+        datafinal3 <- datafinal
+        datafinal2 <- datafinal[-length(datafinal)]
+        datafinal3 <- datafinal3[-1]
+        list_difference <- list()
+        list_difference <- vector("list", sum(lengths(datafinal2)))
+        time <- 0
+        for(i in 1:length(datafinal2)){
+          for(k in seq_along(datafinal2[[i]])){
+            time <- time + 1
+            posicao <- which(names(datafinal2[[i]][k]) == names(datafinal3[[i]]))
+            list_difference[[time]] <- abs(as.numeric(datafinal2[[i]][k]) - as.numeric(datafinal3[[i]][posicao]))
+          }
+        }
+        time <- 0
+        
+        list_difference2 <- list()
+        for(i in 1:length(list_difference)){
+          if(length(list_difference[[i]]) == 1) {
+            list_difference2[[i]] <- list_difference[[i]]
+          } else {
+            list_difference2[[i]] <- NULL
+          }
+        }
+        final <- unlist(list_difference2)
+        
+        traitevolution <- mean(final) / sum(length(datafinal2) + 1)
+        
+        #pos <- which(names(datafinal[[12]][21]) == names(datafinal2[[12]]))
+        #list_difference[[1]] <- abs(as.numeric(datafinal[[12]][21]) - as.numeric(datafinal[[12]][pos]))
+        #list_difference[[2]] <- abs(as.numeric(datafinal[[2]][1]) - as.numeric(datafinal[[3]][pos]))
+        
+      } else {
+        traitevolution <- 0
+      }
       
-     } else {
-       traitevolution <- 0
-     }
-       
-       ##### SPECIATION AND EXTINCTION ####
+      ##### SPECIATION AND EXTINCTION ####
       pos <- pos + 1
       pos2 <- pos2 + 1
       
