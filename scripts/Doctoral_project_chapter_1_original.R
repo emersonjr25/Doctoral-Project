@@ -55,7 +55,7 @@ if (!verify_config(config)) {
 
 #### MODIFICATIONS IN CONFIG ####
 
-config$gen3sis$general$start_time <- 300
+config$gen3sis$general$start_time <- 10
 
 config$gen3sis$general$end_time <- 1
 
@@ -328,14 +328,17 @@ for(p in 1:length(plasti)){
       for(k in 1:length(cam)){
         camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
       }
-      
+    
       # SORT #
       camatualizado <- camatualizado[order(as.numeric(gsub("[^0-9]+", "", camatualizado)), decreasing = TRUE)]
-      
+      cam_length <- length(camatualizado)
+      if(cam_length >= 2) {
+        camatualizado <- camatualizado[c(cam_length - 1, cam_length)]
+      }
       
       # READ FILES #
       datafinal <- list()
-      for(d in 1:filestoread){
+      for(d in 1:length(camatualizado)){
         datafinal[[d]] <- readRDS(camatualizado[[d]])
       }
       
