@@ -53,9 +53,10 @@ if (!verify_config(config)) {
 
 
 
-### MODIFICATIONS IN CONFIG ###
+#### MODIFICATIONS IN CONFIG ####
 
-config$gen3sis$general$start_time <- 20
+
+config$gen3sis$general$start_time <- 10
 
 config$gen3sis$general$end_time <- 1
 
@@ -73,7 +74,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 #########################################################
 rep <- 1
 
-plasti <- seq(0.1, 0.1, 0.1)
+plasti <- seq(0.1, 1, 0.1)
 
 pos <- 0
 pos2 <- 0
@@ -100,52 +101,117 @@ for(k in 1:length(cam)){
 }
 file.remove(camatualizado)  
 
-for(p in 1:length(plasti)){
+config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, config, plasti) {
+  abundance_scale = 10
+  abundance_threshold = 1
+  #abundance threshold
+  survive <- abundance>=abundance_threshold
+  abundance[!survive] <- 0
+  # Modification for plasticity:
+  # Traits are now subtracted from a variance of optima
+  # Such optima are defined by the parameter plast
+  # Higher plast equals more plasticity
+  # plast = 0, means no plasticity
   
-  config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, config) {
-    abundance_scale = 10
-    abundance_threshold = 1
-    #abundance threshold
-    survive <- abundance>=abundance_threshold
-    abundance[!survive] <- 0
-    # Modification for plasticity:
-    # Traits are now subtracted from a variance of optima
-    # Such optima are defined by the parameter plast
-    # Higher plast equals more plasticity
-    # plast = 0, means no plasticity
-    
-    plasticity <- function(x, plast) {
-      return(seq(x - (x * plast), x + (x * plast), 0.01))
+  plasticity <- function(x, plast) {
+    return(seq(x - (x * plast), x + (x * plast), 0.01))
+  }
+  
+  plasticity2 <- function(x, land) {
+    min(abs(x - land))
+  }
+  traits_sub <- lapply(traits[, 'temp'], plasticity, plast = plasti[plasti])
+  traits_sub2 <- sapply(traits_sub, plasticity2, land = landscape[,'temp'])
+  abundance <- ((1 - traits_sub2)*abundance_scale)*as.numeric(survive)
+  
+  
+  #abundance threshold
+  abundance[abundance<abundance_threshold] <- 0
+  k <- ((landscape[,'area']*(landscape[,'arid']+0.1)*(landscape[,'temp']+0.1))
+        *abundance_scale^2)
+  total_ab <- sum(abundance)
+  subtract <- total_ab-k
+  if (subtract > 0) {
+    # print(paste("should:", k, "is:", total_ab, "DIFF:", round(subtract,0) ))
+    while (total_ab>k){
+      alive <- abundance>0
+      loose <- sample(1:length(abundance[alive]),1)
+      abundance[alive][loose] <- abundance[alive][loose]-1
+      total_ab <- sum(abundance)
     }
-   
-    plasticity2 <- function(x, land) {
-      min(abs(x - land))
-    }
-    traits_sub <- lapply(traits[, 'temp'], plasticity, plast = plasti[p])
-    traits_sub2 <- sapply(traits_sub, plasticity2, land = landscape[,'temp'])
-    abundance <- ((1 - traits_sub2)*abundance_scale)*as.numeric(survive)
-    
-    
-    #abundance threshold
-    abundance[abundance<abundance_threshold] <- 0
-    k <- ((landscape[,'area']*(landscape[,'arid']+0.1)*(landscape[,'temp']+0.1))
-          *abundance_scale^2)
-    total_ab <- sum(abundance)
-    subtract <- total_ab-k
-    if (subtract > 0) {
-      # print(paste("should:", k, "is:", total_ab, "DIFF:", round(subtract,0) ))
-      while (total_ab>k){
-        alive <- abundance>0
-        loose <- sample(1:length(abundance[alive]),1)
-        abundance[alive][loose] <- abundance[alive][loose]-1
-        total_ab <- sum(abundance)
-      }
-      #set negative abundances to zero
-      abundance[!alive] <- 0
-    }
-    return(abundance)
-  }  
+    #set negative abundances to zero
+    abundance[!alive] <- 0
+  }
+  return(abundance)
+}  
 
+
+loop_ecology2 <- function (config, data, vars, plasti) {
+  if (config$gen3sis$general$verbose >= 3) {
+    cat(paste("entering ecology module @ time", vars$ti, 
+              "\n"))
+  }
+  all_cells <- rownames(data$landscape$environment)
+  all_species_presence <- do.call(cbind, lapply(data$all_species, 
+                                                FUN = function(sp) {
+                                                  all_cells %in% names(sp$abundance)
+                                                }))
+  rownames(all_species_presence) <- all_cells
+  occupied_cells <- rownames(all_species_presence)[rowSums(all_species_presence) > 
+                                                     0]
+  for (cell in occupied_cells) {
+    local_environment = data$landscape[["environment"]][cell, 
+                                                        , drop = FALSE]
+    coo_sp <- which(all_species_presence[cell, ])
+    traits <- matrix(nrow = length(coo_sp), ncol = length(config$gen3sis$general$trait_names))
+    abundance <- numeric(length(coo_sp))
+    colnames(traits) <- config$gen3sis$general$trait_names
+    i <- 1
+    for (spi in coo_sp) {
+      traits[i, ] <- data$all_species[[spi]][["traits"]][cell, 
+                                                         config$gen3sis$general$trait_names]
+      abundance[i] <- data$all_species[[spi]][["abundance"]][cell]
+      i <- i + 1
+    }
+    max_n_sp_idi <- config$gen3sis$general$max_number_of_coexisting_species
+    if (length(coo_sp) > max_n_sp_idi) {
+      vars$flag <- "max_number_coexisting_species"
+      paste0("Maximum number of species per cell (i.e. max_n_sp_idi) reached. Specifically ", 
+             length(coo_sp), "(>", max_n_sp_idi, ") species @ t", 
+             vars$ti, " idi", cell)
+      return(list(config = config, data = data, vars = vars))
+    }
+    rownames(traits) <- coo_sp
+    names(abundance) <- coo_sp
+    NEW_abd <- config$gen3sis$ecology$apply_ecology(abundance, 
+                                                    traits, local_environment, config, plasti)
+    names(NEW_abd) <- coo_sp
+    shalldie <- NEW_abd == 0
+    for (spi in coo_sp) {
+      data$all_species[[spi]][["abundance"]][cell] <- NEW_abd[[toString(spi)]]
+    }
+    die_sure <- as.integer(names(NEW_abd)[NEW_abd == 0])
+    if (length(die_sure) > 0) {
+      chars <- as.character(die_sure)
+    }
+  }
+  species_list <- list()
+  for (species in data$all_species) {
+    cells <- names(species[["abundance"]])[species[["abundance"]] != 
+                                             0]
+    updated_species <- limit_species_to_cells(species, cells)
+    species_list <- append(species_list, list(updated_species))
+  }
+  data$all_species <- species_list
+  if (config$gen3sis$general$verbose >= 3) {
+    cat(paste("exiting ecology module @ time", vars$ti, 
+              "\n"))
+  }
+  return(list(config = config, data = data, vars = vars))
+}
+
+#for(p in 1:length(plasti)){
+  
   for(r in 1:rep){
     val <- list(data = list(),
                 vars = list(),
@@ -184,7 +250,7 @@ for(p in 1:length(plasti)){
     if (!is.na(timestep_restart)) {
       val <- restore_state(val, timestep_restart)
     }
-    
+    pos2 <- 0
     for (ti in val$vars$steps) {
       
       ##########################################################  
@@ -267,7 +333,7 @@ for(p in 1:length(plasti)){
         print("max number of species reached, breaking loop")
         break
       }
-      val <- loop_ecology(val$config, val$data, val$vars)
+      val <- loop_ecology2(val$config, val$data, val$vars)
       #if (val$vars$flag == "max_number_coexisting_species") {
       # print("max number of coexisting species reached, breaking loop")
       # break
@@ -302,6 +368,7 @@ for(p in 1:length(plasti)){
                                total_runtime, save_file = FALSE)
       #plot_summary(sgen3sis)
       
+      
       # if (verbose >= 1) {
       #  cat("Simulation runtime:", total_runtime, "hours\n")
       # }
@@ -327,14 +394,17 @@ for(p in 1:length(plasti)){
       for(k in 1:length(cam)){
         camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
       }
-      
+    
       # SORT #
       camatualizado <- camatualizado[order(as.numeric(gsub("[^0-9]+", "", camatualizado)), decreasing = TRUE)]
-      
+      cam_length <- length(camatualizado)
+      if(cam_length >= 2) {
+        camatualizado <- camatualizado[c(cam_length - 1, cam_length)]
+      }
       
       # READ FILES #
       datafinal <- list()
-      for(d in 1:filestoread){
+      for(d in 1:length(camatualizado)){
         datafinal[[d]] <- readRDS(camatualizado[[d]])
       }
       
@@ -365,57 +435,44 @@ for(p in 1:length(plasti)){
       }
       
       ####### FINAL MEAN PER TIME STEP #######
-     if(ti <= (val$vars$steps[1] - 1)){
-       datafinal2 <- datafinal
-       datafinal3 <- datafinal
-       datafinal2 <- datafinal[-length(datafinal)]
-       datafinal3 <- datafinal3[-1]
-       list_difference <- list()
-       list_difference <- vector("list", sum(lengths(datafinal2)))
-       time <- 0
-       opa <- list()
-       for(i in 1:length(datafinal2)){
-         #for(k in seq_along(datafinal2[[i]])){
-          # time <- time + 1
-           #posicao <- which(names(datafinal2[[i]][k]) == names(datafinal3[[i]]))
-          # list_difference[[time]] <- abs(as.numeric(datafinal2[[i]][k]) - as.numeric(datafinal3[[i]][posicao]))
-        time <- as.numeric(names(datafinal[[i]]))
-        for(j in seq_along(datafinal[[i]])){
-          if(j <= length(datafinal)){
-            print(datafinal[[j]][time[i]])
-          } else {
-            j <- 1
+      if(ti <= (val$vars$steps[1] - 1)){
+        datafinal2 <- datafinal
+        datafinal3 <- datafinal
+        datafinal2 <- datafinal[-length(datafinal)]
+        datafinal3 <- datafinal3[-1]
+        list_difference <- list()
+        list_difference <- vector("list", sum(lengths(datafinal2)))
+        time <- 0
+        for(i in 1:length(datafinal2)){
+          for(k in seq_along(datafinal2[[i]])){
+            time <- time + 1
+            posicao <- which(names(datafinal2[[i]][k]) == names(datafinal3[[i]]))
+            list_difference[[time]] <- abs(as.numeric(datafinal2[[i]][k]) - as.numeric(datafinal3[[i]][posicao]))
           }
         }
-       }
-       
+        time <- 0
+        
+        list_difference2 <- list()
+        for(i in 1:length(list_difference)){
+          if(length(list_difference[[i]]) == 1) {
+            list_difference2[[i]] <- list_difference[[i]]
+          } else {
+            list_difference2[[i]] <- NULL
+          }
+        }
+        final <- unlist(list_difference2)
+        
+        traitevolution <- mean(final) / sum(length(datafinal2) + 1)
+        
+        #pos <- which(names(datafinal[[12]][21]) == names(datafinal2[[12]]))
+        #list_difference[[1]] <- abs(as.numeric(datafinal[[12]][21]) - as.numeric(datafinal[[12]][pos]))
+        #list_difference[[2]] <- abs(as.numeric(datafinal[[2]][1]) - as.numeric(datafinal[[3]][pos]))
+        
+      } else {
+        traitevolution <- 0
+      }
       
-      
-       time <- 0
-       i <- 1
-       k <- i
-       pos <- which(names(datafinal[[1]][1]) == names(datafinal2[[1]]))
-       list_difference[[1]] <- abs(as.numeric(datafinal[[12]][21]) - as.numeric(datafinal[[12]][pos]))
-       list_difference[[2]] <- abs(as.numeric(datafinal[[2]][1]) - as.numeric(datafinal[[3]][pos]))
-       
-       list_difference2 <- list()
-       for(i in 1:length(list_difference)){
-         if(length(list_difference[[i]]) == 1) {
-           list_difference2[[i]] <- list_difference[[i]]
-         } else {
-           list_difference2[[i]] <- NULL
-         }
-       }
-       final <- unlist(list_difference2)
-       
-       traitevolution <- mean(final) / sum(length(datafinal) + 1)
-    
-      
-     } else {
-       traitevolution <- 0
-     }
-       
-       ##### SPECIATION AND EXTINCTION ####
+      ##### SPECIATION AND EXTINCTION ####
       pos <- pos + 1
       pos2 <- pos2 + 1
       
@@ -467,7 +524,7 @@ for(p in 1:length(plasti)){
   }
   file.remove(camatualizado)  
   rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, datafinal2, datafinal3, list_difference, list_difference2)
-}
+#}
 
 path <- here("output")
 write.csv2(finalresult, file.path(path, "finalresult.csv"), row.names = FALSE)
