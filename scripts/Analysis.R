@@ -18,15 +18,24 @@ dados <- dados %>% filter(replications != 0)
 path <- here("output")
 
 #### plot speciation ####
+pos < - dados$speciation[dados$timesimulation == 1000]
+pos <- which(dados$timesimulation == 1000)
+dados$speciation[pos]
+new_data <- data.frame(x = dados$plasticidade[dados$timesimulation == 1000],
+                       y = dados$speciation[dados$timesimulation == 1000],
+                       plasticidade = dados$plasticidade[dados$timesimulation == 1000]
+                       
+)
 
-general_plot_1 <- ggplot(data = dados, aes(timesimulation, speciation, color = plasticidade)) + 
-  geom_point() + labs(title = paste("Speciation along time with plasticity - all data")) + theme_bw() +
+
+ggplot(data = new_data, aes(x, y, colour = plasticidade, group = plasticidade)) + 
+  geom_col() + labs(title = paste("Speciation along time with plasticity - all data")) + theme_bw() +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
         plot.title = element_text(size = 16, hjust = 0.5),
         axis.text = element_text(size = 12),
-        axis.title = element_text(size = 14)) + 
-      geom_smooth(color = "red", fill = "green") + geom_vline(xintercept=170, color="black", size=.5)
+        axis.title = element_text(size = 14)) 
+
 
 
 tiff(filename = file.path(path, paste0("plot", "_", general_plot_1[["labels"]][["y"]], "_", "plas", "all", ".tif")),
@@ -37,7 +46,7 @@ tiff(filename = file.path(path, paste0("plot", "_", general_plot_1[["labels"]][[
 print(general_plot_1)
 dev.off()
 
-  for(i in unique(dados$plasticidade)){
+for(i in unique(dados$plasticidade)){
   subdata <- dados %>% filter(plasticidade == i)
   tiff(filename = file.path(path, paste0("plot", "_", general_plot_1[["labels"]][["y"]], "_", "plas", i, ".tif")),
        width = 15,
@@ -56,14 +65,14 @@ dev.off()
 
 #### plot extinction ####
 
-general_plot_2 <- ggplot(data = dados, aes(timesimulation, extinction, color = plasticidade)) + 
-  geom_point() + labs(title = paste("Extinction along time with plasticity", i)) + theme_bw() +
+ggplot(data = dados, aes(timesimulation, extinction, colour = plasticidade, group = plasticidade)) + 
+  labs(title = paste("Extinction along time with plasticity")) + theme_bw() +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
         plot.title = element_text(size = 16, hjust = 0.5),
         axis.text = element_text(size = 12),
         axis.title = element_text(size = 14)) + 
-  geom_smooth(color = "red", fill = "green") + geom_vline(xintercept=150, color="black", size=.5)
+  geom_smooth(se = FALSE)
 
 tiff(filename = file.path(path, paste0("plot", "_", general_plot_2[["labels"]][["y"]], "_", "plas", "all", ".tif")),
      width = 15,
@@ -92,14 +101,14 @@ for(i in unique(dados$plasticidade)){
 
 #### plot diversification ####
 
-general_plot_3 <- ggplot(data = dados, aes(timesimulation, diversif, color = plasticidade)) + 
-  geom_point() + labs(title = paste("Diversification along time with plasticity - all data")) + theme_bw() +
+ggplot(data = dados, aes(timesimulation, diversif, colour = plasticidade, group = plasticidade)) + 
+  labs(title = paste("Diversification along time with plasticity - all data")) + theme_bw() +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
         plot.title = element_text(size = 16, hjust = 0.5),
         axis.text = element_text(size = 12),
         axis.title = element_text(size = 14)) + 
-  geom_smooth(color = "red", fill = "green") + geom_vline(xintercept=170, color="black", size=.5)
+  geom_smooth(se = FALSE)
 
 tiff(filename = file.path(path, paste0("plot", "_", general_plot_3[["labels"]][["y"]], "_", "plas", "all", ".tif")),
      width = 15,
@@ -129,14 +138,14 @@ for(i in unique(dados$plasticidade)){
 #### plot trait evolution ####
 #subdata_final <- dados %>% filter(timesimulation >= 100)
 
-general_plot_4 <- ggplot(data = dados, aes(timesimulation, traitevolution, color = plasticidade)) + 
-  geom_point() + labs(title = paste("Trait evolution along time with plasticity - all data")) + theme_bw() +
+ggplot(data = dados, aes(timesimulation, traitevolution, colour = plasticidade, group = plasticidade)) + 
+  labs(title = paste("Trait evolution along time with plasticity - all data")) + theme_bw() +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
         plot.title = element_text(size = 16, hjust = 0.5),
         axis.text = element_text(size = 12),
         axis.title = element_text(size = 14)) + 
-  geom_smooth(color = "red", fill = "green") + geom_vline(xintercept=170, color="black", size=.5)
+  geom_smooth(se = FALSE)
 
 tiff(filename = file.path(path, paste0("plot", "_", general_plot_4[["labels"]][["y"]], "_", "plas", "all", ".tif")),
      width = 15,
@@ -153,14 +162,12 @@ for(i in unique(dados$plasticidade)){
        height = 15,
        units = "cm",
        res = 100)
-   print(ggplot(subdata, aes(timesimulation, traitevolution)) +
-    geom_point() + labs(title = paste("Trait evolution along time with plasticity", i)) + theme_bw() +
-    theme(panel.border = element_blank(), panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
-          plot.title = element_text(size = 16, hjust = 0.5),
-          axis.text = element_text(size = 12),
-          axis.title = element_text(size = 14)))
+  print(ggplot(subdata, aes(timesimulation, traitevolution)) +
+          geom_point() + labs(title = paste("Trait evolution along time with plasticity", i)) + theme_bw() +
+          theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+                panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
+                plot.title = element_text(size = 16, hjust = 0.5),
+                axis.text = element_text(size = 12),
+                axis.title = element_text(size = 14)))
   dev.off()
 }
-
-
