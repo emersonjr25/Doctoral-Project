@@ -10,20 +10,16 @@
 library(gen3sis)
 library(here)
 
-
 #### SIMULATION ####
-
 datapath <- here("data/raw/WorldCenter")
 attach(loadNamespace('gen3sis'), name = 'gen3sis_all')
 config = file.path(datapath, "config/config_worldcenter.R")
 landscape = file.path(datapath, "landscape_new")
 
 output_directory = NA
-
 timestep_restart = NA
 save_state = NA
 call_observer = "all"
-
 enable_gc = FALSE
 verbose = 1
 
@@ -34,8 +30,6 @@ directories <- prepare_directories(
   output_directory = output_directory
 )
 
-#pathway <- paste(datapath, "output/config_worldcenter/phy_res", sep = "/", collapse = "--")
-#dir.create(pathway, showWarnings = FALSE)
 if (is.na(config)[1]) {
   stop("please provide either a config file or a config object")
 } else if (class(config) == "gen3sis_config") {
@@ -51,11 +45,7 @@ if (!verify_config(config)) {
   stop("config verification failed")
 }
 
-
-
 #### MODIFICATIONS IN CONFIG ####
-
-
 config$gen3sis$general$start_time <- 10
 
 config$gen3sis$general$end_time <- 1
@@ -66,9 +56,6 @@ config$gen3sis$general$max_number_of_species <- 5000
 
 config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
   save_traits()
-  #save_species()
-  #plot_richness(data$all_species, data$landscape)
-  
 }
 
 #########################################################
@@ -334,9 +321,6 @@ for(r in 1:rep){
       break
     }
     val <- loop_ecology2(val$config, val$data, val$vars)
-    #if (val$vars$flag == "max_number_coexisting_species") {
-    # print("max number of coexisting species reached, breaking loop")
-    # break
     
     if (verbose >= 0 & val$vars$flag == "OK") {
       cat("Simulation finished. All OK \n")
@@ -347,18 +331,7 @@ for(r in 1:rep){
       cat("Simulation finished. Early abort due to exceeding max number of co-occuring species")
     }
     val <- update.phylo(val$config, val$data, val$vars)
-    # write.table(
-    #  val$data$phy,
-    # file = file.path(pathway,
-    #                paste0("phy", "plast", p, "rep", r, ".txt")),
-    # sep = "\t"
-    # )
-    #write_nex(
-    #  phy = val$data$phy,
-    #  label = "species",
-    #  file.path(output_location = pathway,
-    #     paste0("phy", "plast", p, "rep", r, ".nex"))
-    # )
+   
     system_time_stop <- Sys.time()
     total_runtime <- difftime(system_time_stop, system_time_start,
                               units = "hours")[[1]]
@@ -367,14 +340,10 @@ for(r in 1:rep){
     sgen3sis <- make_summary(val$config, val$data, val$vars,
                              total_runtime, save_file = FALSE)
     #plot_summary(sgen3sis)
-    
-    
-    # if (verbose >= 1) {
-    #  cat("Simulation runtime:", total_runtime, "hours\n")
-    # }
+  
     ################## TRAIT EVOLUTION #####################
     
-    ##### PATHWAY TO TRAITS DATA####
+    ##### PATHWAY TO TRAITS DATA ####
     
     caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", "traits")
     
@@ -388,7 +357,6 @@ for(r in 1:rep){
     for(l in 1:filestoread){
       cam[l] <- caminho
     }
-    cam
     
     camatualizado <- 0
     for(k in 1:length(cam)){
@@ -436,18 +404,15 @@ for(r in 1:rep){
     
     ####### FINAL MEAN PER TIME STEP #######
     if(ti <= (val$vars$steps[1] - 1)){
-      datafinal2 <- datafinal
-      datafinal3 <- datafinal
-      datafinal2 <- datafinal[-length(datafinal)]
-      datafinal3 <- datafinal3[-1]
-      list_difference <- list()
-      list_difference <- vector("list", sum(lengths(datafinal2)))
+      datafinal_less_last <- datafinal[-length(datafinal)]
+      datafinal_less_first <- datafinal[-1]
+      list_difference <- vector("list", sum(lengths(datafinal_less_last)))
       time <- 0
-      for(i in 1:length(datafinal2)){
-        for(k in seq_along(datafinal2[[i]])){
+      for(i in 1:length(datafinal_less_last)){
+        for(k in seq_along(datafinal_less_last[[i]])){
           time <- time + 1
-          posicao <- which(names(datafinal2[[i]][k]) == names(datafinal3[[i]]))
-          list_difference[[time]] <- abs(as.numeric(datafinal2[[i]][k]) - as.numeric(datafinal3[[i]][posicao]))
+          posicao <- which(names(datafinal_less_last[[i]][k]) == names(datafinal_less_first[[i]]))
+          list_difference[[time]] <- abs(as.numeric(datafinal_less_last[[i]][k]) - as.numeric(datafinal_less_first[[i]][posicao]))
         }
       }
       time <- 0
@@ -460,13 +425,9 @@ for(r in 1:rep){
           list_difference2[[i]] <- NULL
         }
       }
-      final <- unlist(list_difference2)
+      datafinal_result <- unlist(list_difference2)
       
-      traitevolution <- mean(final) / sum(length(datafinal2) + 1)
-      
-      #pos <- which(names(datafinal[[12]][21]) == names(datafinal2[[12]]))
-      #list_difference[[1]] <- abs(as.numeric(datafinal[[12]][21]) - as.numeric(datafinal[[12]][pos]))
-      #list_difference[[2]] <- abs(as.numeric(datafinal[[2]][1]) - as.numeric(datafinal[[3]][pos]))
+      traitevolution <- mean(datafinal_result) / sum(length(datafinal_less_last) + 1)
       
     } else {
       traitevolution <- 0
@@ -508,10 +469,8 @@ for(k in 1:length(cam)){
   camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
 }
 file.remove(camatualizado)  
-rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, datafinal2, datafinal3, list_difference, list_difference2)
+rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, datafinal_less_last, datafinal_less_first, list_difference, list_difference2)
 #}
 
 path <- here("output")
 write.csv2(finalresult, file.path(path, "finalresult.csv"), row.names = FALSE)
-#write.csv2(finalresult, file = "finalresult.csv", row.names = FALSE)
-#saveRDS(finalresult, file.path(path, "finalresult.RDS"))
