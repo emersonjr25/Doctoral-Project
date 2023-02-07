@@ -15,7 +15,6 @@ datapath <- here("data/raw/WorldCenter")
 attach(loadNamespace('gen3sis'), name = 'gen3sis_all')
 config = file.path(datapath, "config/config_worldcenter.R")
 landscape = file.path(datapath, "landscape_new")
-
 output_directory = NA
 timestep_restart = NA
 save_state = NA
@@ -107,7 +106,7 @@ config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, c
   plasticity2 <- function(x, land) {
     min(abs(x - land))
   }
-  traits_sub <- lapply(traits[, 'temp'], plasticity, plast = plasti[plasti])
+  traits_sub <- lapply(traits[, 'temp'], plasticity, 0.1)
   traits_sub2 <- sapply(traits_sub, plasticity2, land = landscape[,'temp'])
   abundance <- ((1 - traits_sub2)*abundance_scale)*as.numeric(survive)
   
@@ -131,6 +130,7 @@ config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, c
   }
   return(abundance)
 }  
+
 
 
 loop_ecology2 <- function (config, data, vars, plasti) {
@@ -200,6 +200,7 @@ loop_ecology2 <- function (config, data, vars, plasti) {
 #for(p in 1:length(plasti)){
 
 for(r in 1:rep){
+  traceback()
   val <- list(data = list(),
               vars = list(),
               config = config)
@@ -445,7 +446,7 @@ for(r in 1:rep){
     
     
     if(ti %% 2 == 1) {
-      finalresult$plasticidade[pos] <- plasti[p]
+      finalresult$plasticidade[pos] <- 0.1
       finalresult$replications[pos] <- r
       finalresult$speciation[pos] <- ratespeciation
       finalresult$extinction[pos] <- rateextinction
