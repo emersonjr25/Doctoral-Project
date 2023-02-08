@@ -131,8 +131,6 @@ config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, c
   return(abundance)
 }  
 
-
-
 loop_ecology2 <- function (config, data, vars, plasti) {
   if (config$gen3sis$general$verbose >= 3) {
     cat(paste("entering ecology module @ time", vars$ti, 
@@ -197,281 +195,281 @@ loop_ecology2 <- function (config, data, vars, plasti) {
   return(list(config = config, data = data, vars = vars))
 }
 
-#for(p in 1:length(plasti)){
-
-for(r in 1:rep){
-  traceback()
-  val <- list(data = list(),
-              vars = list(),
-              config = config)
-  val$config <- complete_config(val$config)
-  val$config$gen3sis$general$verbose <- verbose
-  val <- setup_inputs(val$config, val$data, val$vars)
-  val <- setup_variables(val$config, val$data, val$vars)
-  val <- setup_landscape(val$config, val$data, val$vars)
-  val$data$landscape$id <- val$data$landscape$id + 1
-  val <- init_attribute_ancestor_distribution(val$config,
-                                              val$data, val$vars)
+for(p in 1:length(plasti)){
   
-  val <- init_simulation(val$config, val$data, val$vars)
-  val <- init_summary_statistics(val$data, val$vars, val$config)
-  if (is.na(call_observer)) {
-    save_steps <- c(val$config$gen3sis$general$start_time,
-                    val$config$gen3sis$general$end_time)
-  } else if (call_observer == "all") {
-    save_steps <-
-      val$config$gen3sis$general$start_time:val$config$gen3sis$general$end_time
-  } else {
-    steps <- as.integer(call_observer) + 2
-    save_steps <-
-      ceiling(
-        seq(
-          val$config$gen3sis$general$start_time,
-          val$config$gen3sis$general$end_time,
-          length.out = steps
+  for(r in 1:rep){
+    
+    val <- list(data = list(),
+                vars = list(),
+                config = config)
+    val$config <- complete_config(val$config)
+    val$config$gen3sis$general$verbose <- verbose
+    val <- setup_inputs(val$config, val$data, val$vars)
+    val <- setup_variables(val$config, val$data, val$vars)
+    val <- setup_landscape(val$config, val$data, val$vars)
+    val$data$landscape$id <- val$data$landscape$id + 1
+    val <- init_attribute_ancestor_distribution(val$config,
+                                                val$data, val$vars)
+    
+    val <- init_simulation(val$config, val$data, val$vars)
+    val <- init_summary_statistics(val$data, val$vars, val$config)
+    if (is.na(call_observer)) {
+      save_steps <- c(val$config$gen3sis$general$start_time,
+                      val$config$gen3sis$general$end_time)
+    } else if (call_observer == "all") {
+      save_steps <-
+        val$config$gen3sis$general$start_time:val$config$gen3sis$general$end_time
+    } else {
+      steps <- as.integer(call_observer) + 2
+      save_steps <-
+        ceiling(
+          seq(
+            val$config$gen3sis$general$start_time,
+            val$config$gen3sis$general$end_time,
+            length.out = steps
+          )
         )
-      )
-  }
-  val$vars$save_steps <- save_steps
-  val$vars$steps <-
-    val$config$gen3sis$general$start_time:val$config$gen3sis$general$end_time
-  if (!is.na(timestep_restart)) {
-    val <- restore_state(val, timestep_restart)
+    }
+    val$vars$save_steps <- save_steps
+    val$vars$steps <-
+      val$config$gen3sis$general$start_time:val$config$gen3sis$general$end_time
+    if (!is.na(timestep_restart)) {
+      val <- restore_state(val, timestep_restart)
+    }
+    pos2 <- 0
+    for (ti in val$vars$steps) {
+      
+      ##########################################################  
+      
+      # state <- "hightemp"
+      # if(val$vars$steps[ti] == 10){
+      #   if(state == "hightemp"){
+      #     val$data$landscape$environment[, 1] <-  val$data$landscape$environment[, 1] + 0.9
+      #     val$data$inputs$environments$temp  <- val$data$inputs$environments$temp + 0.9 }
+      # }
+      
+      #val$data$inputs$environments$temp <- sapply(val$data$inputs$environments$temp, FUN = function(dados){
+      #return(dados + abs(rnorm(1, 2, 0.1)))
+      #})
+      
+      #val$data$landscape$environment[, 1] <- sapply(val$data$landscape$environment[, 1], FUN = function(dados){
+      # return(dados + abs(rnorm(1, 0.3, 0.1)))
+      #})
+      
+      #######################################################
+      
+      val$vars$n_new_sp_ti <- 0
+      val$vars$n_ext_sp_ti <- 0
+      val$vars$n_sp_added_ti <- 0
+      val$vars$ti <- ti
+      if (verbose >= 2) {
+        cat("loop setup \n")
+      }
+      val <- setup_landscape(val$config, val$data, val$vars)
+      val <- restrict_species(val$config, val$data, val$vars)
+      val <- setup_distance_matrix(val$config, val$data, val$vars)
+      if (verbose >= 2) {
+        cat("speciation \n")
+      }
+      val <- loop_speciation(val$config, val$data, val$vars)
+      val <- update1.n_sp.all_geo_sp_ti(val$config, val$data,
+                                        val$vars)
+      val <- update2.n_sp_alive.geo_sp_ti(val$config, val$data,
+                                          val$vars)
+      if (verbose >= 2) {
+        cat("dispersal \n")
+      }
+      val <- loop_dispersal(val$config, val$data, val$vars)
+      if (verbose >= 2) {
+        cat("evolution \n")
+      }
+      val <- loop_evolution(val$config, val$data, val$vars)
+      if (verbose >= 2) {
+        cat("ecology \n")
+      }
+      if (verbose >= 2) {
+        cat("end of loop updates \n")
+      }
+      val$vars$n_sp_alive <- sum(sapply(val$data$all_species,
+                                        function(sp) {
+                                          ifelse(length(sp[["abundance"]]), 1, 0)
+                                        }))
+      val$vars$n_sp <- length(val$data$all_species)
+      val <- update_loop_steps_variable(val$config, val$data,
+                                        val$vars)
+      if (val$vars$ti %in% val$vars$save_steps) {
+        call_main_observer(val$data, val$vars, val$config)
+      }
+      val <- update_summary_statistics(val$data, val$vars,
+                                       val$config)
+      save_val(val, save_state)
+      if (verbose >= 1) {
+        cat(
+          "step =",
+          ti,
+          ", species alive =",
+          val$vars$n_sp_alive,
+          ", species total =",
+          val$vars$n_sp,
+          "\n"
+        )
+      }
+      if (val$vars$n_sp_alive >= val$config$gen3sis$general$max_number_of_species) {
+        val$vars$flag <- "max_number_species"
+        print("max number of species reached, breaking loop")
+        break
+      }
+      val <- loop_ecology2(val$config, val$data, val$vars)
+      
+      if (verbose >= 0 & val$vars$flag == "OK") {
+        cat("Simulation finished. All OK \n")
+      } else if (verbose >= 0 & val$vars$flag == "max_number_species") {
+        cat("Simulation finished. Early abort due to exceeding max number of species")
+      } else if (verbose >= 0 &
+                 val$vars$flag == "max_number_coexisting_species") {
+        cat("Simulation finished. Early abort due to exceeding max number of co-occuring species")
+      }
+      val <- update.phylo(val$config, val$data, val$vars)
+      
+      system_time_stop <- Sys.time()
+      total_runtime <- difftime(system_time_stop, system_time_start,
+                                units = "hours")[[1]]
+      #write_runtime_statisitics(val$data, val$vars, val$config,
+      #                          total_runtime)
+      sgen3sis <- make_summary(val$config, val$data, val$vars,
+                               total_runtime, save_file = FALSE)
+      #plot_summary(sgen3sis)
+      
+      ################## TRAIT EVOLUTION #####################
+      
+      ##### PATHWAY TO TRAITS DATA ####
+      
+      caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", "traits")
+      
+      listfiles <- list.files("data/raw/WorldCenter/output/config_worldcenter/traits")
+      
+      filestoread <- length(list.files("data/raw/WorldCenter/output/config_worldcenter/traits"))
+      
+      
+      #### Organizing selection of trait files ####
+      cam <- 0
+      for(l in 1:filestoread){
+        cam[l] <- caminho
+      }
+      
+      camatualizado <- 0
+      for(k in 1:length(cam)){
+        camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
+      }
+      
+      # SORT #
+      camatualizado <- camatualizado[order(as.numeric(gsub("[^0-9]+", "", camatualizado)), decreasing = TRUE)]
+      cam_length <- length(camatualizado)
+      if(cam_length >= 2) {
+        camatualizado <- camatualizado[c(cam_length - 1, cam_length)]
+      }
+      
+      # READ FILES #
+      datafinal <- list()
+      for(d in 1:length(camatualizado)){
+        datafinal[[d]] <- readRDS(camatualizado[[d]])
+      }
+      
+      #### CALCULATING MEAN TRAIT PER TIME STEP #####
+      
+      ### change name of list ###
+      for(i in 1:length(datafinal)){
+        names(datafinal) <- paste0("timestep", length(datafinal):1)
+      }
+      
+      #### function to return column ###
+      colunatemp <- function(dados){
+        return(dados[, 1])
+      }
+      
+      ### only values of species temperature ###
+      for(i in 1:length(datafinal)){
+        datafinal[[i]] <- lapply(datafinal[[i]], colunatemp)
+      }
+      
+      for(i in 1:length(datafinal)){
+        datafinal[[i]] <- lapply(datafinal[[i]], mean)
+      }
+      
+      for(i in 1:length(datafinal)){
+        result <- lapply(datafinal[[i]], is.nan)
+        datafinal[[i]] <- datafinal[[i]][which(result == FALSE)]
+      }
+      
+      ####### FINAL MEAN PER TIME STEP #######
+      if(ti <= (val$vars$steps[1] - 1)){
+        datafinal_less_last <- datafinal[-length(datafinal)]
+        datafinal_less_first <- datafinal[-1]
+        list_difference <- vector("list", sum(lengths(datafinal_less_last)))
+        time <- 0
+        for(i in 1:length(datafinal_less_last)){
+          for(k in seq_along(datafinal_less_last[[i]])){
+            time <- time + 1
+            posicao <- which(names(datafinal_less_last[[i]][k]) == names(datafinal_less_first[[i]]))
+            list_difference[[time]] <- abs(as.numeric(datafinal_less_last[[i]][k]) - as.numeric(datafinal_less_first[[i]][posicao]))
+          }
+        }
+        time <- 0
+        
+        list_difference2 <- list()
+        for(i in 1:length(list_difference)){
+          if(length(list_difference[[i]]) == 1) {
+            list_difference2[[i]] <- list_difference[[i]]
+          } else {
+            list_difference2[[i]] <- NULL
+          }
+        }
+        datafinal_result <- unlist(list_difference2)
+        
+        traitevolution <- mean(datafinal_result) / sum(length(datafinal_less_last) + 1)
+        
+      } else {
+        traitevolution <- 0
+      }
+      
+      ##### SPECIATION AND EXTINCTION ####
+      pos <- pos + 1
+      pos2 <- pos2 + 1
+      
+      ratespeciation <- round(sum(sgen3sis$summary$phylo_summary[, 3]) / pos2, digits = 2)
+      
+      rateextinction <- round(sum(sgen3sis$summary$phylo_summary[, 4]) / pos2, digits = 2)
+      
+      diversification <- ratespeciation - rateextinction
+      
+      
+      if(ti %% 2 == 1) {
+        finalresult$plasticidade[pos] <- 0.1
+        finalresult$replications[pos] <- r
+        finalresult$speciation[pos] <- ratespeciation
+        finalresult$extinction[pos] <- rateextinction
+        finalresult$diversif[pos] <- diversification
+        finalresult$traitevolution[pos] <- traitevolution
+        finalresult$timestep[pos] <- ti
+        finalresult$timesimulation[pos] <- pos2
+      }
+    } 
   }
   pos2 <- 0
-  for (ti in val$vars$steps) {
-    
-    ##########################################################  
-    
-    # state <- "hightemp"
-    # if(val$vars$steps[ti] == 10){
-    #   if(state == "hightemp"){
-    #     val$data$landscape$environment[, 1] <-  val$data$landscape$environment[, 1] + 0.9
-    #     val$data$inputs$environments$temp  <- val$data$inputs$environments$temp + 0.9 }
-    # }
-    
-    #val$data$inputs$environments$temp <- sapply(val$data$inputs$environments$temp, FUN = function(dados){
-    #return(dados + abs(rnorm(1, 2, 0.1)))
-    #})
-    
-    #val$data$landscape$environment[, 1] <- sapply(val$data$landscape$environment[, 1], FUN = function(dados){
-    # return(dados + abs(rnorm(1, 0.3, 0.1)))
-    #})
-    
-    #######################################################
-    
-    val$vars$n_new_sp_ti <- 0
-    val$vars$n_ext_sp_ti <- 0
-    val$vars$n_sp_added_ti <- 0
-    val$vars$ti <- ti
-    if (verbose >= 2) {
-      cat("loop setup \n")
-    }
-    val <- setup_landscape(val$config, val$data, val$vars)
-    val <- restrict_species(val$config, val$data, val$vars)
-    val <- setup_distance_matrix(val$config, val$data, val$vars)
-    if (verbose >= 2) {
-      cat("speciation \n")
-    }
-    val <- loop_speciation(val$config, val$data, val$vars)
-    val <- update1.n_sp.all_geo_sp_ti(val$config, val$data,
-                                      val$vars)
-    val <- update2.n_sp_alive.geo_sp_ti(val$config, val$data,
-                                        val$vars)
-    if (verbose >= 2) {
-      cat("dispersal \n")
-    }
-    val <- loop_dispersal(val$config, val$data, val$vars)
-    if (verbose >= 2) {
-      cat("evolution \n")
-    }
-    val <- loop_evolution(val$config, val$data, val$vars)
-    if (verbose >= 2) {
-      cat("ecology \n")
-    }
-    if (verbose >= 2) {
-      cat("end of loop updates \n")
-    }
-    val$vars$n_sp_alive <- sum(sapply(val$data$all_species,
-                                      function(sp) {
-                                        ifelse(length(sp[["abundance"]]), 1, 0)
-                                      }))
-    val$vars$n_sp <- length(val$data$all_species)
-    val <- update_loop_steps_variable(val$config, val$data,
-                                      val$vars)
-    if (val$vars$ti %in% val$vars$save_steps) {
-      call_main_observer(val$data, val$vars, val$config)
-    }
-    val <- update_summary_statistics(val$data, val$vars,
-                                     val$config)
-    save_val(val, save_state)
-    if (verbose >= 1) {
-      cat(
-        "step =",
-        ti,
-        ", species alive =",
-        val$vars$n_sp_alive,
-        ", species total =",
-        val$vars$n_sp,
-        "\n"
-      )
-    }
-    if (val$vars$n_sp_alive >= val$config$gen3sis$general$max_number_of_species) {
-      val$vars$flag <- "max_number_species"
-      print("max number of species reached, breaking loop")
-      break
-    }
-    val <- loop_ecology2(val$config, val$data, val$vars)
-    
-    if (verbose >= 0 & val$vars$flag == "OK") {
-      cat("Simulation finished. All OK \n")
-    } else if (verbose >= 0 & val$vars$flag == "max_number_species") {
-      cat("Simulation finished. Early abort due to exceeding max number of species")
-    } else if (verbose >= 0 &
-               val$vars$flag == "max_number_coexisting_species") {
-      cat("Simulation finished. Early abort due to exceeding max number of co-occuring species")
-    }
-    val <- update.phylo(val$config, val$data, val$vars)
-   
-    system_time_stop <- Sys.time()
-    total_runtime <- difftime(system_time_stop, system_time_start,
-                              units = "hours")[[1]]
-    #write_runtime_statisitics(val$data, val$vars, val$config,
-    #                          total_runtime)
-    sgen3sis <- make_summary(val$config, val$data, val$vars,
-                             total_runtime, save_file = FALSE)
-    #plot_summary(sgen3sis)
-  
-    ################## TRAIT EVOLUTION #####################
-    
-    ##### PATHWAY TO TRAITS DATA ####
-    
-    caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", "traits")
-    
-    listfiles <- list.files("data/raw/WorldCenter/output/config_worldcenter/traits")
-    
-    filestoread <- length(list.files("data/raw/WorldCenter/output/config_worldcenter/traits"))
-    
-    
-    #### Organizing selection of trait files ####
-    cam <- 0
-    for(l in 1:filestoread){
-      cam[l] <- caminho
-    }
-    
-    camatualizado <- 0
-    for(k in 1:length(cam)){
-      camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
-    }
-    
-    # SORT #
-    camatualizado <- camatualizado[order(as.numeric(gsub("[^0-9]+", "", camatualizado)), decreasing = TRUE)]
-    cam_length <- length(camatualizado)
-    if(cam_length >= 2) {
-      camatualizado <- camatualizado[c(cam_length - 1, cam_length)]
-    }
-    
-    # READ FILES #
-    datafinal <- list()
-    for(d in 1:length(camatualizado)){
-      datafinal[[d]] <- readRDS(camatualizado[[d]])
-    }
-    
-    #### CALCULATING MEAN TRAIT PER TIME STEP #####
-    
-    ### change name of list ###
-    for(i in 1:length(datafinal)){
-      names(datafinal) <- paste0("timestep", length(datafinal):1)
-    }
-    
-    #### function to return column ###
-    colunatemp <- function(dados){
-      return(dados[, 1])
-    }
-    
-    ### only values of species temperature ###
-    for(i in 1:length(datafinal)){
-      datafinal[[i]] <- lapply(datafinal[[i]], colunatemp)
-    }
-    
-    for(i in 1:length(datafinal)){
-      datafinal[[i]] <- lapply(datafinal[[i]], mean)
-    }
-    
-    for(i in 1:length(datafinal)){
-      result <- lapply(datafinal[[i]], is.nan)
-      datafinal[[i]] <- datafinal[[i]][which(result == FALSE)]
-    }
-    
-    ####### FINAL MEAN PER TIME STEP #######
-    if(ti <= (val$vars$steps[1] - 1)){
-      datafinal_less_last <- datafinal[-length(datafinal)]
-      datafinal_less_first <- datafinal[-1]
-      list_difference <- vector("list", sum(lengths(datafinal_less_last)))
-      time <- 0
-      for(i in 1:length(datafinal_less_last)){
-        for(k in seq_along(datafinal_less_last[[i]])){
-          time <- time + 1
-          posicao <- which(names(datafinal_less_last[[i]][k]) == names(datafinal_less_first[[i]]))
-          list_difference[[time]] <- abs(as.numeric(datafinal_less_last[[i]][k]) - as.numeric(datafinal_less_first[[i]][posicao]))
-        }
-      }
-      time <- 0
-      
-      list_difference2 <- list()
-      for(i in 1:length(list_difference)){
-        if(length(list_difference[[i]]) == 1) {
-          list_difference2[[i]] <- list_difference[[i]]
-        } else {
-          list_difference2[[i]] <- NULL
-        }
-      }
-      datafinal_result <- unlist(list_difference2)
-      
-      traitevolution <- mean(datafinal_result) / sum(length(datafinal_less_last) + 1)
-      
-    } else {
-      traitevolution <- 0
-    }
-    
-    ##### SPECIATION AND EXTINCTION ####
-    pos <- pos + 1
-    pos2 <- pos2 + 1
-    
-    ratespeciation <- round(sum(sgen3sis$summary$phylo_summary[, 3]) / pos2, digits = 2)
-    
-    rateextinction <- round(sum(sgen3sis$summary$phylo_summary[, 4]) / pos2, digits = 2)
-    
-    diversification <- ratespeciation - rateextinction
-    
-    
-    if(ti %% 2 == 1) {
-      finalresult$plasticidade[pos] <- 0.1
-      finalresult$replications[pos] <- r
-      finalresult$speciation[pos] <- ratespeciation
-      finalresult$extinction[pos] <- rateextinction
-      finalresult$diversif[pos] <- diversification
-      finalresult$traitevolution[pos] <- traitevolution
-      finalresult$timestep[pos] <- ti
-      finalresult$timesimulation[pos] <- pos2
-    }
-  } 
+  caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", "traits")
+  listfiles <- list.files("data/raw/WorldCenter/output/config_worldcenter/traits")
+  filestoread <- length(list.files("data/raw/WorldCenter/output/config_worldcenter/traits"))
+  cam <- 0
+  for(l in 1:filestoread){
+    cam[l] <- caminho
+  }
+  camatualizado <- 0
+  for(k in 1:length(cam)){
+    camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
+  }
+  file.remove(camatualizado)  
+  rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, datafinal_less_last, datafinal_less_first, list_difference, list_difference2)
 }
-pos2 <- 0
-caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", "traits")
-listfiles <- list.files("data/raw/WorldCenter/output/config_worldcenter/traits")
-filestoread <- length(list.files("data/raw/WorldCenter/output/config_worldcenter/traits"))
-cam <- 0
-for(l in 1:filestoread){
-  cam[l] <- caminho
-}
-camatualizado <- 0
-for(k in 1:length(cam)){
-  camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
-}
-file.remove(camatualizado)  
-rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, datafinal_less_last, datafinal_less_first, list_difference, list_difference2)
-#}
 
 path <- here("output")
 write.csv2(finalresult, file.path(path, "finalresult.csv"), row.names = FALSE)
