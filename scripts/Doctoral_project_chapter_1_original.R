@@ -131,6 +131,10 @@ config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, c
   return(abundance)
 }  
 
+
+####################################################################
+
+
 loop_ecology2 <- function (config, data, vars, plasti) {
   if (config$gen3sis$general$verbose >= 3) {
     cat(paste("entering ecology module @ time", vars$ti, 
