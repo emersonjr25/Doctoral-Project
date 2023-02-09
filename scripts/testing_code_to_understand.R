@@ -1,19 +1,60 @@
 library(gen3sis)
+
+#######################################################
+##### FIRST TEST ######
+#######################################################
+#without loop 
 plasti <- 0.1
-abundance <- rep(100, 10)
 trait <- list(a = 1:5)
-local_environment <- list(6:10)
-for (i in 1:1){
-  testing <- function(data){
+result <- vector("list", length = length(plasti))
+
+testing <- function(data, plasti){
+  plasticity <- function(x, plast) {
+    return(seq(x - (x * plast), x + (x * plast), 0.01))
+  }
+  traits_sub <- lapply(data[[1]], plasticity, plasti)
+  traits_sub
+}
+result <- testing(trait, plasti)
+
+#######################################################
+##### with loop ######
+
+plasti <- seq(0.1, 1, 0.1)
+trait <- list(a = 1:5)
+result <- vector("list", length = length(plasti))
+
+for (i in 1:length(plasti)){
+  testing <- function(data, plasti){
     plasticity <- function(x, plast) {
       return(seq(x - (x * plast), x + (x * plast), 0.01))
     }
-    traits_sub <- lapply(data[[1]], plasticity, plasti)
+    traits_sub <- lapply(data[[1]], plasticity, plasti[[i]])
     traits_sub
   }
-  result <- testing(trait)
+  result[[i]] <- testing(trait, plasti)
 }
 
+#######################################################
+#### SECOND TEST ####
+#######################################################
+
+plasti <- 0.1
+trait <- list(a = 1:5)
+result <- vector("list", length = length(plasti))
+
+abundance <- rep(100, 10)
+local_environment <- list(6:10)
+
+
+testing <- function(data, plasti){
+  plasticity <- function(x, plast) {
+    return(seq(x - (x * plast), x + (x * plast), 0.01))
+  }
+  traits_sub <- lapply(data[[1]], plasticity, plasti)
+  traits_sub
+}
+result <- testing(trait, plasti)
 
 
 plasticity2 <- function(x, land) {
