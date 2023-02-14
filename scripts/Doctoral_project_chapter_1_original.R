@@ -108,7 +108,7 @@ config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, c
   }
   
   traits_sub <- lapply(traits[, 'temp'], plasticity, plasticidade)
-  traits_sub2 <- mapply(plasticity2, traits_sub, land = landscape[,'temp'])
+  traits_sub2 <- mapply(plasticity2, traits_sub, landscape[,'temp'])
   abundance <- ((1 - traits_sub2)*abundance_scale)*as.numeric(survive)
   
   
@@ -173,9 +173,7 @@ loop_ecology2 <- function (config, data, vars, plasticidade) {
     }
     rownames(traits) <- coo_sp
     names(abundance) <- coo_sp
-    NEW_abd <- config$gen3sis$ecology$apply_ecology(abundance, 
-                                                    traits, local_environment, 
-                                                    config, plasticidade)
+    NEW_abd <- config$gen3sis$ecology$apply_ecology(abundance, traits, local_environment, config, plasticidade)
     names(NEW_abd) <- coo_sp
     shalldie <- NEW_abd == 0
     for (spi in coo_sp) {
