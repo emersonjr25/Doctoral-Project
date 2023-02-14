@@ -45,7 +45,7 @@ if (!verify_config(config)) {
 }
 
 #### MODIFICATIONS IN CONFIG ####
-config$gen3sis$general$start_time <- 10
+config$gen3sis$general$start_time <- 50
 
 config$gen3sis$general$end_time <- 1
 
@@ -60,7 +60,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 #########################################################
 rep <- 1
 
-plasti <- seq(0.1, 1, 0.1)
+plasti <- c(0.1, 1, 100)
 
 pos <- 0
 pos2 <- 0
@@ -87,7 +87,7 @@ for(k in 1:length(cam)){
 }
 file.remove(camatualizado)  
 
-config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, config, plasti) {
+config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, config, plasticidade) {
   abundance_scale = 10
   abundance_threshold = 1
   #abundance threshold
@@ -106,8 +106,9 @@ config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, c
   plasticity2 <- function(x, land) {
     min(abs(x - land))
   }
-  traits_sub <- lapply(traits[, 'temp'], plasticity, 0.1)
-  traits_sub2 <- sapply(traits_sub, plasticity2, land = landscape[,'temp'])
+  
+  traits_sub <- lapply(traits[, 'temp'], plasticity, plasticidade)
+  traits_sub2 <- mapply(plasticity2, traits_sub, land = landscape[,'temp'])
   abundance <- ((1 - traits_sub2)*abundance_scale)*as.numeric(survive)
   
   
@@ -135,7 +136,7 @@ config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, c
 ####################################################################
 
 
-loop_ecology2 <- function (config, data, vars, plasti) {
+loop_ecology2 <- function (config, data, vars, plasticidade) {
   if (config$gen3sis$general$verbose >= 3) {
     cat(paste("entering ecology module @ time", vars$ti, 
               "\n"))
@@ -173,7 +174,8 @@ loop_ecology2 <- function (config, data, vars, plasti) {
     rownames(traits) <- coo_sp
     names(abundance) <- coo_sp
     NEW_abd <- config$gen3sis$ecology$apply_ecology(abundance, 
-                                                    traits, local_environment, config, plasti)
+                                                    traits, local_environment, 
+                                                    config, plasticidade)
     names(NEW_abd) <- coo_sp
     shalldie <- NEW_abd == 0
     for (spi in coo_sp) {
@@ -323,7 +325,7 @@ for(p in 1:length(plasti)){
         print("max number of species reached, breaking loop")
         break
       }
-      val <- loop_ecology2(val$config, val$data, val$vars)
+      val <- loop_ecology2(val$config, val$data, val$vars, plasti[p])
       
       if (verbose >= 0 & val$vars$flag == "OK") {
         cat("Simulation finished. All OK \n")
@@ -448,7 +450,7 @@ for(p in 1:length(plasti)){
       
       
       if(ti %% 2 == 1) {
-        finalresult$plasticidade[pos] <- 0.1
+        finalresult$plasticidade[pos] <- plasti[[p]]
         finalresult$replications[pos] <- r
         finalresult$speciation[pos] <- ratespeciation
         finalresult$extinction[pos] <- rateextinction
@@ -458,7 +460,7 @@ for(p in 1:length(plasti)){
         finalresult$timesimulation[pos] <- pos2
       }
     } 
-  }
+ }
   pos2 <- 0
   caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", "traits")
   listfiles <- list.files("data/raw/WorldCenter/output/config_worldcenter/traits")

@@ -63,6 +63,15 @@ for(i in unique(dados$plasticidade)){
   dev.off()
 }
 
+ggplot(data = dados, aes(timesimulation, speciation, colour = plasticidade, group = plasticidade)) + 
+  labs(title = paste("Extinction along time with plasticity")) + theme_bw() +
+  theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
+        plot.title = element_text(size = 16, hjust = 0.5),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) + 
+  geom_smooth(se = FALSE)
+
 #### plot extinction ####
 
 ggplot(data = dados, aes(timesimulation, extinction, colour = plasticidade, group = plasticidade)) + 

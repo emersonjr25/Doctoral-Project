@@ -41,11 +41,9 @@ for (i in 1:length(plasti)){
 
 plasti <- 0.1
 trait <- list(a = 1:5)
-result <- vector("list", length = length(plasti))
-
-abundance <- rep(100, 10)
+trait_sub <- vector("list", length = length(plasti))
 local_environment <- list(6:10)
-
+#abundance <- rep(100, 10)
 
 testing <- function(data, plasti){
   plasticity <- function(x, plast) {
@@ -54,15 +52,17 @@ testing <- function(data, plasti){
   traits_sub <- lapply(data[[1]], plasticity, plasti)
   traits_sub
 }
-result <- testing(trait, plasti)
-
+trait_sub <- testing(trait, plasti)
 
 plasticity2 <- function(x, land) {
   min(abs(x - land))
 }
 
-traits_sub <- lapply(trait[[1]], plasticity, 0.1)
-traits_sub2 <- sapply(traits_sub, plasticity2, land = environment[[1]])
+plasticity2(trait_sub[[1]], local_environment[[1]][[1]])
+
+traits_sub2 <- mapply(plasticity2, trait_sub, land = local_environment[[1]])
+
+
 
 
 config <- function(abundance, trait, environment) {
