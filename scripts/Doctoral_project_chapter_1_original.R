@@ -60,7 +60,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 #########################################################
 rep <- 1
 
-plasti <- c(0.1, 1, 100)
+plasti <- c(0.1, 1, 10)
 
 pos <- 0
 pos2 <- 0

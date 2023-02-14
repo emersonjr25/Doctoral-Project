@@ -85,7 +85,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 #########################################################
 rep <- 1
 
-plasti <- c(0.1, 1, 100)
+plasti <- seq(0.1, 1, 0.1)
 
 pos <- 0
 pos2 <- 0
@@ -224,9 +224,9 @@ loop_ecology2 <- function (config, data, vars, plasticidade) {
   return(list(config = config, data = data, vars = vars))
 }
 
-for(p in 1:length(plasti)){
+#for(p in 1:length(plasti)){
   
-  for(r in 1:rep){
+#  for(r in 1:rep){
     
     val <- list(data = list(),
                 vars = list(),
@@ -266,8 +266,7 @@ for(p in 1:length(plasti)){
       val <- restore_state(val, timestep_restart)
     }
     pos2 <- 0
-    for (ti in val$vars$steps) {
-      
+   # for (ti in val$vars$steps) {
       ##########################################################  
       
       # state <- "hightemp"
@@ -290,7 +289,7 @@ for(p in 1:length(plasti)){
       val$vars$n_new_sp_ti <- 0
       val$vars$n_ext_sp_ti <- 0
       val$vars$n_sp_added_ti <- 0
-      val$vars$ti <- ti
+      val$vars$ti <- val$vars$steps[1]
       if (verbose >= 2) {
         cat("loop setup \n")
       }
@@ -335,7 +334,7 @@ for(p in 1:length(plasti)){
       if (verbose >= 1) {
         cat(
           "step =",
-          ti,
+          val$vars$steps[1],
           ", species alive =",
           val$vars$n_sp_alive,
           ", species total =",
@@ -348,7 +347,7 @@ for(p in 1:length(plasti)){
         print("max number of species reached, breaking loop")
         break
       }
-      val <- loop_ecology2(val$config, val$data, val$vars, plasti[p])
+      val <- loop_ecology2(val$config, val$data, val$vars, plasti[1])
       
       if (verbose >= 0 & val$vars$flag == "OK") {
         cat("Simulation finished. All OK \n")
@@ -431,7 +430,7 @@ for(p in 1:length(plasti)){
       }
       
       ####### FINAL MEAN PER TIME STEP #######
-      if(ti <= (val$vars$steps[1] - 1)){
+      if(val$vars$steps[1] <= (val$vars$steps[1] - 1)){
         datafinal_less_last <- datafinal[-length(datafinal)]
         datafinal_less_first <- datafinal[-1]
         list_difference <- vector("list", sum(lengths(datafinal_less_last)))
@@ -472,8 +471,8 @@ for(p in 1:length(plasti)){
       diversification <- ratespeciation - rateextinction
       
       
-      if(ti %% 2 == 1) {
-        finalresult$plasticidade[pos] <- plasti[[p]]
+      if(val$vars$steps[1] %% 2 == 1) {
+        finalresult$plasticidade[pos] <- plasti[1]
         finalresult$replications[pos] <- r
         finalresult$speciation[pos] <- ratespeciation
         finalresult$extinction[pos] <- rateextinction
@@ -482,8 +481,8 @@ for(p in 1:length(plasti)){
         finalresult$timestep[pos] <- ti
         finalresult$timesimulation[pos] <- pos2
       }
-    } 
-  }
+   # } 
+  #}
   pos2 <- 0
   caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", "traits")
   listfiles <- list.files("data/raw/WorldCenter/output/config_worldcenter/traits")
@@ -498,7 +497,7 @@ for(p in 1:length(plasti)){
   }
   file.remove(camatualizado)  
   rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, datafinal_less_last, datafinal_less_first, list_difference, list_difference2)
-}
+#}
 
 path <- here("output")
 write.csv2(finalresult, file.path(path, "finalresult.csv"), row.names = FALSE)
