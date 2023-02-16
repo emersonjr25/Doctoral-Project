@@ -82,6 +82,22 @@ config$gen3sis$general$end_time <- 1
 
 timesteps_total <- length(config$gen3sis$general$start_time:config$gen3sis$general$end_time)
 
+config$gen3sis$initialization$create_ancestor_species <- function(landscape, config) {
+  range <- c(-180, 180, -90, 90)
+  co <- landscape$coordinates
+  selection <- co[, "x"] >= range[1] &
+    co[, "x"] <= range[2] &
+    co[, "y"] >= range[3] &
+    co[, "y"] <= range[4]
+  initial_cells <- rownames(co)[selection]
+  new_species <- create_species(initial_cells, config)
+  #set local adaptation to max optimal temp equals local temp
+  new_species$traits[ , "temp"] <- 0
+  new_species$traits[ , "dispersal"] <- 1
+  
+  return(list(new_species))
+}
+
 config$gen3sis$general$max_number_of_species <- 5000
 
 config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){

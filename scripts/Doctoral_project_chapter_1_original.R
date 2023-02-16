@@ -45,7 +45,7 @@ if (!verify_config(config)) {
 }
 
 #### MODIFICATIONS IN CONFIG ####
-config$gen3sis$general$start_time <- 60
+config$gen3sis$general$start_time <- 50
 
 config$gen3sis$general$end_time <- 1
 
@@ -60,7 +60,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 #########################################################
 rep <- 1
 
-plasti <- c(0.1, 1)
+plasti <- c(0, 1)
 
 pos <- 0
 pos2 <- 0
@@ -88,6 +88,7 @@ for(k in 1:length(cam)){
 file.remove(camatualizado)  
 
 config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, config, plasticidade) {
+  browser()
   abundance_scale = 10
   abundance_threshold = 1
   #abundance threshold
@@ -114,21 +115,21 @@ config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, c
   
   #abundance threshold
   abundance[abundance<abundance_threshold] <- 0
-  k <- ((landscape[,'area']*(landscape[,'arid']+0.1)*(landscape[,'temp']+0.1))
-        *abundance_scale^2)
-  total_ab <- sum(abundance)
-  subtract <- total_ab-k
-  if (subtract > 0) {
-    # print(paste("should:", k, "is:", total_ab, "DIFF:", round(subtract,0) ))
-    while (total_ab>k){
-      alive <- abundance>0
-      loose <- sample(1:length(abundance[alive]),1)
-      abundance[alive][loose] <- abundance[alive][loose]-1
-      total_ab <- sum(abundance)
-    }
-    #set negative abundances to zero
-    abundance[!alive] <- 0
-  }
+  # k <- ((landscape[,'area']*(landscape[,'arid']+0.1)*(landscape[,'temp']+0.1))
+  #       *abundance_scale^2)
+  # total_ab <- sum(abundance)
+  # subtract <- total_ab-k
+  # if (subtract > 0) {
+  #   # print(paste("should:", k, "is:", total_ab, "DIFF:", round(subtract,0) ))
+  #   while (total_ab>k){
+  #     alive <- abundance>0
+  #     loose <- sample(1:length(abundance[alive]),1)
+  #     abundance[alive][loose] <- abundance[alive][loose]-1
+  #     total_ab <- sum(abundance)
+  #   }
+  #   #set negative abundances to zero
+  #   abundance[!alive] <- 0
+  # }
   return(abundance)
 }  
 
@@ -460,7 +461,7 @@ for(p in 1:length(plasti)){
       #if(pos2 == 50){
      #   saveRDS(val, file = paste0(plasti, '_', pos2, 'simulation', '.rds'))
      #   break
-      }
+      # }
     } 
  }
   pos2 <- 0
