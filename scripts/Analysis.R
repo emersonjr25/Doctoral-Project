@@ -18,24 +18,14 @@ dados <- dados %>% filter(replications != 0)
 path <- here("output")
 
 #### plot speciation ####
-pos < - dados$speciation[dados$timesimulation == 1000]
-pos <- which(dados$timesimulation == 1000)
-dados$speciation[pos]
-new_data <- data.frame(x = dados$plasticidade[dados$timesimulation == 1000],
-                       y = dados$speciation[dados$timesimulation == 1000],
-                       plasticidade = dados$plasticidade[dados$timesimulation == 1000]
-                       
-)
-
-
-ggplot(data = new_data, aes(x, y, colour = plasticidade, group = plasticidade)) + 
-  geom_col() + labs(title = paste("Speciation along time with plasticity - all data")) + theme_bw() +
+ggplot(data = dados, aes(timesimulation, speciation, colour = plasticidade, group = plasticidade)) + 
+  labs(title = paste("Speciation along time with plasticity")) + theme_bw() +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
         plot.title = element_text(size = 16, hjust = 0.5),
         axis.text = element_text(size = 12),
-        axis.title = element_text(size = 14)) 
-
+        axis.title = element_text(size = 14)) + 
+  geom_smooth(se = FALSE)
 
 
 tiff(filename = file.path(path, paste0("plot", "_", general_plot_1[["labels"]][["y"]], "_", "plas", "all", ".tif")),
@@ -62,15 +52,6 @@ for(i in unique(dados$plasticidade)){
                 axis.title = element_text(size = 14)))
   dev.off()
 }
-
-ggplot(data = dados, aes(timesimulation, speciation, colour = plasticidade, group = plasticidade)) + 
-  labs(title = paste("Extinction along time with plasticity")) + theme_bw() +
-  theme(panel.border = element_blank(), panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
-        plot.title = element_text(size = 16, hjust = 0.5),
-        axis.text = element_text(size = 12),
-        axis.title = element_text(size = 14)) + 
-  geom_smooth(se = FALSE)
 
 #### plot extinction ####
 

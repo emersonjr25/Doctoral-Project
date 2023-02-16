@@ -35,6 +35,12 @@ for (i in seq_along(plas)){
 library(gen3sis)
 library(here)
 
+#### verifying differences in files ####
+#one_p_50_time <- readRDS('1_50simulation.rds')
+#one_p_18_time <- readRDS('1_18simulation.rds')
+#zero_one_p_50_time <- readRDS('0.1_50simulation.rds')
+#zero_oneone_p_18_time <- readRDS('0.1_18simulation.rds')
+
 #### SIMULATION ####
 datapath <- here("data/raw/WorldCenter")
 attach(loadNamespace('gen3sis'), name = 'gen3sis_all')
@@ -113,6 +119,7 @@ for(k in 1:length(cam)){
 file.remove(camatualizado)  
 
 config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, config, plasticidade) {
+  browser()
   abundance_scale = 10
   abundance_threshold = 1
   #abundance threshold
@@ -347,7 +354,7 @@ loop_ecology2 <- function (config, data, vars, plasticidade) {
         print("max number of species reached, breaking loop")
         break
       }
-      val <- loop_ecology2(val$config, val$data, val$vars, plasti[1])
+      val <- loop_ecology2(val$config, val$data, val$vars, plasti[length(plasti)])
       
       if (verbose >= 0 & val$vars$flag == "OK") {
         cat("Simulation finished. All OK \n")

@@ -45,7 +45,7 @@ if (!verify_config(config)) {
 }
 
 #### MODIFICATIONS IN CONFIG ####
-config$gen3sis$general$start_time <- 50
+config$gen3sis$general$start_time <- 60
 
 config$gen3sis$general$end_time <- 1
 
@@ -60,7 +60,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 #########################################################
 rep <- 1
 
-plasti <- c(0.1, 1, 10)
+plasti <- c(0.1, 1)
 
 pos <- 0
 pos2 <- 0
@@ -456,6 +456,10 @@ for(p in 1:length(plasti)){
         finalresult$traitevolution[pos] <- traitevolution
         finalresult$timestep[pos] <- ti
         finalresult$timesimulation[pos] <- pos2
+      }
+      #if(pos2 == 50){
+     #   saveRDS(val, file = paste0(plasti, '_', pos2, 'simulation', '.rds'))
+     #   break
       }
     } 
  }
