@@ -4,7 +4,6 @@
 
 library(gen3sis)
 config <- function(tr, envi, plasticidade) {
-  
   plasticity <- function(x, plast) {
     return(seq(x - (x * plast), x + (x * plast), 0.01))
   }
@@ -29,6 +28,9 @@ for (i in seq_along(plas)){
   a[[i]] <- loop_ecology2(list(1:2), list(3:4), plas[[i]])
 }
 
+plasticity <- function(x, plast) {
+  return(seq(x - (x * plast), x + (x * plast), 0.01))
+}
 #######################################################
 ######## TEST WITH REAL DATA ############
 #######################################################
@@ -82,22 +84,6 @@ config$gen3sis$general$end_time <- 1
 
 timesteps_total <- length(config$gen3sis$general$start_time:config$gen3sis$general$end_time)
 
-config$gen3sis$initialization$create_ancestor_species <- function(landscape, config) {
-  range <- c(-180, 180, -90, 90)
-  co <- landscape$coordinates
-  selection <- co[, "x"] >= range[1] &
-    co[, "x"] <= range[2] &
-    co[, "y"] >= range[3] &
-    co[, "y"] <= range[4]
-  initial_cells <- rownames(co)[selection]
-  new_species <- create_species(initial_cells, config)
-  #set local adaptation to max optimal temp equals local temp
-  new_species$traits[ , "temp"] <- 0
-  new_species$traits[ , "dispersal"] <- 1
-  
-  return(list(new_species))
-}
-
 config$gen3sis$general$max_number_of_species <- 5000
 
 config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
@@ -135,7 +121,7 @@ for(k in 1:length(cam)){
 file.remove(camatualizado)  
 
 config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, config, plasticidade) {
-  browser()
+
   abundance_scale = 10
   abundance_threshold = 1
   #abundance threshold
@@ -162,21 +148,21 @@ config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, c
   
   #abundance threshold
   abundance[abundance<abundance_threshold] <- 0
-  k <- ((landscape[,'area']*(landscape[,'arid']+0.1)*(landscape[,'temp']+0.1))
-        *abundance_scale^2)
-  total_ab <- sum(abundance)
-  subtract <- total_ab-k
-  if (subtract > 0) {
-    # print(paste("should:", k, "is:", total_ab, "DIFF:", round(subtract,0) ))
-    while (total_ab>k){
-      alive <- abundance>0
-      loose <- sample(1:length(abundance[alive]),1)
-      abundance[alive][loose] <- abundance[alive][loose]-1
-      total_ab <- sum(abundance)
-    }
-    #set negative abundances to zero
-    abundance[!alive] <- 0
-  }
+  # k <- ((landscape[,'area']*(landscape[,'arid']+0.1)*(landscape[,'temp']+0.1))
+  #       *abundance_scale^2)
+  # total_ab <- sum(abundance)
+  # subtract <- total_ab-k
+  # if (subtract > 0) {
+  #   # print(paste("should:", k, "is:", total_ab, "DIFF:", round(subtract,0) ))
+  #   while (total_ab>k){
+  #     alive <- abundance>0
+  #     loose <- sample(1:length(abundance[alive]),1)
+  #     abundance[alive][loose] <- abundance[alive][loose]-1
+  #     total_ab <- sum(abundance)
+  #   }
+  #   #set negative abundances to zero
+  #   abundance[!alive] <- 0
+  # }
   return(abundance)
 }  
 
@@ -185,6 +171,7 @@ config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, c
 
 
 loop_ecology2 <- function (config, data, vars, plasticidade) {
+  browser()
   if (config$gen3sis$general$verbose >= 3) {
     cat(paste("entering ecology module @ time", vars$ti, 
               "\n"))
@@ -247,6 +234,17 @@ loop_ecology2 <- function (config, data, vars, plasticidade) {
   return(list(config = config, data = data, vars = vars))
 }
 
+modify_initial_temperature <- function(config, data, vars){
+  temp_ancient <- data[['landscape']][['environment']][, 1]
+  new_temp <- sapply(temp_ancient, function(x){ 
+    x <- abs(rnorm(1, x, sd = 0.5))
+  })
+  new_temp[new_temp >= 1] <- 1
+  new_temp[new_temp <= 0] <- 0.1
+  data[['landscape']][['environment']][, 1] <- new_temp
+  return(list(config = config, data = data, vars = vars))
+}
+
 #for(p in 1:length(plasti)){
   
 #  for(r in 1:rep){
@@ -289,6 +287,9 @@ loop_ecology2 <- function (config, data, vars, plasticidade) {
       val <- restore_state(val, timestep_restart)
     }
     pos2 <- 0
+    
+    val <- modify_initial_temperature(val$config, val$data, val$vars)
+    
    # for (ti in val$vars$steps) {
       ##########################################################  
       
@@ -370,7 +371,7 @@ loop_ecology2 <- function (config, data, vars, plasticidade) {
         print("max number of species reached, breaking loop")
         break
       }
-      val <- loop_ecology2(val$config, val$data, val$vars, plasti[length(plasti)])
+      val <- loop_ecology2(val$config, val$data, val$vars, plasti[1])
       
       if (verbose >= 0 & val$vars$flag == "OK") {
         cat("Simulation finished. All OK \n")

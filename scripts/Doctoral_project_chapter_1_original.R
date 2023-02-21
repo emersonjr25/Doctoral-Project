@@ -88,7 +88,7 @@ for(k in 1:length(cam)){
 file.remove(camatualizado)  
 
 config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, config, plasticidade) {
-  browser()
+  #browser()
   abundance_scale = 10
   abundance_threshold = 1
   #abundance threshold
@@ -200,6 +200,17 @@ loop_ecology2 <- function (config, data, vars, plasticidade) {
   return(list(config = config, data = data, vars = vars))
 }
 
+modify_initial_temperature <- function(config, data, vars){
+  temp_ancient <- data[['landscape']][['environment']][, 1]
+  new_temp <- sapply(temp_ancient, function(x){ 
+    x <- abs(rnorm(1, x, sd = 0.5))
+  })
+  new_temp[new_temp >= 1] <- 1
+  new_temp[new_temp <= 0] <- 0.1
+  data[['landscape']][['environment']][, 1] <- new_temp
+  return(list(config = config, data = data, vars = vars))
+}
+
 for(p in 1:length(plasti)){
   
   for(r in 1:rep){
@@ -242,6 +253,7 @@ for(p in 1:length(plasti)){
       val <- restore_state(val, timestep_restart)
     }
     pos2 <- 0
+    val <- modify_initial_temperature(val$config, val$data, val$vars)
     for (ti in val$vars$steps) {
       
       ##########################################################  
