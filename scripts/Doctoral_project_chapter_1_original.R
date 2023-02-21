@@ -45,7 +45,7 @@ if (!verify_config(config)) {
 }
 
 #### MODIFICATIONS IN CONFIG ####
-config$gen3sis$general$start_time <- 50
+config$gen3sis$general$start_time <- 25
 
 config$gen3sis$general$end_time <- 1
 
@@ -89,7 +89,7 @@ file.remove(camatualizado)
 
 config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, config, plasticidade) {
   #browser()
-  abundance_scale = 10
+  abundance_scale = 1
   abundance_threshold = 1
   #abundance threshold
   survive <- abundance>=abundance_threshold
@@ -114,7 +114,7 @@ config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, c
   
   
   #abundance threshold
-  abundance[abundance<abundance_threshold] <- 0
+  # abundance[abundance<abundance_threshold] <- 0
   # k <- ((landscape[,'area']*(landscape[,'arid']+0.1)*(landscape[,'temp']+0.1))
   #       *abundance_scale^2)
   # total_ab <- sum(abundance)
@@ -138,6 +138,7 @@ config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, c
 
 
 loop_ecology2 <- function (config, data, vars, plasticidade) {
+  #browser()
   if (config$gen3sis$general$verbose >= 3) {
     cat(paste("entering ecology module @ time", vars$ti, 
               "\n"))
@@ -200,16 +201,39 @@ loop_ecology2 <- function (config, data, vars, plasticidade) {
   return(list(config = config, data = data, vars = vars))
 }
 
-modify_initial_temperature <- function(config, data, vars){
-  temp_ancient <- data[['landscape']][['environment']][, 1]
-  new_temp <- sapply(temp_ancient, function(x){ 
-    x <- abs(rnorm(1, x, sd = 0.5))
-  })
-  new_temp[new_temp >= 1] <- 1
-  new_temp[new_temp <= 0] <- 0.1
-  data[['landscape']][['environment']][, 1] <- new_temp
+modify_input_temperature <- function(config, data, vars, seed = 1){
+  set.seed(seed)
+  temp_ancient <- data[["inputs"]][["environments"]][['temp']]
+  new_temp <- matrix(NA, 
+                     nrow = nrow(temp_ancient),
+                     ncol = ncol(temp_ancient),
+                     dimnames = dimnames(temp_ancient))
+  temp <- 0
+  for(i in 1:ncol(temp_ancient)){
+    temp <- temp_ancient[, i]
+    temp[!is.na(temp)] <- sapply(temp[!is.na(temp)], function(x){
+      x <- abs(rnorm(1, x, sd = 0.5))
+    })
+    temp[!is.na(temp) & temp >= 1] <- 1
+    temp[!is.na(temp) & temp <= 0] <- 0.1
+    new_temp[, i] <- temp
+    temp <- 0
+  }
+  data[["inputs"]][["environments"]][['temp']] <- new_temp
   return(list(config = config, data = data, vars = vars))
 }
+
+# variability_temperature_each_year <- function(config, data, vars, seed = 1){
+#   set.seed(seed)
+#   temp_ancient <- data[['landscape']][['environment']][, 1]
+#   new_temp <- sapply(temp_ancient, function(x){ 
+#     x <- abs(rnorm(1, x, sd = 0.5))
+#   })
+#   new_temp[new_temp >= 1] <- 1
+#   new_temp[new_temp <= 0] <- 0.1
+#   data[['landscape']][['environment']][, 1] <- new_temp
+#   return(list(config = config, data = data, vars = vars))
+# }
 
 for(p in 1:length(plasti)){
   
@@ -222,6 +246,7 @@ for(p in 1:length(plasti)){
     val$config$gen3sis$general$verbose <- verbose
     val <- setup_inputs(val$config, val$data, val$vars)
     val <- setup_variables(val$config, val$data, val$vars)
+    val <- modify_input_temperature(val$config, val$data, val$vars)
     val <- setup_landscape(val$config, val$data, val$vars)
     val$data$landscape$id <- val$data$landscape$id + 1
     val <- init_attribute_ancestor_distribution(val$config,
@@ -253,7 +278,7 @@ for(p in 1:length(plasti)){
       val <- restore_state(val, timestep_restart)
     }
     pos2 <- 0
-    val <- modify_initial_temperature(val$config, val$data, val$vars)
+    
     for (ti in val$vars$steps) {
       
       ##########################################################  
@@ -282,6 +307,7 @@ for(p in 1:length(plasti)){
       if (verbose >= 2) {
         cat("loop setup \n")
       }
+      
       val <- setup_landscape(val$config, val$data, val$vars)
       val <- restrict_species(val$config, val$data, val$vars)
       val <- setup_distance_matrix(val$config, val$data, val$vars)
