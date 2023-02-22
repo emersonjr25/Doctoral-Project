@@ -60,7 +60,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 #########################################################
 rep <- 1
 
-plasti <- c(0, 1)
+plasti <- c(1, 1)
 
 pos <- 0
 pos2 <- 0
@@ -88,8 +88,8 @@ for(k in 1:length(cam)){
 file.remove(camatualizado)  
 
 config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, config, plasticidade) {
-  #browser()
-  abundance_scale = 1
+  browser()
+  abundance_scale = 1.5
   abundance_threshold = 1
   #abundance threshold
   survive <- abundance>=abundance_threshold
@@ -111,31 +111,29 @@ config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, c
   traits_sub <- lapply(traits[, 'temp'], plasticity, plasticidade)
   traits_sub2 <- mapply(plasticity2, traits_sub, landscape[,'temp'])
   abundance <- ((1 - traits_sub2)*abundance_scale)*as.numeric(survive)
-  
-  
+
   #abundance threshold
-  # abundance[abundance<abundance_threshold] <- 0
-  # k <- ((landscape[,'area']*(landscape[,'arid']+0.1)*(landscape[,'temp']+0.1))
-  #       *abundance_scale^2)
-  # total_ab <- sum(abundance)
-  # subtract <- total_ab-k
-  # if (subtract > 0) {
-  #   # print(paste("should:", k, "is:", total_ab, "DIFF:", round(subtract,0) ))
-  #   while (total_ab>k){
-  #     alive <- abundance>0
-  #     loose <- sample(1:length(abundance[alive]),1)
-  #     abundance[alive][loose] <- abundance[alive][loose]-1
-  #     total_ab <- sum(abundance)
-  #   }
-  #   #set negative abundances to zero
-  #   abundance[!alive] <- 0
-  # }
-  return(abundance)
-}  
+#   abundance[abundance<abundance_threshold] <- 0
+#   k <- ((landscape[,'area']*(landscape[,'arid']+0.1)*(landscape[,'temp']+0.1))
+#         *abundance_scale^2)
+#   total_ab <- sum(abundance)
+#   subtract <- total_ab-k
+#   if (subtract > 0) {
+#     # print(paste("should:", k, "is:", total_ab, "DIFF:", round(subtract,0) ))
+#     while (total_ab>k){
+#       alive <- abundance>0
+#       loose <- sample(1:length(abundance[alive]),1)
+#       abundance[alive][loose] <- abundance[alive][loose]-1
+#       total_ab <- sum(abundance)
+#     }
+#     #set negative abundances to zero
+#     abundance[!alive] <- 0
+#   }
+   return(abundance)
+ }  
 
 
 ####################################################################
-
 
 loop_ecology2 <- function (config, data, vars, plasticidade) {
   #browser()
@@ -246,7 +244,6 @@ for(p in 1:length(plasti)){
     val$config$gen3sis$general$verbose <- verbose
     val <- setup_inputs(val$config, val$data, val$vars)
     val <- setup_variables(val$config, val$data, val$vars)
-    val <- modify_input_temperature(val$config, val$data, val$vars)
     val <- setup_landscape(val$config, val$data, val$vars)
     val$data$landscape$id <- val$data$landscape$id + 1
     val <- init_attribute_ancestor_distribution(val$config,
@@ -278,27 +275,9 @@ for(p in 1:length(plasti)){
       val <- restore_state(val, timestep_restart)
     }
     pos2 <- 0
+    val <- modify_input_temperature(val$config, val$data, val$vars)
     
     for (ti in val$vars$steps) {
-      
-      ##########################################################  
-      
-      # state <- "hightemp"
-      # if(val$vars$steps[ti] == 10){
-      #   if(state == "hightemp"){
-      #     val$data$landscape$environment[, 1] <-  val$data$landscape$environment[, 1] + 0.9
-      #     val$data$inputs$environments$temp  <- val$data$inputs$environments$temp + 0.9 }
-      # }
-      
-      #val$data$inputs$environments$temp <- sapply(val$data$inputs$environments$temp, FUN = function(dados){
-      #return(dados + abs(rnorm(1, 2, 0.1)))
-      #})
-      
-      #val$data$landscape$environment[, 1] <- sapply(val$data$landscape$environment[, 1], FUN = function(dados){
-      # return(dados + abs(rnorm(1, 0.3, 0.1)))
-      #})
-      
-      #######################################################
       
       val$vars$n_new_sp_ti <- 0
       val$vars$n_ext_sp_ti <- 0
@@ -520,3 +499,4 @@ for(p in 1:length(plasti)){
 
 path <- here("output")
 write.csv2(finalresult, file.path(path, "finalresult.csv"), row.names = FALSE)
+

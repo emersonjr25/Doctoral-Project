@@ -280,7 +280,6 @@ modify_input_temperature <- function(config, data, vars, seed = 1){
     val$config$gen3sis$general$verbose <- verbose
     val <- setup_inputs(val$config, val$data, val$vars)
     val <- setup_variables(val$config, val$data, val$vars)
-    val <- modify_input_temperature(val$config, val$data, val$vars)
     val <- setup_landscape(val$config, val$data, val$vars)
     val$data$landscape$id <- val$data$landscape$id + 1
     val <- init_attribute_ancestor_distribution(val$config,
@@ -312,28 +311,11 @@ modify_input_temperature <- function(config, data, vars, seed = 1){
       val <- restore_state(val, timestep_restart)
     }
     pos2 <- 0
+    val <- modify_input_temperature(val$config, val$data, val$vars)
     
     #val <- modify_initial_temperature(val$config, val$data, val$vars)
   
    # for (ti in val$vars$steps) {
-      ##########################################################  
-      
-      # state <- "hightemp"
-      # if(val$vars$steps[ti] == 10){
-      #   if(state == "hightemp"){
-      #     val$data$landscape$environment[, 1] <-  val$data$landscape$environment[, 1] + 0.9
-      #     val$data$inputs$environments$temp  <- val$data$inputs$environments$temp + 0.9 }
-      # }
-      
-      #val$data$inputs$environments$temp <- sapply(val$data$inputs$environments$temp, FUN = function(dados){
-      #return(dados + abs(rnorm(1, 2, 0.1)))
-      #})
-      
-      #val$data$landscape$environment[, 1] <- sapply(val$data$landscape$environment[, 1], FUN = function(dados){
-      # return(dados + abs(rnorm(1, 0.3, 0.1)))
-      #})
-      
-      #######################################################
       
       val$vars$n_new_sp_ti <- 0
       val$vars$n_ext_sp_ti <- 0
