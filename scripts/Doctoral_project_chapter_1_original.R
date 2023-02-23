@@ -6,6 +6,10 @@
 ##### Methods: Computational simulation #############
 ##### Script to input, modify and run model #########
 
+#### THINGS TO SEE: ABUNDANCE SCALE, TRAITS VALUES,
+# AND TRAIT EVOLUTION NEGATIVE ####
+
+
 #### PACKAGES ####
 library(gen3sis)
 library(here)
@@ -60,7 +64,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 #########################################################
 rep <- 1
 
-plasti <- c(1, 1)
+plasti <- c(0, 1)
 
 pos <- 0
 pos2 <- 0
@@ -85,10 +89,10 @@ camatualizado <- 0
 for(k in 1:length(cam)){
   camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
 }
-file.remove(camatualizado)  
+file.remove(camatualizado)
 
 config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, config, plasticidade) {
-  browser()
+  #browser()
   abundance_scale = 1.5
   abundance_threshold = 1
   #abundance threshold
@@ -113,25 +117,24 @@ config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, c
   abundance <- ((1 - traits_sub2)*abundance_scale)*as.numeric(survive)
 
   #abundance threshold
-#   abundance[abundance<abundance_threshold] <- 0
-#   k <- ((landscape[,'area']*(landscape[,'arid']+0.1)*(landscape[,'temp']+0.1))
-#         *abundance_scale^2)
-#   total_ab <- sum(abundance)
-#   subtract <- total_ab-k
-#   if (subtract > 0) {
-#     # print(paste("should:", k, "is:", total_ab, "DIFF:", round(subtract,0) ))
-#     while (total_ab>k){
-#       alive <- abundance>0
-#       loose <- sample(1:length(abundance[alive]),1)
-#       abundance[alive][loose] <- abundance[alive][loose]-1
-#       total_ab <- sum(abundance)
-#     }
-#     #set negative abundances to zero
-#     abundance[!alive] <- 0
-#   }
+  abundance[abundance<abundance_threshold] <- 0
+  # k <- ((landscape[,'area']*(landscape[,'arid']+0.1)*(landscape[,'temp']+0.1))
+  #       *abundance_scale^2)
+  # total_ab <- sum(abundance)
+  # subtract <- total_ab-k
+  # if (subtract > 0) {
+  #   # print(paste("should:", k, "is:", total_ab, "DIFF:", round(subtract,0) ))
+  #   while (total_ab>k){
+  #     alive <- abundance>0
+  #     loose <- sample(1:length(abundance[alive]),1)
+  #     abundance[alive][loose] <- abundance[alive][loose]-1
+  #     total_ab <- sum(abundance)
+  #   }
+  #   #set negative abundances to zero
+  #   abundance[!alive] <- 0
+  # }
    return(abundance)
  }  
-
 
 ####################################################################
 
