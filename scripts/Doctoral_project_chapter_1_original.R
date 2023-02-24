@@ -6,7 +6,7 @@
 ##### Methods: Computational simulation #############
 ##### Script to input, modify and run model #########
 
-#### THINGS TO SEE: ABUNDANCE SCALE, TRAITS VALUES,
+#### THINGS TO SEE: READ ARTICLE/DOCUMENTATION, ABUNDANCE SCALE, TRAITS VALUES,
 # AND TRAIT EVOLUTION NEGATIVE ####
 
 
