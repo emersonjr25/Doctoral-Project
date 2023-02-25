@@ -46,7 +46,7 @@ if (!verify_config(config)) {
 }
 
 #### MODIFICATIONS IN CONFIG - SPECIES AND SYSTEM ####
-config$gen3sis$general$start_time <- 35
+config$gen3sis$general$start_time <- 100
 
 config$gen3sis$general$end_time <- 1
 
@@ -72,7 +72,8 @@ finalresult <- data.frame(plasticidade = runif(rep * length(plasti) * timesteps_
                           diversif = runif(rep * length(plasti) * timesteps_total, 0, 0),
                           traitevolution = runif(rep * length(plasti) * timesteps_total, 0, 0),
                           timestep = runif(rep * length(plasti) * timesteps_total, 0, 0),
-                          timesimulation = runif(rep * length(plasti) * timesteps_total, 0, 0))
+                          timesimulation = runif(rep * length(plasti) * timesteps_total, 0, 0),
+                          speciestotal = runif(rep * length(plasti) * timesteps_total, 0, 0))
 
 # ALTERING INITIAL TRAIT VALUES #
 
@@ -485,6 +486,7 @@ for(p in 1:length(plasti)){
         finalresult$traitevolution[pos] <- traitevolution
         finalresult$timestep[pos] <- ti
         finalresult$timesimulation[pos] <- pos2
+        finalresult$speciestotal[pos] <- sgen3sis$summary$phylo_summary[, 1][length(sgen3sis$summary$phylo_summary[, 1])]
       }
       #if(pos2 == 50){
      #   saveRDS(val, file = paste0(plasti, '_', pos2, 'simulation', '.rds'))
