@@ -99,7 +99,7 @@ finalresult <- data.frame(plasticidade = runif(rep * length(plasti) * timesteps_
 # ADD PLASTICITY AND MODIFICATIONS IN ECOLOGY #
 
 config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, config, plasticidade) {
-  #browser()
+  browser()
   abundance_scale = 1.5
   abundance_threshold = 1
   #abundance threshold
