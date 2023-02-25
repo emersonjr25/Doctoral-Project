@@ -18,7 +18,7 @@ dados <- dados %>% filter(replications != 0)
 path <- here("output")
 
 #### plot speciation ####
-ggplot(data = dados, aes(timesimulation, speciation, colour = plasticidade, group = plasticidade)) + 
+general_plot_1 <- ggplot(data = dados, aes(timesimulation, speciation, colour = plasticidade, group = plasticidade)) + 
   labs(title = paste("Speciation along time with plasticity")) + theme_bw() +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
@@ -55,7 +55,7 @@ for(i in unique(dados$plasticidade)){
 
 #### plot extinction ####
 
-ggplot(data = dados, aes(timesimulation, extinction, colour = plasticidade, group = plasticidade)) + 
+general_plot_2 <- ggplot(data = dados, aes(timesimulation, extinction, colour = plasticidade, group = plasticidade)) + 
   labs(title = paste("Extinction along time with plasticity")) + theme_bw() +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
@@ -91,7 +91,7 @@ for(i in unique(dados$plasticidade)){
 
 #### plot diversification ####
 
-ggplot(data = dados, aes(timesimulation, diversif, colour = plasticidade, group = plasticidade)) + 
+general_plot_3 <- ggplot(data = dados, aes(timesimulation, diversif, colour = plasticidade, group = plasticidade)) + 
   labs(title = paste("Diversification along time with plasticity - all data")) + theme_bw() +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
@@ -128,7 +128,7 @@ for(i in unique(dados$plasticidade)){
 #### plot trait evolution ####
 #subdata_final <- dados %>% filter(timesimulation >= 100)
 
-ggplot(data = dados, aes(timesimulation, traitevolution, colour = plasticidade, group = plasticidade)) + 
+general_plot_4 <- ggplot(data = dados, aes(timesimulation, traitevolution, colour = plasticidade, group = plasticidade)) + 
   labs(title = paste("Trait evolution along time with plasticity - all data")) + theme_bw() +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
