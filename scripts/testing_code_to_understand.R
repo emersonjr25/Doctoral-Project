@@ -120,6 +120,24 @@ for(k in 1:length(cam)){
 }
 file.remove(camatualizado)  
 
+config$gen3sis$initialization$create_ancestor_species <- function(landscape, config) {
+  range <- c(-180, 180, -90, 90)
+  co <- landscape$coordinates
+  selection <- co[, "x"] >= range[1] &
+    co[, "x"] <= range[2] &
+    co[, "y"] >= range[3] &
+    co[, "y"] <= range[4]
+  initial_cells <- rownames(co)[selection]
+  new_species <- create_species(initial_cells, config)
+  #set local adaptation to max optimal temp equals local temp
+  new_species$traits[ , "temp"] <- rnorm(length(landscape$environment[,"temp"]), 0.5, 0.5)
+  new_species$traits[ , "temp"][new_species$traits[ , "temp"] <= 0]  <- runif(1, 0, 0.4)
+  new_species$traits[ , "temp"][new_species$traits[ , "temp"] >= 1]  <- runif(1, 0.6, 1)
+  new_species$traits[ , "dispersal"] <- 1
+
+  return(list(new_species))
+}
+
 config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, config, plasticidade) {
 
   abundance_scale = 10
@@ -266,7 +284,40 @@ modify_input_temperature <- function(config, data, vars, seed = 1){
 #   new_temp[new_temp <= 0] <- 0.1
 #   return(list(config = config, data = data, vars = vars))
 # }
+evolve2 <- function (species, landscape, distance_matrix, config) 
+{
+  browser()
+  if (!length(species[["abundance"]])) {
+    return(species)
+  }
+  species_presence <- names(species[["abundance"]])
+  distances <- config$gen3sis$dispersal$get_dispersal_values(length(species_presence), 
+                                                             species, landscape, config)
+  permutation <- sample(1:length(species_presence), length(species_presence))
+  cluster_indices <- Tdbscan_variable(distance_matrix[species_presence[permutation], 
+                                                      species_presence[permutation], drop = FALSE], distances, 
+                                      1)
+  cluster_indices <- cluster_indices[order(permutation)]
+  new_traits <- config$gen3sis$mutation$apply_evolution(species, 
+                                                        cluster_indices, landscape, config)
+  species_traits <- colnames(species[["traits"]])
+  species[["traits"]][, species_traits] <- new_traits[, species_traits, 
+                                                      drop = FALSE]
+  return(species)
+}
 
+loop_evolution2 <- function (config, data, vars) 
+{
+  if (config$gen3sis$general$verbose >= 3) {
+    cat(paste("entering mutation module \n"))
+  }
+  data$all_species <- lapply(data$all_species, evolve2, data$landscape, 
+                             data$distance, config)
+  if (config$gen3sis$general$verbose >= 3) {
+    cat(paste("exiting mutation module \n"))
+  }
+  return(list(config = config, data = data, vars = vars))
+}
 
 
 #for(p in 1:length(plasti)){
@@ -342,6 +393,7 @@ modify_input_temperature <- function(config, data, vars, seed = 1){
       if (verbose >= 2) {
         cat("evolution \n")
       }
+
       val <- loop_evolution(val$config, val$data, val$vars)
       if (verbose >= 2) {
         cat("ecology \n")

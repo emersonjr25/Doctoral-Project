@@ -6,15 +6,12 @@
 ##### Methods: Computational simulation #############
 ##### Script to input, modify and run model #########
 
-#### THINGS TO SEE: READ ARTICLE/DOCUMENTATION, ABUNDANCE SCALE, TRAITS VALUES,
-# AND TRAIT EVOLUTION NEGATIVE ####
-
-
 #### PACKAGES ####
 library(gen3sis)
 library(here)
 
-#### SIMULATION ####
+################## SIMULATION #########################
+#### CARRYING CONFIGURATIONS AND PATHS ####
 datapath <- here("data/raw/WorldCenter")
 attach(loadNamespace('gen3sis'), name = 'gen3sis_all')
 config = file.path(datapath, "config/config_worldcenter.R")
@@ -48,8 +45,8 @@ if (!verify_config(config)) {
   stop("config verification failed")
 }
 
-#### MODIFICATIONS IN CONFIG ####
-config$gen3sis$general$start_time <- 25
+#### MODIFICATIONS IN CONFIG - SPECIES AND SYSTEM ####
+config$gen3sis$general$start_time <- 100
 
 config$gen3sis$general$end_time <- 1
 
@@ -61,10 +58,9 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
   save_traits()
 }
 
-#########################################################
 rep <- 1
 
-plasti <- c(0, 1)
+plasti <- seq(0, 1, 0.1)
 
 pos <- 0
 pos2 <- 0
@@ -77,19 +73,29 @@ finalresult <- data.frame(plasticidade = runif(rep * length(plasti) * timesteps_
                           traitevolution = runif(rep * length(plasti) * timesteps_total, 0, 0),
                           timestep = runif(rep * length(plasti) * timesteps_total, 0, 0),
                           timesimulation = runif(rep * length(plasti) * timesteps_total, 0, 0))
-#### REMOVING TRAITS OF ANTERIOR SIMULATIONS ####
-caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", "traits")
-listfiles <- list.files("data/raw/WorldCenter/output/config_worldcenter/traits")
-filestoread <- length(list.files("data/raw/WorldCenter/output/config_worldcenter/traits"))
-cam <- 0
-for(l in 1:filestoread){
-  cam[l] <- caminho
-}
-camatualizado <- 0
-for(k in 1:length(cam)){
-  camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
-}
-file.remove(camatualizado)
+
+# ALTERING INITIAL TRAIT VALUES #
+
+# config$gen3sis$initialization$create_ancestor_species <- function(landscape, config) {
+# 
+#   range <- c(-180, 180, -90, 90)
+#   co <- landscape$coordinates
+#   selection <- co[, "x"] >= range[1] &
+#     co[, "x"] <= range[2] &
+#     co[, "y"] >= range[3] &
+#     co[, "y"] <= range[4]
+#   initial_cells <- rownames(co)[selection]
+#   new_species <- create_species(initial_cells, config)
+#   #set local adaptation to max optimal temp equals local temp
+#   new_species$traits[ , "temp"] <- rnorm(length(landscape$environment[,"temp"]), 0.5, 0.5)
+#   new_species$traits[ , "temp"][new_species$traits[ , "temp"] <= 0]  <- runif(1, 0, 0.3)
+#   new_species$traits[ , "temp"][new_species$traits[ , "temp"] >= 1]  <- runif(1, 0.7, 1)
+#   new_species$traits[ , "dispersal"] <- 1
+# 
+#   return(list(new_species))
+# }
+
+# ADD PLASTICITY AND MODIFICATIONS IN ECOLOGY #
 
 config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, config, plasticidade) {
   #browser()
@@ -115,7 +121,7 @@ config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, c
   traits_sub <- lapply(traits[, 'temp'], plasticity, plasticidade)
   traits_sub2 <- mapply(plasticity2, traits_sub, landscape[,'temp'])
   abundance <- ((1 - traits_sub2)*abundance_scale)*as.numeric(survive)
-
+  
   #abundance threshold
   abundance[abundance<abundance_threshold] <- 0
   # k <- ((landscape[,'area']*(landscape[,'arid']+0.1)*(landscape[,'temp']+0.1))
@@ -133,10 +139,8 @@ config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, c
   #   #set negative abundances to zero
   #   abundance[!alive] <- 0
   # }
-   return(abundance)
- }  
-
-####################################################################
+  return(abundance)
+}  
 
 loop_ecology2 <- function (config, data, vars, plasticidade) {
   #browser()
@@ -202,6 +206,8 @@ loop_ecology2 <- function (config, data, vars, plasticidade) {
   return(list(config = config, data = data, vars = vars))
 }
 
+# MODIFICATION IN INPUT TEMPERATURE - MORE VARIATION #
+
 modify_input_temperature <- function(config, data, vars, seed = 1){
   set.seed(seed)
   temp_ancient <- data[["inputs"]][["environments"]][['temp']]
@@ -224,17 +230,19 @@ modify_input_temperature <- function(config, data, vars, seed = 1){
   return(list(config = config, data = data, vars = vars))
 }
 
-# variability_temperature_each_year <- function(config, data, vars, seed = 1){
-#   set.seed(seed)
-#   temp_ancient <- data[['landscape']][['environment']][, 1]
-#   new_temp <- sapply(temp_ancient, function(x){ 
-#     x <- abs(rnorm(1, x, sd = 0.5))
-#   })
-#   new_temp[new_temp >= 1] <- 1
-#   new_temp[new_temp <= 0] <- 0.1
-#   data[['landscape']][['environment']][, 1] <- new_temp
-#   return(list(config = config, data = data, vars = vars))
-# }
+#### REMOVING TRAITS OF ANTERIOR SIMULATIONS ####
+caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", "traits")
+listfiles <- list.files("data/raw/WorldCenter/output/config_worldcenter/traits")
+filestoread <- length(list.files("data/raw/WorldCenter/output/config_worldcenter/traits"))
+cam <- 0
+for(l in 1:filestoread){
+  cam[l] <- caminho
+}
+camatualizado <- 0
+for(k in 1:length(cam)){
+  camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
+}
+file.remove(camatualizado)
 
 for(p in 1:length(plasti)){
   
@@ -451,7 +459,7 @@ for(p in 1:length(plasti)){
         }
         datafinal_result <- unlist(list_difference2)
         
-        traitevolution <- mean(datafinal_result) / sum(length(datafinal_less_last) + 1)
+        traitevolution <- abs((mean(datafinal_result)) / sum(length(datafinal_less_last) + 1))
         
       } else {
         traitevolution <- 0
@@ -502,4 +510,3 @@ for(p in 1:length(plasti)){
 
 path <- here("output")
 write.csv2(finalresult, file.path(path, "finalresult.csv"), row.names = FALSE)
-
