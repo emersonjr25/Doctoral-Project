@@ -77,30 +77,30 @@ finalresult <- data.frame(plasticidade = runif(rep * length(plasti) * timesteps_
 
 # ALTERING INITIAL TRAIT VALUES #
 
-# config$gen3sis$initialization$create_ancestor_species <- function(landscape, config) {
-# 
-#   range <- c(-180, 180, -90, 90)
-#   co <- landscape$coordinates
-#   selection <- co[, "x"] >= range[1] &
-#     co[, "x"] <= range[2] &
-#     co[, "y"] >= range[3] &
-#     co[, "y"] <= range[4]
-#   initial_cells <- rownames(co)[selection]
-#   new_species <- create_species(initial_cells, config)
-#   #set local adaptation to max optimal temp equals local temp
-#   new_species$traits[ , "temp"] <- rnorm(length(landscape$environment[,"temp"]), 0.5, 0.5)
-#   new_species$traits[ , "temp"][new_species$traits[ , "temp"] <= 0]  <- runif(1, 0, 0.3)
-#   new_species$traits[ , "temp"][new_species$traits[ , "temp"] >= 1]  <- runif(1, 0.7, 1)
-#   new_species$traits[ , "dispersal"] <- 1
-# 
-#   return(list(new_species))
-# }
+config$gen3sis$initialization$create_ancestor_species <- function(landscape, config) {
+
+  range <- c(-180, 180, -90, 90)
+  co <- landscape$coordinates
+  selection <- co[, "x"] >= range[1] &
+    co[, "x"] <= range[2] &
+    co[, "y"] >= range[3] &
+    co[, "y"] <= range[4]
+  initial_cells <- rownames(co)[selection]
+  new_species <- create_species(initial_cells, config)
+  #set local adaptation to max optimal temp equals local temp
+  new_species$traits[ , "temp"] <- rnorm(length(landscape$environment[,"temp"]), 0.5, 0.5)
+  new_species$traits[ , "temp"][new_species$traits[ , "temp"] <= 0]  <- runif(1, 0, 0.3)
+  new_species$traits[ , "temp"][new_species$traits[ , "temp"] >= 1]  <- runif(1, 0.7, 1)
+  new_species$traits[ , "dispersal"] <- 1
+
+  return(list(new_species))
+}
 
 # ADD PLASTICITY AND MODIFICATIONS IN ECOLOGY #
 
 config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, config, plasticidade) {
-  browser()
-  abundance_scale = 1.5
+  #browser()
+  abundance_scale = 2
   abundance_threshold = 1
   #abundance threshold
   survive <- abundance>=abundance_threshold
