@@ -46,13 +46,13 @@ if (!verify_config(config)) {
 }
 
 #### MODIFICATIONS IN CONFIG - SPECIES AND SYSTEM ####
-config$gen3sis$general$start_time <- 100
+config$gen3sis$general$start_time <- 500
 
 config$gen3sis$general$end_time <- 1
 
 timesteps_total <- length(config$gen3sis$general$start_time:config$gen3sis$general$end_time)
 
-config$gen3sis$general$max_number_of_species <- 5000
+config$gen3sis$general$max_number_of_species <- 3000
 
 config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
   save_traits()
@@ -77,30 +77,30 @@ finalresult <- data.frame(plasticidade = runif(rep * length(plasti) * timesteps_
 
 # ALTERING INITIAL TRAIT VALUES #
 
-config$gen3sis$initialization$create_ancestor_species <- function(landscape, config) {
-
-  range <- c(-180, 180, -90, 90)
-  co <- landscape$coordinates
-  selection <- co[, "x"] >= range[1] &
-    co[, "x"] <= range[2] &
-    co[, "y"] >= range[3] &
-    co[, "y"] <= range[4]
-  initial_cells <- rownames(co)[selection]
-  new_species <- create_species(initial_cells, config)
-  #set local adaptation to max optimal temp equals local temp
-  new_species$traits[ , "temp"] <- rnorm(length(landscape$environment[,"temp"]), 0.5, 0.5)
-  new_species$traits[ , "temp"][new_species$traits[ , "temp"] <= 0]  <- runif(1, 0, 0.3)
-  new_species$traits[ , "temp"][new_species$traits[ , "temp"] >= 1]  <- runif(1, 0.7, 1)
-  new_species$traits[ , "dispersal"] <- 1
-
-  return(list(new_species))
-}
+# config$gen3sis$initialization$create_ancestor_species <- function(landscape, config) {
+# 
+#   range <- c(-180, 180, -90, 90)
+#   co <- landscape$coordinates
+#   selection <- co[, "x"] >= range[1] &
+#     co[, "x"] <= range[2] &
+#     co[, "y"] >= range[3] &
+#     co[, "y"] <= range[4]
+#   initial_cells <- rownames(co)[selection]
+#   new_species <- create_species(initial_cells, config)
+#   #set local adaptation to max optimal temp equals local temp
+#   new_species$traits[ , "temp"] <- rnorm(length(landscape$environment[,"temp"]), 0.5, 0.5)
+#   new_species$traits[ , "temp"][new_species$traits[ , "temp"] <= 0]  <- runif(1, 0, 0.3)
+#   new_species$traits[ , "temp"][new_species$traits[ , "temp"] >= 1]  <- runif(1, 0.7, 1)
+#   new_species$traits[ , "dispersal"] <- 1
+# 
+#   return(list(new_species))
+# }
 
 # ADD PLASTICITY AND MODIFICATIONS IN ECOLOGY #
 
 config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, config, plasticidade) {
   #browser()
-  abundance_scale = 2
+  abundance_scale = 1.5
   abundance_threshold = 1
   #abundance threshold
   survive <- abundance>=abundance_threshold
@@ -449,15 +449,22 @@ for(p in 1:length(plasti)){
           }
         }
         time <- 0
-        
+    
         list_difference2 <- list()
-        for(i in 1:length(list_difference)){
-          if(length(list_difference[[i]]) == 1) {
-            list_difference2[[i]] <- list_difference[[i]]
-          } else {
-            list_difference2[[i]] <- NULL
-          }
+        if(length(list_difference) >= 1){
+          for(i in 1:length(list_difference)){
+            if(length(list_difference[[i]]) == 1) {
+              list_difference2[[i]] <- list_difference[[i]]
+            } else {
+              list_difference2[[i]] <- NULL
+            }
+          } 
+        } else {
+          list_difference <- 0
+          list_difference2 <- 0
+          break
         }
+        
         datafinal_result <- unlist(list_difference2)
         
         traitevolution <- abs((mean(datafinal_result)) / sum(length(datafinal_less_last) + 1))
@@ -493,7 +500,8 @@ for(p in 1:length(plasti)){
      #   break
       # }
     } 
- }
+  }
+
   pos2 <- 0
   caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", "traits")
   listfiles <- list.files("data/raw/WorldCenter/output/config_worldcenter/traits")
