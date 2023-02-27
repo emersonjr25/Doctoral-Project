@@ -46,7 +46,7 @@ if (!verify_config(config)) {
 }
 
 #### MODIFICATIONS IN CONFIG - SPECIES AND SYSTEM ####
-config$gen3sis$general$start_time <- 500
+config$gen3sis$general$start_time <- 100
 
 config$gen3sis$general$end_time <- 1
 
