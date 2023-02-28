@@ -18,6 +18,7 @@ dados <- dados %>% filter(replications != 0)
 path <- here("output")
 
 #### plot speciation ####
+colors <- c('#e7e1ef','#d4b9da','#fcc5c0','#fa9fb5','#f768a1','#dd3497','#ae017e','#7a0177','#49006a')
 general_plot_1 <- ggplot(data = dados, aes(timesimulation, speciation, colour = plasticidade, group = plasticidade)) + 
   labs(title = paste("Speciation along time with plasticity")) + theme_bw() +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
@@ -25,7 +26,8 @@ general_plot_1 <- ggplot(data = dados, aes(timesimulation, speciation, colour = 
         plot.title = element_text(size = 16, hjust = 0.5),
         axis.text = element_text(size = 12),
         axis.title = element_text(size = 14)) + 
-  geom_smooth(se = FALSE)
+   scale_color_gradientn(colours = colors, na.value = NA) +
+ geom_smooth(se = FALSE)
 
 
 tiff(filename = file.path(path, paste0("plot", "_", general_plot_1[["labels"]][["y"]], "_", "plas", "all", ".tif")),
@@ -62,6 +64,7 @@ general_plot_2 <- ggplot(data = dados, aes(timesimulation, extinction, colour = 
         plot.title = element_text(size = 16, hjust = 0.5),
         axis.text = element_text(size = 12),
         axis.title = element_text(size = 14)) + 
+  scale_color_gradientn(colours = colors, na.value = NA) +
   geom_smooth(se = FALSE)
 
 tiff(filename = file.path(path, paste0("plot", "_", general_plot_2[["labels"]][["y"]], "_", "plas", "all", ".tif")),
@@ -98,6 +101,7 @@ general_plot_3 <- ggplot(data = dados, aes(timesimulation, diversif, colour = pl
         plot.title = element_text(size = 16, hjust = 0.5),
         axis.text = element_text(size = 12),
         axis.title = element_text(size = 14)) + 
+  scale_color_gradientn(colours = colors, na.value = NA) +
   geom_smooth(se = FALSE)
 
 tiff(filename = file.path(path, paste0("plot", "_", general_plot_3[["labels"]][["y"]], "_", "plas", "all", ".tif")),
@@ -135,6 +139,7 @@ general_plot_4 <- ggplot(data = dados, aes(timesimulation, traitevolution, colou
         plot.title = element_text(size = 16, hjust = 0.5),
         axis.text = element_text(size = 12),
         axis.title = element_text(size = 14)) + 
+  scale_color_gradientn(colours = colors, na.value = NA) +
   geom_smooth(se = FALSE)
 
 tiff(filename = file.path(path, paste0("plot", "_", general_plot_4[["labels"]][["y"]], "_", "plas", "all", ".tif")),

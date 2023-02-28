@@ -46,13 +46,13 @@ if (!verify_config(config)) {
 }
 
 #### MODIFICATIONS IN CONFIG - SPECIES AND SYSTEM ####
-config$gen3sis$general$start_time <- 600
+config$gen3sis$general$start_time <- 100
 
 config$gen3sis$general$end_time <- 1
 
 timesteps_total <- length(config$gen3sis$general$start_time:config$gen3sis$general$end_time)
 
-config$gen3sis$general$max_number_of_species <- 10000
+config$gen3sis$general$max_number_of_species <- 3000
 
 config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
   save_traits()
@@ -60,7 +60,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 
 rep <- 1
 
-plasti <- c(1)
+plasti <- seq(0, 1, 0.1)
 
 pos <- 0
 pos2 <- 0
@@ -100,30 +100,29 @@ finalresult <- data.frame(plasticidade = runif(rep * length(plasti) * timesteps_
 
 config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, config, plasticidade) {
   #browser()
-  abundance_scale = 1.12
+  abundance_scale = 1.5
   abundance_threshold = 1
   #abundance threshold
   survive <- abundance>=abundance_threshold
   abundance[!survive] <- 0
-  
   # Modification for plasticity:
   # Traits are now subtracted from a variance of optima
   # Such optima are defined by the parameter plast
   # Higher plast equals more plasticity
   # plast = 0, means no plasticity
-
+  
   plasticity <- function(x, plast) {
     return(seq(x - (x * plast), x + (x * plast), 0.01))
   }
-
+  
   plasticity2 <- function(x, land) {
     min(abs(x - land))
   }
-
+  
   traits_sub <- lapply(traits[, 'temp'], plasticity, plasticidade)
   traits_sub2 <- mapply(plasticity2, traits_sub, landscape[,'temp'])
   abundance <- ((1 - traits_sub2)*abundance_scale)*as.numeric(survive)
-
+  
   #abundance threshold
   abundance[abundance<abundance_threshold] <- 0
   # k <- ((landscape[,'area']*(landscape[,'arid']+0.1)*(landscape[,'temp']+0.1))
@@ -142,7 +141,7 @@ config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, c
   #   abundance[!alive] <- 0
   # }
   return(abundance)
-}
+}  
 
 loop_ecology2 <- function (config, data, vars, plasticidade) {
   #browser()
@@ -291,9 +290,7 @@ for(p in 1:length(plasti)){
     val <- modify_input_temperature(val$config, val$data, val$vars)
     
     for (ti in val$vars$steps) {
-      # if (ti == 540) {
-      #   break
-      # }
+      
       val$vars$n_new_sp_ti <- 0
       val$vars$n_ext_sp_ti <- 0
       val$vars$n_sp_added_ti <- 0
@@ -518,7 +515,7 @@ for(p in 1:length(plasti)){
     camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
   }
   file.remove(camatualizado)  
- rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, datafinal_less_last, datafinal_less_first, list_difference, list_difference2)
+  rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, datafinal_less_last, datafinal_less_first, list_difference, list_difference2)
 }
 
 path <- here("output")
