@@ -6,6 +6,9 @@
 ##### Methods: Computational simulation #############
 ##### Script to input, modify and run model #########
 
+### LOOP DISPESAL, LOOP SPECIATION, RESTRICT_SPECIES,
+# MATRIX ###
+
 #### PACKAGES ####
 library(gen3sis)
 library(here)
@@ -340,11 +343,33 @@ loop_speciation <- function (config, data, vars)
   return(list(config = config, data = data, vars = vars))
 }
 
+disperse_species <- function (species, source, destination, config) 
+{
+  if(ti == 25){
+    browser()
+  }
+  index <- 1:length(species[["abundance"]])
+  names(index) <- names(species[["abundance"]])
+  index[destination] <- index[source]
+  sorted <- as.character(sort(as.numeric(names(index))))
+  abundance <- species[["abundance"]]
+  abundance[destination] <- config$gen3sis$initialization$initial_abundance
+  species[["abundance"]] <- abundance[sorted]
+  traits <- species[["traits"]][source, , drop = FALSE]
+  rownames(traits) <- destination
+  species[["traits"]] <- rbind(species[["traits"]], traits)[sorted, 
+                                                            , drop = FALSE]
+  index <- species[["divergence"]][["index"]]
+  index[destination] <- index[source]
+  species[["divergence"]][["index"]] <- index[sorted]
+  return(invisible(species))
+}
+
 disperse <- function (species, landscape, distance_matrix, config) 
 {
-  # if(ti == 94){
-  #   browser()
-  # }
+   if(ti == 25){
+      browser()
+   }
   if (!length(species[["abundance"]])) {
     return(species)
   }
@@ -384,9 +409,9 @@ disperse <- function (species, landscape, distance_matrix, config)
 
 loop_dispersal <- function (config, data, vars) 
 {
-  # if(ti == 94){
-  #   browser()
-  # }
+   if(ti == 25){
+     browser()
+   }
   if (config$gen3sis$general$verbose >= 3) {
     cat(paste("entering dispersal module \n"))
   }
