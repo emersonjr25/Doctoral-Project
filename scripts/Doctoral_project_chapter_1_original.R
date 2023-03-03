@@ -6,8 +6,7 @@
 ##### Methods: Computational simulation #############
 ##### Script to input, modify and run model #########
 
-### LOOP DISPESAL, LOOP SPECIATION, RESTRICT_SPECIES,
-# MATRIX ###
+### LOOP DISPESAL, LOOP SPECIATION ###
 
 #### PACKAGES ####
 library(gen3sis)
@@ -63,7 +62,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 
 rep <- 1
 
-plasti <- c(0)
+plasti <- c(0, 0.4, 1)
 
 pos <- 0
 pos2 <- 0
@@ -345,7 +344,7 @@ loop_speciation <- function (config, data, vars)
 
 disperse_species <- function (species, source, destination, config) 
 {
-  if(ti == 25){
+  if(ti == 45){
     browser()
   }
   index <- 1:length(species[["abundance"]])
@@ -367,7 +366,7 @@ disperse_species <- function (species, source, destination, config)
 
 disperse <- function (species, landscape, distance_matrix, config) 
 {
-   if(ti == 25){
+   if(ti == 45){
       browser()
    }
   if (!length(species[["abundance"]])) {
@@ -376,6 +375,21 @@ disperse <- function (species, landscape, distance_matrix, config)
   presence_spi_ti <- names(species[["abundance"]])
   all_cells <- rownames(landscape$coordinates)
   free_cells <- all_cells[!(all_cells %in% presence_spi_ti)]
+  if(length(free_cells) >= 1){
+    if(length(free_cells) >= 200){
+      free_cells <- rownames(val$data$landscape$coordinates)
+      free_cells <- free_cells %>%
+                    sample(200) %>% as.numeric() %>%
+                    sort() %>% as.character()
+      #free_cells <- free_cells[1:100]
+    } else {
+      half <- round(length(free_cells) - (length(free_cells) * 0.5))
+      free_cells <- free_cells %>%
+                   sample(half) %>% as.numeric() %>%
+                   sort() %>% as.character()
+      #free_cells <- free_cells[1:half]
+    }
+  }
   num_draws <- length(free_cells) * length(presence_spi_ti)
   r_disp <- config$gen3sis$dispersal$get_dispersal_values(num_draws, 
                                                           species, landscape, config)
@@ -409,7 +423,7 @@ disperse <- function (species, landscape, distance_matrix, config)
 
 loop_dispersal <- function (config, data, vars) 
 {
-   if(ti == 25){
+   if(ti == 45){
      browser()
    }
   if (config$gen3sis$general$verbose >= 3) {
