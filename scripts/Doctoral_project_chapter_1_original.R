@@ -6,8 +6,6 @@
 ##### Methods: Computational simulation #############
 ##### Script to input, modify and run model #########
 
-### LOOP DISPESAL, LOOP SPECIATION ###
-
 #### PACKAGES ####
 library(gen3sis)
 library(here)
@@ -49,7 +47,7 @@ if (!verify_config(config)) {
 }
 
 #### MODIFICATIONS IN CONFIG - SPECIES AND SYSTEM ####
-config$gen3sis$general$start_time <- 50
+config$gen3sis$general$start_time <- 500
 
 config$gen3sis$general$end_time <- 1
 
@@ -63,7 +61,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 
 rep <- 1
 
-plasti <- c(0, 0.4, 1)
+plasti <- c(0, 0.25, 0.5, 0.75, 1)
 
 pos <- 0
 pos2 <- 0
@@ -252,9 +250,9 @@ modify_input_temperature <- function(config, data, vars, seed = 1){
 
 disperse2 <- function (species, landscape, distance_matrix, config) 
 {
-  #if(ti == 45){
-   # browser()
- # }
+  #if (ti == 48){
+  #  browser()
+  #}
   if (!length(species[["abundance"]])) {
     return(species)
   }
@@ -262,10 +260,10 @@ disperse2 <- function (species, landscape, distance_matrix, config)
   all_cells <- rownames(landscape$coordinates)
   free_cells <- all_cells[!(all_cells %in% presence_spi_ti)]
   if(length(free_cells) >= 1){
-    if(length(free_cells) >= 400){
+    if(length(free_cells) >= 200){
       free_cells <- rownames(val$data$landscape$coordinates)
       free_cells <- free_cells %>%
-                    sample(400) %>% as.numeric() %>%
+                    sample(200) %>% as.numeric() %>%
                     sort() %>% as.character()
       #free_cells <- free_cells[1:100]
     } else {
@@ -303,14 +301,16 @@ disperse2 <- function (species, landscape, distance_matrix, config)
     species <- disperse_species(species, as.character(orig), 
                                 dest, config)
   }
-  # if (config$gen3sis$general$verbose >= 1){
-  #   cat(paste('free cells', free_cells))
+   #if (config$gen3sis$general$verbose >= 1){
+  #   cat(paste('free cells', length(free_cells)))
   # }
   return(species)
 }
 
 loop_dispersal2 <- function (config, data, vars) {
-  #browser()
+  #if (ti == 48){
+  #  browser()
+ # }
   if (config$gen3sis$general$verbose >= 3) {
     cat(paste("entering dispersal module \n"))
   }
@@ -340,7 +340,6 @@ file.remove(camatualizado)
 for(p in 1:length(plasti)){
   
   for(r in 1:rep){
-    
     val <- list(data = list(),
                 vars = list(),
                 config = config)
@@ -382,8 +381,8 @@ for(p in 1:length(plasti)){
     val <- modify_input_temperature(val$config, val$data, val$vars)
     
     for (ti in val$vars$steps) {
-      # if (ti == 540) {
-      #   break
+       #if (ti == 48) {
+       #  break 
       # }
       val$vars$n_new_sp_ti <- 0
       val$vars$n_ext_sp_ti <- 0
