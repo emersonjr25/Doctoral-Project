@@ -11,6 +11,7 @@
 #### PACKAGES ####
 library(gen3sis)
 library(here)
+library(dplyr)
 
 ################## SIMULATION #########################
 #### CARRYING CONFIGURATIONS AND PATHS ####
@@ -158,7 +159,7 @@ config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, c
 }
 
 loop_ecology2 <- function (config, data, vars, plasticidade) {
-  # if(ti == 90){
+   #if(ti == 45){
   # browser()
   #     }
   if (config$gen3sis$general$verbose >= 3) {
@@ -249,126 +250,11 @@ modify_input_temperature <- function(config, data, vars, seed = 1){
 
 ################### FOR TESTS ####################################
 
-loop_speciation <- function (config, data, vars)
+disperse2 <- function (species, landscape, distance_matrix, config) 
 {
-  # if(ti == 94){
-  #   browser()
-  # }
-  if (config$gen3sis$general$verbose >= 3) {
-    cat(paste("entering speciation module \n"))
-  }
-  for (spi in 1:vars$n_sp) {
-    species <- data$all_species[[spi]]
-    if (!length(species[["abundance"]])) {
-      (next)()
-    }
-    species_presence <- names(species[["abundance"]])
-    if (length(species_presence) == 1) {
-      clu_geo_spi_ti <- 1
-    }
-    else {
-      distances <- config$gen3sis$dispersal$get_dispersal_values(length(species_presence),
-                                                                 species, data$landscape, config)
-      permutation <- sample(1:length(species_presence),
-                            length(species_presence))
-      clu_geo_spi_ti <- Tdbscan_variable(data$distance_matrix[species_presence[permutation],
-                                                              species_presence[permutation], drop = FALSE],
-                                         distances, 1)
-      clu_geo_spi_ti <- clu_geo_spi_ti[order(permutation)]
-    }
-    gen_dist_spi <- decompress_divergence(species[["divergence"]])
-    ifactor <- config$gen3sis$speciation$get_divergence_factor(species,
-                                                               clu_geo_spi_ti, data[["landscape"]], config)
-    gen_dist_spi <- update_divergence(gen_dist_spi, clu_geo_spi_ti,
-                                      ifactor = ifactor)
-    gen_dist_spi <- compress_divergence(gen_dist_spi)
-    species[["divergence"]] <- gen_dist_spi
-    clu_gen_spi_ti_c <- Tdbscan(gen_dist_spi$compressed_matrix,
-                                config$gen3sis$speciation$divergence_threshold,
-                                1)
-    clu_gen_spi_ti <- clu_gen_spi_ti_c[gen_dist_spi$index]
-    n_new_sp <- max(clu_gen_spi_ti) - 1
-    vars$n_new_sp_ti <- vars$n_new_sp_ti + n_new_sp
-    if (n_new_sp > 0) {
-      if (config$gen3sis$general$verbose >= 3) {
-        cat(paste("[!]   Wellcome Strange  Thing   [!] \n"))
-        cat(paste(n_new_sp, "speciation event(s) happened \n"))
-      }
-      desc_unique <- unique(clu_gen_spi_ti)[-1] + vars$n_sp +
-        vars$n_sp_added_ti - 1
-      data$phy <- rbind(data$phy, data.frame(Ancestor = rep(spi,
-                                                            n_new_sp), Descendent = desc_unique, Speciation.Time = rep(vars$ti,
-                                                                                                                       n_new_sp), Extinction.Time = rep(vars$ti, n_new_sp),
-                                             Speciation.Type = rep("Genetic", n_new_sp)))
-      full_gen_dist <- gen_dist_spi
-      gen_dist_spi$index <- gen_dist_spi$index[clu_gen_spi_ti ==
-                                                 1]
-      ue <- unique(gen_dist_spi$index)
-      gen_dist_spi$compressed_matrix <- gen_dist_spi$compressed_matrix[ue,
-                                                                       ue, drop = FALSE]
-      if (length(ue) > 0) {
-        fullrange <- 1:length(ue)
-        dimnames(gen_dist_spi$compressed_matrix) <- list(fullrange,
-                                                         fullrange)
-        for (i in 1:length(gen_dist_spi$index)) {
-          gen_dist_spi$index[i] <- fullrange[ue == gen_dist_spi$index[i]]
-        }
-      }
-      for (desci in desc_unique) {
-        tep_clu_gen_desci_index <- which(desc_unique ==
-                                           desci) + 1
-        new_species <- create_species_from_existing(species,
-                                                    desci, names(species[["abundance"]][clu_gen_spi_ti ==
-                                                                                          tep_clu_gen_desci_index]), config)
-        data$all_species <- append(data$all_species,
-                                   list(new_species))
-      }
-      species <- limit_species_to_cells(species = species,
-                                        cells = names(species[["abundance"]][clu_gen_spi_ti ==
-                                                                               1]))
-      vars$n_sp_added_ti <- vars$n_sp_added_ti + n_new_sp
-      clu_geo_spi_ti <- clu_geo_spi_ti[clu_gen_spi_ti ==
-                                         1]
-    }
-    data$all_species[[spi]] <- species
-  }
-  if (config$gen3sis$general$verbose >= 3) {
-    cat(paste("exiting speciation module \n"))
-  }
-  if (config$gen3sis$general$verbose >= 3 && vars$n_sp_added_ti >
-      0) {
-    cat(paste(vars$n_sp_added_ti, "new species created \n"))
-  }
-  return(list(config = config, data = data, vars = vars))
-}
-
-disperse_species <- function (species, source, destination, config) 
-{
-  if(ti == 45){
-    browser()
-  }
-  index <- 1:length(species[["abundance"]])
-  names(index) <- names(species[["abundance"]])
-  index[destination] <- index[source]
-  sorted <- as.character(sort(as.numeric(names(index))))
-  abundance <- species[["abundance"]]
-  abundance[destination] <- config$gen3sis$initialization$initial_abundance
-  species[["abundance"]] <- abundance[sorted]
-  traits <- species[["traits"]][source, , drop = FALSE]
-  rownames(traits) <- destination
-  species[["traits"]] <- rbind(species[["traits"]], traits)[sorted, 
-                                                            , drop = FALSE]
-  index <- species[["divergence"]][["index"]]
-  index[destination] <- index[source]
-  species[["divergence"]][["index"]] <- index[sorted]
-  return(invisible(species))
-}
-
-disperse <- function (species, landscape, distance_matrix, config) 
-{
-   if(ti == 45){
-      browser()
-   }
+  #if(ti == 45){
+   # browser()
+ # }
   if (!length(species[["abundance"]])) {
     return(species)
   }
@@ -376,10 +262,10 @@ disperse <- function (species, landscape, distance_matrix, config)
   all_cells <- rownames(landscape$coordinates)
   free_cells <- all_cells[!(all_cells %in% presence_spi_ti)]
   if(length(free_cells) >= 1){
-    if(length(free_cells) >= 200){
+    if(length(free_cells) >= 400){
       free_cells <- rownames(val$data$landscape$coordinates)
       free_cells <- free_cells %>%
-                    sample(200) %>% as.numeric() %>%
+                    sample(400) %>% as.numeric() %>%
                     sort() %>% as.character()
       #free_cells <- free_cells[1:100]
     } else {
@@ -417,19 +303,18 @@ disperse <- function (species, landscape, distance_matrix, config)
     species <- disperse_species(species, as.character(orig), 
                                 dest, config)
   }
+  # if (config$gen3sis$general$verbose >= 1){
+  #   cat(paste('free cells', free_cells))
+  # }
   return(species)
 }
 
-
-loop_dispersal <- function (config, data, vars) 
-{
-   if(ti == 45){
-     browser()
-   }
+loop_dispersal2 <- function (config, data, vars) {
+  #browser()
   if (config$gen3sis$general$verbose >= 3) {
     cat(paste("entering dispersal module \n"))
   }
-  data$all_species <- lapply(data$all_species, disperse, data$landscape, 
+  data$all_species <- lapply(data$all_species, disperse2, data$landscape, 
                              data$distance_matrix, config)
   if (config$gen3sis$general$verbose >= 3) {
     cat(paste("exiting dispersal module \n"))
@@ -522,7 +407,7 @@ for(p in 1:length(plasti)){
       if (verbose >= 2) {
         cat("dispersal \n")
       }
-      val <- loop_dispersal(val$config, val$data, val$vars)
+      val <- loop_dispersal2(val$config, val$data, val$vars)
       if (verbose >= 2) {
         cat("evolution \n")
       }
@@ -724,7 +609,7 @@ for(p in 1:length(plasti)){
     camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
   }
   file.remove(camatualizado)  
- #rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, datafinal_less_last, datafinal_less_first, list_difference, list_difference2)
+ rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, datafinal_less_last, datafinal_less_first, list_difference, list_difference2)
 }
 
 path <- here("output")
