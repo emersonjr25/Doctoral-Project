@@ -584,3 +584,49 @@ loop_evolution2 <- function (config, data, vars)
 
 path <- here("output")
 write.csv2(finalresult, file.path(path, "finalresult.csv"), row.names = FALSE)
+
+#### TEST DISPERSION ####
+
+# presence_spi_ti <- names(val$data$all_species[[1]][['abundance']])
+# all_cells <- rownames(val$data$landscape$coordinates)
+# free_cells <- all_cells[!(all_cells %in% presence_spi_ti)]
+# if(length(free_cells) >= 1){
+#   if(length(free_cells) >= 100){
+#     free_cells <- free_cells %>%
+#       sample(100) %>% as.numeric() %>%
+#       sort() %>% as.character()
+#   } else {
+#     half <- round(length(free_cells) - (length(free_cells) * 0.5))
+#     free_cells <- free_cells %>%
+#       sample(half) %>% as.numeric() %>%
+#       sort() %>% as.character()
+#   }
+# }
+# num_draws <- length(free_cells) * length(presence_spi_ti)
+# r_disp <- config$gen3sis$dispersal$get_dispersal_values(num_draws, 
+#                                                         species, landscape, config)
+# geo_disp <- val$data$distance_matrix[presence_spi_ti, free_cells, 
+#                             drop = FALSE]
+# geo_disp <- geo_disp <= r_disp
+# colonized <- rep(FALSE, length(all_cells))
+# names(colonized) <- all_cells
+# colonized[free_cells] <- apply(geo_disp, 2, any)
+# if(length(free_cells) >= 1){
+#   if (length(colonized[colonized == TRUE]) >= 10){
+#     quantity <- 9
+#     position <- colonized[colonized == TRUE] %>% 
+#       sample(quantity)
+#     names(position) <- position %>% 
+#       names() %>% 
+#       as.numeric() %>% 
+#       sort() %>% 
+#       as.character()
+#     colonized <- sapply(colonized, function(x) x <- FALSE)
+#     for(i in 1:length(colonized)){
+#       condition <- sum(names(colonized[i]) == names(position))
+#       if(condition >= 1){
+#         colonized[i] <- TRUE
+#       }
+#     }
+#   }
+# }
