@@ -47,7 +47,7 @@ if (!verify_config(config)) {
 }
 
 #### MODIFICATIONS IN CONFIG - SPECIES AND SYSTEM ####
-config$gen3sis$general$start_time <- 500
+config$gen3sis$general$start_time <- 100
 
 config$gen3sis$general$end_time <- 1
 
@@ -61,7 +61,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 
 rep <- 1
 
-plasti <- c(0, 0.25, 0.5, 0.75, 1)
+plasti <- c(0.25)
 
 pos <- 0
 pos2 <- 0
@@ -250,9 +250,9 @@ modify_input_temperature <- function(config, data, vars, seed = 1){
 
 disperse2 <- function (species, landscape, distance_matrix, config) 
 {
-  #if (ti == 48){
-  #  browser()
-  #}
+ # if (ti == 97){
+ #   browser()
+ # }
   if (!length(species[["abundance"]])) {
     return(species)
   }
@@ -261,17 +261,14 @@ disperse2 <- function (species, landscape, distance_matrix, config)
   free_cells <- all_cells[!(all_cells %in% presence_spi_ti)]
   if(length(free_cells) >= 1){
     if(length(free_cells) >= 100){
-      free_cells <- rownames(val$data$landscape$coordinates)
       free_cells <- free_cells %>%
                     sample(100) %>% as.numeric() %>%
                     sort() %>% as.character()
-      #free_cells <- free_cells[1:100]
     } else {
       half <- round(length(free_cells) - (length(free_cells) * 0.5))
       free_cells <- free_cells %>%
                    sample(half) %>% as.numeric() %>%
                    sort() %>% as.character()
-      #free_cells <- free_cells[1:half]
     }
   }
   num_draws <- length(free_cells) * length(presence_spi_ti)
@@ -286,6 +283,9 @@ disperse2 <- function (species, landscape, distance_matrix, config)
   tep_occ_id <- all_cells[colonized]
   if (length(tep_occ_id) > 0) {
     dest <- which(colonized == TRUE)
+   # if(length(dest) >= 5){
+    #  dest <- sample(dest, 3)
+   # }
     if (length(presence_spi_ti) == 1) {
       orig <- rep(1, length(dest))
     }
@@ -308,9 +308,9 @@ disperse2 <- function (species, landscape, distance_matrix, config)
 }
 
 loop_dispersal2 <- function (config, data, vars) {
-  #if (ti == 48){
-  #  browser()
- # }
+#  if (ti == 97){
+#    browser()
+#  }
   if (config$gen3sis$general$verbose >= 3) {
     cat(paste("entering dispersal module \n"))
   }
@@ -410,7 +410,7 @@ for(p in 1:length(plasti)){
       if (verbose >= 2) {
         cat("evolution \n")
       }
-      val <- loop_evolution(val$config, val$data, val$vars)
+      #val <- loop_evolution(val$config, val$data, val$vars)
       if (verbose >= 2) {
         cat("ecology \n")
       }
@@ -608,8 +608,9 @@ for(p in 1:length(plasti)){
     camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
   }
   file.remove(camatualizado)  
- rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, datafinal_less_last, datafinal_less_first, list_difference, list_difference2)
+# rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, datafinal_less_last, datafinal_less_first, list_difference, list_difference2)
 }
 
 path <- here("output")
+
 write.csv2(finalresult, file.path(path, "finalresult.csv"), row.names = FALSE)
