@@ -47,7 +47,7 @@ if (!verify_config(config)) {
 }
 
 #### MODIFICATIONS IN CONFIG - SPECIES AND SYSTEM ####
-config$gen3sis$general$start_time <- 200
+config$gen3sis$general$start_time <- 50
 
 config$gen3sis$general$end_time <- 1
 
@@ -61,7 +61,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 
 rep <- 1
 
-plasti <- c(0, 0.25, 1)
+plasti <- c(0.25, 1)
 
 pos <- 0
 pos2 <- 0
@@ -250,9 +250,9 @@ modify_input_temperature <- function(config, data, vars, seed = 1){
 
 disperse2 <- function (species, landscape, distance_matrix, config) 
 {
-  #if (ti == 90){
-  #  browser()
-  #}
+  #if (ti == 140){
+ #   browser()
+#}
   if (!length(species[["abundance"]])) {
     return(species)
   }
@@ -281,8 +281,8 @@ disperse2 <- function (species, landscape, distance_matrix, config)
   names(colonized) <- all_cells
   colonized[free_cells] <- apply(geo_disp, 2, any)
   if(length(free_cells) >= 1){
-    if (length(colonized[colonized == TRUE]) >= 7){
-      quantity <- 6
+    if (length(colonized[colonized == TRUE]) > 5){
+      quantity <- 5
       position <- colonized[colonized == TRUE] %>% 
         sample(quantity)
       names(position) <- position %>% 
@@ -624,9 +624,8 @@ for(p in 1:length(plasti)){
     camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
   }
   file.remove(camatualizado)  
-# rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, datafinal_less_last, datafinal_less_first, list_difference, list_difference2)
+ rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, datafinal_less_last, datafinal_less_first, list_difference, list_difference2)
 }
 
 path <- here("output")
-
 write.csv2(finalresult, file.path(path, "finalresult.csv"), row.names = FALSE)
