@@ -61,7 +61,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 
 rep <- 1
 
-plasti <- c(0.25, 1)
+plasti <- c(0, 0.25, 1)
 
 pos <- 0
 pos2 <- 0
@@ -259,18 +259,18 @@ disperse2 <- function (species, landscape, distance_matrix, config)
   presence_spi_ti <- names(species[["abundance"]])
   all_cells <- rownames(landscape$coordinates)
   free_cells <- all_cells[!(all_cells %in% presence_spi_ti)]
-  # if(length(free_cells) >= 1){
-  #   if(length(free_cells) >= 100){
-  #     free_cells <- free_cells %>%
-  #                   sample(100) %>% as.numeric() %>%
-  #                   sort() %>% as.character()
-  #   } else {
-  #     half <- round(length(free_cells) - (length(free_cells) * 0.5))
-  #     free_cells <- free_cells %>%
-  #                  sample(half) %>% as.numeric() %>%
-  #                  sort() %>% as.character()
-  #   }
-  # }
+  if(length(free_cells) >= 1){
+    if(length(free_cells) >= 300){
+      free_cells <- free_cells %>%
+                    sample(300) %>% as.numeric() %>%
+                    sort() %>% as.character()
+    } else {
+      half <- round(length(free_cells) - (length(free_cells) * 0.5))
+      free_cells <- free_cells %>%
+                   sample(half) %>% as.numeric() %>%
+                   sort() %>% as.character()
+    }
+  }
   num_draws <- length(free_cells) * length(presence_spi_ti)
   r_disp <- config$gen3sis$dispersal$get_dispersal_values(num_draws, 
                                                           species, landscape, config)
@@ -280,25 +280,25 @@ disperse2 <- function (species, landscape, distance_matrix, config)
   colonized <- rep(FALSE, length(all_cells))
   names(colonized) <- all_cells
   colonized[free_cells] <- apply(geo_disp, 2, any)
-  if(length(free_cells) >= 1){
-    if (length(colonized[colonized == TRUE]) > 5){
-      quantity <- 5
-      position <- colonized[colonized == TRUE] %>% 
-        sample(quantity)
-      names(position) <- position %>% 
-        names() %>% 
-        as.numeric() %>% 
-        sort() %>% 
-        as.character()
-      colonized <- sapply(colonized, function(x) x <- FALSE)
-      for(i in 1:length(colonized)){
-        condition <- sum(names(colonized[i]) == names(position))
-        if(condition >= 1){
-          colonized[i] <- TRUE
-        }
-      }
-    }
-  }
+  # if(length(free_cells) >= 1){
+  #   if (length(colonized[colonized == TRUE]) > 5){
+  #     quantity <- 5
+  #     position <- colonized[colonized == TRUE] %>%
+  #       sample(quantity)
+  #     names(position) <- position %>%
+  #       names() %>%
+  #       as.numeric() %>%
+  #       sort() %>%
+  #       as.character()
+  #     colonized <- sapply(colonized, function(x) x <- FALSE)
+  #     for(i in 1:length(colonized)){
+  #       condition <- sum(names(colonized[i]) == names(position))
+  #       if(condition >= 1){
+  #         colonized[i] <- TRUE
+  #       }
+  #     }
+  #   }
+  # }
   tep_occ_id <- all_cells[colonized]
   if (length(tep_occ_id) > 0) {
     dest <- which(colonized == TRUE)
@@ -397,9 +397,9 @@ for(p in 1:length(plasti)){
     val <- modify_input_temperature(val$config, val$data, val$vars)
     
     for (ti in val$vars$steps) {
-       #if (ti == 48) {
-       #  break 
-      # }
+       if (ti == 192) {
+         break 
+       }
       val$vars$n_new_sp_ti <- 0
       val$vars$n_ext_sp_ti <- 0
       val$vars$n_sp_added_ti <- 0
@@ -586,10 +586,13 @@ for(p in 1:length(plasti)){
       pos <- pos + 1
       pos2 <- pos2 + 1
       
-      ratespeciation <- round(sum(sgen3sis$summary$phylo_summary[, 3]) / pos2, digits = 2)
+      current_time <- length(sgen3sis$summary$phylo_summary[, 3])
+      current_time_less_one <- length(sgen3sis$summary$phylo_summary[, 2]) - 1
       
-      rateextinction <- round(sum(sgen3sis$summary$phylo_summary[, 4]) / pos2, digits = 2)
+      ratespeciation <- abs(as.numeric(sgen3sis$summary$phylo_summary[, 3][current_time] / sgen3sis$summary$phylo_summary[, 2][current_time_less_one]))
       
+      rateextinction <- abs(as.numeric(sgen3sis$summary$phylo_summary[, 4][current_time] / sgen3sis$summary$phylo_summary[, 2][current_time_less_one]))
+  
       diversification <- ratespeciation - rateextinction
       
       
