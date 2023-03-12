@@ -47,7 +47,7 @@ if (!verify_config(config)) {
 }
 
 #### MODIFICATIONS IN CONFIG - SPECIES AND SYSTEM ####
-config$gen3sis$general$start_time <- 50
+config$gen3sis$general$start_time <- 200
 
 config$gen3sis$general$end_time <- 1
 
@@ -260,9 +260,9 @@ disperse2 <- function (species, landscape, distance_matrix, config)
   all_cells <- rownames(landscape$coordinates)
   free_cells <- all_cells[!(all_cells %in% presence_spi_ti)]
   if(length(free_cells) >= 1){
-    if(length(free_cells) >= 250){
+    if(length(free_cells) >= 300){
       free_cells <- free_cells %>%
-                    sample(250) %>% as.numeric() %>%
+                    sample(300) %>% as.numeric() %>%
                     sort() %>% as.character()
     } else {
       half <- round(length(free_cells) - (length(free_cells) * 0.5))
@@ -397,9 +397,9 @@ for(p in 1:length(plasti)){
     val <- modify_input_temperature(val$config, val$data, val$vars)
     
     for (ti in val$vars$steps) {
-       if (ti == 192) {
-         break 
-       }
+       # if (ti == 192) {
+       #   break 
+       # }
       val$vars$n_new_sp_ti <- 0
       val$vars$n_ext_sp_ti <- 0
       val$vars$n_sp_added_ti <- 0
