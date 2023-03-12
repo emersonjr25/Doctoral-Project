@@ -53,7 +53,7 @@ config$gen3sis$general$end_time <- 1
 
 timesteps_total <- length(config$gen3sis$general$start_time:config$gen3sis$general$end_time)
 
-config$gen3sis$general$max_number_of_species <- 10000
+config$gen3sis$general$max_number_of_species <- 50000
 
 config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
   save_traits()
@@ -260,9 +260,9 @@ disperse2 <- function (species, landscape, distance_matrix, config)
   all_cells <- rownames(landscape$coordinates)
   free_cells <- all_cells[!(all_cells %in% presence_spi_ti)]
   if(length(free_cells) >= 1){
-    if(length(free_cells) >= 300){
+    if(length(free_cells) >= 250){
       free_cells <- free_cells %>%
-                    sample(300) %>% as.numeric() %>%
+                    sample(250) %>% as.numeric() %>%
                     sort() %>% as.character()
     } else {
       half <- round(length(free_cells) - (length(free_cells) * 0.5))
@@ -281,8 +281,8 @@ disperse2 <- function (species, landscape, distance_matrix, config)
   names(colonized) <- all_cells
   colonized[free_cells] <- apply(geo_disp, 2, any)
   # if(length(free_cells) >= 1){
-  #   if (length(colonized[colonized == TRUE]) > 5){
-  #     quantity <- 5
+  #   if (length(colonized[colonized == TRUE]) > 35){
+  #     quantity <- 35
   #     position <- colonized[colonized == TRUE] %>%
   #       sample(quantity)
   #     names(position) <- position %>%
