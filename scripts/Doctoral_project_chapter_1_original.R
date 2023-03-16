@@ -76,10 +76,11 @@ finalresult <- data.frame(plasticidade = runif(rep * length(plasti) * timesteps_
                           timesimulation = runif(rep * length(plasti) * timesteps_total, 0, 0),
                           speciestotal = runif(rep * length(plasti) * timesteps_total, 0, 0))
 #### CARRYING FUNCTIONS #####
-# source(here('scripts', 'functions', "apply_ecology_plasticity.R"))
-# functions <- list.files(folder)
-# source(functions[[1]])
-# apply_ecology_plasticity
+folder <- here('scripts', 'functions')
+functions_path <- paste0(folder, '/', list.files(folder))
+for(i in functions_path){
+  source(i)
+}
 
 #### REMOVING TRAITS OF ANTERIOR SIMULATIONS ####
 caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", "traits")
