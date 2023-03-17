@@ -73,8 +73,7 @@ finalresult <- data.frame(plasticidade = runif(rep * length(plasti) * timesteps_
                           diversif = runif(rep * length(plasti) * timesteps_total, 0, 0),
                           traitevolution = runif(rep * length(plasti) * timesteps_total, 0, 0),
                           timestep = runif(rep * length(plasti) * timesteps_total, 0, 0),
-                          timesimulation = runif(rep * length(plasti) * timesteps_total, 0, 0),
-                          speciesalive = runif(rep * length(plasti) * timesteps_total, 0, 0))
+                          timesimulation = runif(rep * length(plasti) * timesteps_total, 0, 0))
 #### CARRYING FUNCTIONS #####
 folder <- here('scripts', 'functions')
 functions_path <- paste0(folder, '/', list.files(folder))
@@ -302,6 +301,7 @@ for(p in 1:length(plasti)){
             list_difference[[time]] <- abs(as.numeric(datafinal_less_last[[i]][k]) - as.numeric(datafinal_less_first[[i]][posicao]))
           }
         }
+
         time <- 0
     
         list_difference2 <- list()
@@ -350,12 +350,11 @@ for(p in 1:length(plasti)){
         finalresult$traitevolution[pos] <- traitevolution
         finalresult$timestep[pos] <- ti
         finalresult$timesimulation[pos] <- pos2
-        finalresult$speciesalive[pos] <- sgen3sis$summary$phylo_summary[, 1][length(sgen3sis$summary$phylo_summary[, 1])]
       }
-      if(pos2 == 16){
+     # if(pos2 == 16){
      #   saveRDS(val, file = paste0(plasti, '_', pos2, 'simulation', '.rds'))
-        break
-       }
+       # break
+       #}
     } 
   }
 
