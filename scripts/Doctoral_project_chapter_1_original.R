@@ -61,7 +61,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 
 rep <- 1
 
-plasti <- c(0)
+plasti <- c(0, 0.25, 1)
 
 pos <- 0
 pos2 <- 0
@@ -293,15 +293,18 @@ for(p in 1:length(plasti)){
         datafinal_less_last <- datafinal[-length(datafinal)]
         datafinal_less_first <- datafinal[-1]
         list_difference <- vector("list", sum(lengths(datafinal_less_last)))
+        posicao_list <- vector("list", sum(lengths(datafinal_less_last)))
         time <- 0
         for(i in 1:length(datafinal_less_last)){
           for(k in seq_along(datafinal_less_last[[i]])){
+            #browser()
             time <- time + 1
             posicao <- which(names(datafinal_less_last[[i]][k]) == names(datafinal_less_first[[i]]))
+            posicao_list[[time]] <- as.numeric(datafinal_less_first[[i]][posicao])
             list_difference[[time]] <- abs(as.numeric(datafinal_less_last[[i]][k]) - as.numeric(datafinal_less_first[[i]][posicao]))
           }
         }
-
+        
         time <- 0
     
         list_difference2 <- list()
@@ -320,8 +323,9 @@ for(p in 1:length(plasti)){
         }
         
         datafinal_result <- unlist(list_difference2)
+        trait_previous <- unlist(posicao_list)
         
-        traitevolution <- abs((mean(datafinal_result)) / sum(length(datafinal_less_last) + 1))
+        traitevolution <- abs(mean(datafinal_result / trait_previous))
         
       } else {
         traitevolution <- 0
@@ -352,26 +356,25 @@ for(p in 1:length(plasti)){
         finalresult$timesimulation[pos] <- pos2
       }
      # if(pos2 == 16){
-     #   saveRDS(val, file = paste0(plasti, '_', pos2, 'simulation', '.rds'))
-       # break
-       #}
+        # saveRDS(val, file = paste0(plasti, '_', pos2, 'simulation', '.rds'))
+      #  break
+      #}
     } 
   }
-
-  pos2 <- 0
-  caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", "traits")
-  listfiles <- list.files("data/raw/WorldCenter/output/config_worldcenter/traits")
-  filestoread <- length(list.files("data/raw/WorldCenter/output/config_worldcenter/traits"))
-  cam <- 0
-  for(l in 1:filestoread){
-    cam[l] <- caminho
-  }
-  camatualizado <- 0
-  for(k in 1:length(cam)){
-    camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
-  }
-  file.remove(camatualizado)  
- #rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, datafinal_less_last, datafinal_less_first, list_difference, list_difference2)
+ pos2 <- 0
+ caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", "traits")
+ listfiles <- list.files("data/raw/WorldCenter/output/config_worldcenter/traits")
+ filestoread <- length(list.files("data/raw/WorldCenter/output/config_worldcenter/traits"))
+ cam <- 0
+ for(l in 1:filestoread){
+   cam[l] <- caminho
+ }
+ camatualizado <- 0
+ for(k in 1:length(cam)){
+   camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
+ }
+ file.remove(camatualizado)
+ rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, datafinal_less_last, datafinal_less_first, list_difference, list_difference2)
 }
 
 path <- here("output")
