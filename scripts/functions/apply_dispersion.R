@@ -6,9 +6,9 @@
 
 disperse2 <- function (species, landscape, distance_matrix, config) 
 {
-  #if (ti == 140){
-  #   browser()
-  #}
+  #if (ti == 45){
+ #    browser()
+ # }
   if (!length(species[["abundance"]])) {
     return(species)
   }
@@ -36,25 +36,6 @@ disperse2 <- function (species, landscape, distance_matrix, config)
   colonized <- rep(FALSE, length(all_cells))
   names(colonized) <- all_cells
   colonized[free_cells] <- apply(geo_disp, 2, any)
-  # if(length(free_cells) >= 1){
-  #   if (length(colonized[colonized == TRUE]) > 35){
-  #     quantity <- 35
-  #     position <- colonized[colonized == TRUE] %>%
-  #       sample(quantity)
-  #     names(position) <- position %>%
-  #       names() %>%
-  #       as.numeric() %>%
-  #       sort() %>%
-  #       as.character()
-  #     colonized <- sapply(colonized, function(x) x <- FALSE)
-  #     for(i in 1:length(colonized)){
-  #       condition <- sum(names(colonized[i]) == names(position))
-  #       if(condition >= 1){
-  #         colonized[i] <- TRUE
-  #       }
-  #     }
-  #   }
-  # }
   tep_occ_id <- all_cells[colonized]
   if (length(tep_occ_id) > 0) {
     dest <- which(colonized == TRUE)

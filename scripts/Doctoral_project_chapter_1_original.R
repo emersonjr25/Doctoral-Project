@@ -61,7 +61,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 
 rep <- 1
 
-plasti <- c(0, 0.25, 1)
+plasti <- c(0)
 
 pos <- 0
 pos2 <- 0
@@ -74,7 +74,7 @@ finalresult <- data.frame(plasticidade = runif(rep * length(plasti) * timesteps_
                           traitevolution = runif(rep * length(plasti) * timesteps_total, 0, 0),
                           timestep = runif(rep * length(plasti) * timesteps_total, 0, 0),
                           timesimulation = runif(rep * length(plasti) * timesteps_total, 0, 0),
-                          speciestotal = runif(rep * length(plasti) * timesteps_total, 0, 0))
+                          speciesalive = runif(rep * length(plasti) * timesteps_total, 0, 0))
 #### CARRYING FUNCTIONS #####
 folder <- here('scripts', 'functions')
 functions_path <- paste0(folder, '/', list.files(folder))
@@ -332,7 +332,7 @@ for(p in 1:length(plasti)){
       pos2 <- pos2 + 1
       
       current_time <- length(sgen3sis$summary$phylo_summary[, 3])
-      current_time_less_one <- length(sgen3sis$summary$phylo_summary[, 2]) - 1
+      current_time_less_one <- current_time - 1
       
       ratespeciation <- abs(as.numeric(sgen3sis$summary$phylo_summary[, 3][current_time] / sgen3sis$summary$phylo_summary[, 2][current_time_less_one]))
       
@@ -350,12 +350,12 @@ for(p in 1:length(plasti)){
         finalresult$traitevolution[pos] <- traitevolution
         finalresult$timestep[pos] <- ti
         finalresult$timesimulation[pos] <- pos2
-        finalresult$speciestotal[pos] <- sgen3sis$summary$phylo_summary[, 1][length(sgen3sis$summary$phylo_summary[, 1])]
+        finalresult$speciesalive[pos] <- sgen3sis$summary$phylo_summary[, 1][length(sgen3sis$summary$phylo_summary[, 1])]
       }
-      #if(pos2 == 50){
+      if(pos2 == 16){
      #   saveRDS(val, file = paste0(plasti, '_', pos2, 'simulation', '.rds'))
-     #   break
-      # }
+        break
+       }
     } 
   }
 
@@ -372,7 +372,7 @@ for(p in 1:length(plasti)){
     camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
   }
   file.remove(camatualizado)  
- rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, datafinal_less_last, datafinal_less_first, list_difference, list_difference2)
+ #rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, datafinal_less_last, datafinal_less_first, list_difference, list_difference2)
 }
 
 path <- here("output")
