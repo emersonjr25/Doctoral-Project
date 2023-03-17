@@ -1,47 +1,6 @@
-#######################################################
-#### complete TEST ####
-#######################################################
-
 library(gen3sis)
-config <- function(tr, envi, plasticidade) {
-  plasticity <- function(x, plast) {
-    return(seq(x - (x * plast), x + (x * plast), 0.01))
-  }
-  
-  plasticity2 <- function(x, land) {
-    min(abs(x - land))
-  }
-  
-  traits_sub <- lapply(tr[[1]], plasticity, plasticidade)
-  traits_sub2 <-  mapply(plasticity2, traits_sub, envi[[1]])
-  abundance <- (1 - traits_sub2)
-  return(c(abundance, plasticidade))
-}  
-
-loop_ecology2 <- function (tr, envi, plasticidade) {
-  config(tr, envi, plasticidade)
-}
-
-plas <- seq(0.1, 1, 0.1)
-a <- list()
-for (i in seq_along(plas)){
-  a[[i]] <- loop_ecology2(list(1:2), list(3:4), plas[[i]])
-}
-
-plasticity <- function(x, plast) {
-  return(seq(x - (x * plast), x + (x * plast), 0.01))
-}
-#######################################################
-######## TEST WITH REAL DATA ############
-#######################################################
-library(gen3sis)
+library(dplyr)
 library(here)
-
-#### verifying differences in files ####
-#one_p_50_time <- readRDS('1_50simulation.rds')
-#one_p_18_time <- readRDS('1_18simulation.rds')
-#zero_one_p_50_time <- readRDS('0.1_50simulation.rds')
-#zero_oneone_p_18_time <- readRDS('0.1_18simulation.rds')
 
 #### SIMULATION ####
 datapath <- here("data/raw/WorldCenter")
