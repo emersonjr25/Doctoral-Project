@@ -47,7 +47,7 @@ if (!verify_config(config)) {
 }
 
 #### PREPARATION IN CONFIG - SPECIES AND SYSTEM ####
-config$gen3sis$general$start_time <- 50
+config$gen3sis$general$start_time <- 100
 
 config$gen3sis$general$end_time <- 1
 
@@ -58,6 +58,7 @@ config$gen3sis$general$max_number_of_species <- 50000
 config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
   save_traits()
 }
+#config$gen3sis$speciation$divergence_threshold <- 10
 
 rep <- 1
 
@@ -81,124 +82,6 @@ for(i in functions_path){
   source(i)
 }
 
-loop_speciation <- function (config, data, vars) 
-{
-  if(ti == 48){
-    browser()
-  }
-  if (config$gen3sis$general$verbose >= 3) {
-    cat(paste("entering speciation module \n"))
-  }
-  for (spi in 1:vars$n_sp) {
-    species <- data$all_species[[spi]]
-    if (!length(species[["abundance"]])) {
-      (next)()
-    }
-    species_presence <- names(species[["abundance"]])
-    if (length(species_presence) == 1) {
-      clu_geo_spi_ti <- 1
-    }
-    else {
-      distances <- config$gen3sis$dispersal$get_dispersal_values(length(species_presence), 
-                                                                 species, data$landscape, config)
-      permutation <- sample(1:length(species_presence), 
-                            length(species_presence))
-      clu_geo_spi_ti <- Tdbscan_variable(data$distance_matrix[species_presence[permutation], 
-                                                              species_presence[permutation], drop = FALSE], 
-                                         distances, 1)
-      clu_geo_spi_ti <- clu_geo_spi_ti[order(permutation)]
-    }
-    gen_dist_spi <- decompress_divergence(species[["divergence"]])
-    ifactor <- config$gen3sis$speciation$get_divergence_factor(species, 
-                                                               clu_geo_spi_ti, data[["landscape"]], config)
-    gen_dist_spi <- update_divergence(gen_dist_spi, clu_geo_spi_ti, 
-                                      ifactor = ifactor)
-    gen_dist_spi <- compress_divergence(gen_dist_spi)
-    species[["divergence"]] <- gen_dist_spi
-    clu_gen_spi_ti_c <- Tdbscan(gen_dist_spi$compressed_matrix, 
-                                config$gen3sis$speciation$divergence_threshold, 
-                                1)
-    clu_gen_spi_ti <- clu_gen_spi_ti_c[gen_dist_spi$index]
-    n_new_sp <- max(clu_gen_spi_ti) - 1
-    vars$n_new_sp_ti <- vars$n_new_sp_ti + n_new_sp
-    if (n_new_sp > 0) {
-      if (config$gen3sis$general$verbose >= 3) {
-        cat(paste("[!]   Wellcome Strange  Thing   [!] \n"))
-        cat(paste(n_new_sp, "speciation event(s) happened \n"))
-      }
-      desc_unique <- unique(clu_gen_spi_ti)[-1] + vars$n_sp + 
-        vars$n_sp_added_ti - 1
-      data$phy <- rbind(data$phy, data.frame(Ancestor = rep(spi, 
-                                                            n_new_sp), Descendent = desc_unique, Speciation.Time = rep(vars$ti, 
-                                                                                                                       n_new_sp), Extinction.Time = rep(vars$ti, n_new_sp), 
-                                             Speciation.Type = rep("Genetic", n_new_sp)))
-      full_gen_dist <- gen_dist_spi
-      gen_dist_spi$index <- gen_dist_spi$index[clu_gen_spi_ti == 
-                                                 1]
-      ue <- unique(gen_dist_spi$index)
-      gen_dist_spi$compressed_matrix <- gen_dist_spi$compressed_matrix[ue, 
-                                                                       ue, drop = FALSE]
-      if (length(ue) > 0) {
-        fullrange <- 1:length(ue)
-        dimnames(gen_dist_spi$compressed_matrix) <- list(fullrange, 
-                                                         fullrange)
-        for (i in 1:length(gen_dist_spi$index)) {
-          gen_dist_spi$index[i] <- fullrange[ue == gen_dist_spi$index[i]]
-        }
-      }
-      for (desci in desc_unique) {
-        tep_clu_gen_desci_index <- which(desc_unique == 
-                                           desci) + 1
-        new_species <- create_species_from_existing(species, 
-                                                    desci, names(species[["abundance"]][clu_gen_spi_ti == 
-                                                                                          tep_clu_gen_desci_index]), config)
-        data$all_species <- append(data$all_species, 
-                                   list(new_species))
-      }
-      species <- limit_species_to_cells(species = species, 
-                                        cells = names(species[["abundance"]][clu_gen_spi_ti == 
-                                                                               1]))
-      vars$n_sp_added_ti <- vars$n_sp_added_ti + n_new_sp
-      clu_geo_spi_ti <- clu_geo_spi_ti[clu_gen_spi_ti == 
-                                         1]
-    }
-    data$all_species[[spi]] <- species
-  }
-  if (config$gen3sis$general$verbose >= 3) {
-    cat(paste("exiting speciation module \n"))
-  }
-  if (config$gen3sis$general$verbose >= 3 && vars$n_sp_added_ti > 
-      0) {
-    cat(paste(vars$n_sp_added_ti, "new species created \n"))
-  }
-  return(list(config = config, data = data, vars = vars))
-}
-
-update_divergence <- function (divergence, cluster_indices, ifactor) 
-{
-  if(ti == 48){
-    browser()
-  }
-  clusters <- unique(cluster_indices)
-  if (length(ifactor) == 1) {
-    divergence <- divergence + ifactor
-    dfactor <- 1 + ifactor
-  }
-  else {
-    divergence <- divergence + ifactor[cluster_indices, 
-                                       cluster_indices]
-    dfactor <- 1
-  }
-  for (i in clusters) {
-    divergence[cluster_indices == i, cluster_indices == 
-                 i] <- divergence[cluster_indices == i, cluster_indices == 
-                                    i] - dfactor
-  }
-  divergence[divergence < 0] <- 0
-  return(divergence)
-}
-
-
 #### REMOVING TRAITS OF ANTERIOR SIMULATIONS ####
 caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", "traits")
 listfiles <- list.files("data/raw/WorldCenter/output/config_worldcenter/traits")
@@ -221,6 +104,7 @@ for(p in 1:length(plasti)){
     val <- list(data = list(),
                 vars = list(),
                 config = config)
+    val$config$gen3sis$general$random_seed <- r
     val$config <- complete_config(val$config)
     val$config$gen3sis$general$verbose <- verbose
     val <- setup_inputs(val$config, val$data, val$vars)
@@ -481,7 +365,7 @@ for(p in 1:length(plasti)){
     camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
   }
   file.remove(camatualizado)
-  rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, datafinal_less_last, datafinal_less_first, list_difference, list_difference2)
+  rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, datafinal_less_last, datafinal_less_first, list_difference)
 }
 
 path <- here("output")
