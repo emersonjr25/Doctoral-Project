@@ -4,7 +4,7 @@
 ### Main goal: Verify the effect of plasticity on adaptive evolution #####################
 ##### Diversification and Trait Evolution ~ Plasticity
 ##### Methods: Computational simulation #############
-##### Script to input, modify and run model #########
+##### Script to input,ko modify and run model #########
 
 #### PACKAGES ####
 library(gen3sis)
@@ -47,7 +47,7 @@ if (!verify_config(config)) {
 }
 
 #### PREPARATION IN CONFIG - SPECIES AND SYSTEM ####
-config$gen3sis$general$start_time <- 100
+config$gen3sis$general$start_time <- 50
 
 config$gen3sis$general$end_time <- 1
 
@@ -59,11 +59,11 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
   save_traits()
 }
 
-#config$gen3sis$speciation$divergence_threshold <- 10
+config$gen3sis$speciation$divergence_threshold <- 10
 
 rep <- 1
 
-plasti <- c(0, 0.25, 1)
+plasti <- c(0, 0.25, 0.5, 0.75, 1)
 
 pos <- 0
 pos2 <- 0
