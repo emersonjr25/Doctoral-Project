@@ -58,6 +58,7 @@ config$gen3sis$general$max_number_of_species <- 50000
 config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
   save_traits()
 }
+
 #config$gen3sis$speciation$divergence_threshold <- 10
 
 rep <- 1

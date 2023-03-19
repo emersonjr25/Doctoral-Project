@@ -16,9 +16,9 @@ disperse2 <- function (species, landscape, distance_matrix, config)
   all_cells <- rownames(landscape$coordinates)
   free_cells <- all_cells[!(all_cells %in% presence_spi_ti)]
   if(length(free_cells) >= 1){
-    if(length(free_cells) >= 250){
+    if(length(free_cells) >= 260){
       free_cells <- free_cells %>%
-        sample(250) %>% as.numeric() %>%
+        sample(260) %>% as.numeric() %>%
         sort() %>% as.character()
     } else {
       half <- round(length(free_cells) - (length(free_cells) * 0.5))
