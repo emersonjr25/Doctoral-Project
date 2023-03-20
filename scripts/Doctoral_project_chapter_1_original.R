@@ -47,13 +47,14 @@ if (!verify_config(config)) {
 }
 
 #### PREPARATION IN CONFIG - SPECIES AND SYSTEM ####
-config$gen3sis$general$start_time <- 50
+config$gen3sis$general$start_time <- 500
 
 config$gen3sis$general$end_time <- 1
 
 timesteps_total <- length(config$gen3sis$general$start_time:config$gen3sis$general$end_time)
 
 config$gen3sis$general$max_number_of_species <- 50000
+config$gen3sis$general$max_number_of_coexisting_species <- 200000
 
 config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
   save_traits()
