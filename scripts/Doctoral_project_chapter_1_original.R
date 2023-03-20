@@ -47,7 +47,7 @@ if (!verify_config(config)) {
 }
 
 #### PREPARATION IN CONFIG - SPECIES AND SYSTEM ####
-config$gen3sis$general$start_time <- 500
+config$gen3sis$general$start_time <- 1000
 
 config$gen3sis$general$end_time <- 1
 
@@ -62,7 +62,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 
 config$gen3sis$speciation$divergence_threshold <- 10
 
-rep <- 1
+rep <- 5
 
 plasti <- c(0, 0.25, 0.5, 0.75, 1)
 
@@ -102,7 +102,7 @@ file.remove(camatualizado)
 
 for(p in 1:length(plasti)){
   
-  for(r in 1:rep){
+  for(r in 4:rep){
     val <- list(data = list(),
                 vars = list(),
                 config = config)
@@ -367,7 +367,7 @@ for(p in 1:length(plasti)){
     camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
   }
   file.remove(camatualizado)
-  rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, datafinal_less_last, datafinal_less_first, list_difference)
+  rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, datafinal_less_last, datafinal_less_first, list_difference, position_list)
 }
 
 path <- here("output")
