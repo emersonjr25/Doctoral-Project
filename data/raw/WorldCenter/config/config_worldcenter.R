@@ -21,7 +21,6 @@
 ######################################
 
 # set the random seed for the simulation
-
 random_seed = 001
 
 # set the starting time step or leave NA to use the earliest/highest time-step
@@ -49,7 +48,20 @@ environmental_ranges = list("temp" = c(-45, 55), "area"=c(101067, 196949), "arid
 # a place to inspect the internal state of the simulation and collect additional information if desired
 end_of_timestep_observer = function(data, vars, config){
   save_species()
-  plot_richness(data$all_species, data$landscape)
+  #plot_richness(data$all_species, data$landscape)
+  # example 1 plot over simulation
+    # par(mfrow=c(2,3))
+    # plot_raster_single(data$landscape$environment[,"temp"], data$landscape, "temp", NA)
+    # plot_raster_single(data$landscape$environment[,"prec"], data$landscape, "prec", NA)
+    # plot_raster_single(data$landscape$environment[,"area"], data$landscape, "area", NA)
+    # plot_richness(data$all_species, data$landscape)
+    # plot_species_presence(data$all_species[[1]], data$landscape)
+    # plot(0,type='n',axes=FALSE,ann=FALSE)
+    # mtext("STATUS",1)
+  # example 2 plot over simulations saving plots
+    # plot_richness(data$all_species, data$landscape)
+    # plot_landscape(data$landscape)
+  
 }
 
 ######################################
@@ -62,7 +74,7 @@ initial_abundance = 1
 # defines the initial species traits and ranges
 # place species within rectangle, our case entire globe
 create_ancestor_species <- function(landscape, config) {
-  range <- c(-180, 180, -90, 90)
+   range <- c(-180, 180, -90, 90)
   co <- landscape$coordinates
   selection <- co[, "x"] >= range[1] &
     co[, "x"] <= range[2] &
@@ -70,7 +82,7 @@ create_ancestor_species <- function(landscape, config) {
     co[, "y"] <= range[4]
   initial_cells <- rownames(co)[selection]
   new_species <- create_species(initial_cells, config)
-  #set local adaptation to max optima l temp equals local temp
+  #set local adaptation to max optimal temp equals local temp
   new_species$traits[ , "temp"] <- landscape$environment[,"temp"]
   new_species$traits[ , "dispersal"] <- 1
   
