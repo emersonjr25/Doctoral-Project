@@ -46,8 +46,15 @@ if (!verify_config(config)) {
   stop("config verification failed")
 }
 
+#### CARRYING FUNCTIONS #####
+folder <- here('scripts', 'functions')
+functions_path <- paste0(folder, '/', list.files(folder))
+for(i in functions_path){
+  source(i)
+}
+
 #### PREPARATION IN CONFIG - SPECIES AND SYSTEM ####
-config$gen3sis$general$start_time <- 1000
+config$gen3sis$general$start_time <- 50
 
 config$gen3sis$general$end_time <- 1
 
@@ -56,13 +63,14 @@ timesteps_total <- length(config$gen3sis$general$start_time:config$gen3sis$gener
 config$gen3sis$general$max_number_of_species <- 50000
 config$gen3sis$general$max_number_of_coexisting_species <- 200000
 
+
 config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
   save_traits()
 }
 
 config$gen3sis$speciation$divergence_threshold <- 10
 
-rep <- 5
+rep <- 1
 
 plasti <- c(0, 0.25, 0.5, 0.75, 1)
 
@@ -78,17 +86,11 @@ finalresult <- data.frame(plasticidade = runif(rep * length(plasti) * timesteps_
                           timestep = runif(rep * length(plasti) * timesteps_total, 0, 0),
                           timesimulation = runif(rep * length(plasti) * timesteps_total, 0, 0))
 
-#### CARRYING FUNCTIONS #####
-folder <- here('scripts', 'functions')
-functions_path <- paste0(folder, '/', list.files(folder))
-for(i in functions_path){
-  source(i)
-}
-
 #### REMOVING TRAITS OF ANTERIOR SIMULATIONS ####
-caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", "traits")
-listfiles <- list.files("data/raw/WorldCenter/output/config_worldcenter/traits")
-filestoread <- length(list.files("data/raw/WorldCenter/output/config_worldcenter/traits"))
+traits_path <- paste0('traits', rep)
+caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", traits_path)
+listfiles <- list.files(paste0("data/raw/WorldCenter/output/config_worldcenter/", traits_path))
+filestoread <- length(listfiles)
 cam <- 0
 for(l in 1:filestoread){
   cam[l] <- caminho
@@ -99,11 +101,11 @@ for(k in 1:length(cam)){
 }
 file.remove(camatualizado)
 
-#################################################################################
+#### EXECUTION SIMULATION ####
 
 for(p in 1:length(plasti)){
   
-  for(r in 1:rep){
+  for(r in rep:rep){
     val <- list(data = list(),
                 vars = list(),
                 config = config)
@@ -230,19 +232,15 @@ for(p in 1:length(plasti)){
       #                          total_runtime)
       sgen3sis <- make_summary(val$config, val$data, val$vars,
                                total_runtime, save_file = FALSE)
-      
       #plot_summary(sgen3sis)
       
       ################## TRAIT EVOLUTION #####################
       
       ##### PATHWAY TO TRAITS DATA ####
-      
-      caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", "traits")
-      
-      listfiles <- list.files("data/raw/WorldCenter/output/config_worldcenter/traits")
-      
-      filestoread <- length(list.files("data/raw/WorldCenter/output/config_worldcenter/traits"))
-      
+      traits_path <- paste0('traits', rep)
+      caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", traits_path)
+      listfiles <- list.files(paste0("data/raw/WorldCenter/output/config_worldcenter/", traits_path))
+      filestoread <- length(listfiles)
       
       #### Organizing selection of trait files ####
       cam <- 0
@@ -296,18 +294,18 @@ for(p in 1:length(plasti)){
       
       ####### FINAL MEAN PER TIME STEP #######
       if(ti <= (val$vars$steps[1] - 1)){
-        datafinal_less_last <- datafinal[-length(datafinal)]
-        datafinal_less_first <- datafinal[-1]
-        list_difference <- vector("list", sum(lengths(datafinal_less_last)))
-        position_list <- vector("list", sum(lengths(datafinal_less_last)))
+        trait_ancient_less_last <- datafinal[-length(datafinal)]
+        trait_new_less_first <- datafinal[-1]
+        list_difference <- vector("list", sum(lengths(trait_ancient_less_last)))
+        position_list <- vector("list", sum(lengths(trait_ancient_less_last)))
         time <- 0
-        for(i in 1:length(datafinal_less_last)){
-          for(k in seq_along(datafinal_less_last[[i]])){
+        for(i in 1:length(trait_ancient_less_last)){
+          for(k in seq_along(trait_ancient_less_last[[i]])){
             #browser()
             time <- time + 1
-            posicao <- which(names(datafinal_less_last[[i]][k]) == names(datafinal_less_first[[i]]))
-            position_list[[time]] <- as.numeric(datafinal_less_first[[i]][posicao])
-            list_difference[[time]] <- abs(as.numeric(datafinal_less_last[[i]][k]) - as.numeric(datafinal_less_first[[i]][posicao]))
+            posicao <- which(names(trait_ancient_less_last[[i]][k]) == names(trait_new_less_first[[i]]))
+            position_list[[time]] <- as.numeric(trait_ancient_less_last[[i]][posicao])
+            list_difference[[time]] <- abs(as.numeric(trait_ancient_less_last[[i]][k]) - as.numeric(trait_new_less_first[[i]][posicao]))
           }
         }
         time <- 0
@@ -355,9 +353,10 @@ for(p in 1:length(plasti)){
       #   break
       # }
       # pos2 <- 0
-      # caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", "traits")
-      # listfiles <- list.files("data/raw/WorldCenter/output/config_worldcenter/traits")
-      # filestoread <- length(list.files("data/raw/WorldCenter/output/config_worldcenter/traits"))
+      # traits_path <- paste0('traits', rep)
+      # caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", traits_path)
+      # listfiles <- list.files(paste0("data/raw/WorldCenter/output/config_worldcenter/", traits_path))
+      # filestoread <- length(listfiles)
       # cam <- 0
       # for(l in 1:filestoread){
       #   cam[l] <- caminho
@@ -366,11 +365,11 @@ for(p in 1:length(plasti)){
       # for(k in 1:length(cam)){
       #   camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
       # }
-      #file.remove(camatualizado)
-     # rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, datafinal_less_last, datafinal_less_first, list_difference, position_list)
-    }
+      # file.remove(camatualizado)
+      # rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, trait_ancient_less_last, trait_new_less_first, list_difference, position_list)
+    } 
   }
 }
 
 path <- here("output")
-write.csv2(finalresult, file.path(path, "finalresult.csv"), row.names = FALSE)
+write.csv2(finalresult, file.path(path, paste0('rep_', rep, "_finalresult.csv")), row.names = FALSE)
