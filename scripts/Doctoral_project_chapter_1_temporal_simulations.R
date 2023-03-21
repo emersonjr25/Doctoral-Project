@@ -63,6 +63,7 @@ timesteps_total <- length(config$gen3sis$general$start_time:config$gen3sis$gener
 config$gen3sis$general$max_number_of_species <- 15000
 config$gen3sis$general$max_number_of_coexisting_species <- 200000
 
+rep <- 1
 
 config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
   save_traits()
@@ -70,7 +71,6 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 
 config$gen3sis$speciation$divergence_threshold <- 10
 
-rep <- 1
 
 plasti <- c(0, 0.25, 0.5, 0.75, 1)
 
