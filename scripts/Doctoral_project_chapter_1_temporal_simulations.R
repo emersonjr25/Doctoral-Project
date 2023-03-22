@@ -54,7 +54,7 @@ for(i in functions_path){
 }
 
 #### PREPARATION IN CONFIG - SPECIES AND SYSTEM ####
-config$gen3sis$general$start_time <- 500
+config$gen3sis$general$start_time <- 50
 
 config$gen3sis$general$end_time <- 1
 
@@ -64,6 +64,7 @@ config$gen3sis$general$max_number_of_species <- 15000
 config$gen3sis$general$max_number_of_coexisting_species <- 200000
 
 rep <- 1
+quantitity_rep <- 1
 
 config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
   save_traits()
@@ -72,19 +73,19 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 config$gen3sis$speciation$divergence_threshold <- 10
 
 
-plasti <- c(0, 0.25, 0.5, 0.75, 1)
+plasti <- c(0, 0.25, 1)
 
 pos <- 0
 pos2 <- 0
 
-finalresult <- data.frame(plasticidade = runif(rep * length(plasti) * timesteps_total, 0, 0),
-                          replications = runif(rep * length(plasti) * timesteps_total, 0, 0),
-                          speciation = runif(rep * length(plasti) * timesteps_total, 0, 0),
-                          extinction = runif(rep * length(plasti) * timesteps_total, 0, 0),
-                          diversif = runif(rep * length(plasti) * timesteps_total, 0, 0),
-                          traitevolution = runif(rep * length(plasti) * timesteps_total, 0, 0),
-                          timestep = runif(rep * length(plasti) * timesteps_total, 0, 0),
-                          timesimulation = runif(rep * length(plasti) * timesteps_total, 0, 0))
+finalresult <- data.frame(plasticidade = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
+                          replications = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
+                          speciation = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
+                          extinction = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
+                          diversif = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
+                          traitevolution = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
+                          timestep = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
+                          timesimulation = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0))
 
 #### REMOVING TRAITS OF ANTERIOR SIMULATIONS ####
 traits_path <- paste0('traits', rep)
@@ -148,9 +149,6 @@ for(p in 1:length(plasti)){
     val <- modify_input_temperature(val$config, val$data, val$vars)
     
     for (ti in val$vars$steps) {
-      # if (ti == 192) {
-      #   break 
-      # }
       val$vars$n_new_sp_ti <- 0
       val$vars$n_ext_sp_ti <- 0
       val$vars$n_sp_added_ti <- 0
