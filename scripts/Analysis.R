@@ -31,6 +31,7 @@ if(length(path_files) >= 2){
 } else {
   dados <- read.csv2("output/rep_1_finalresult.csv")
   dados <- dados %>% filter(replications != 0)
+  path <- here('output')
 }
 
 #### TEST FAST ####
