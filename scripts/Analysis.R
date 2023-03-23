@@ -11,11 +11,27 @@ library(dplyr)
 library(ggplot2)
 library(here)
 
-
 #### data ####
-dados <- read.csv2("output/rep_1_finalresult.csv")
-dados <- dados %>% filter(replications != 0)
-path <- here("output")
+path_general <- here('output/')
+path_files <- list.files(path_general, pattern = 'csv')
+
+if(length(path_files) >= 2){
+  path_complete <- paste0(path_general, "/", path_files)
+  dados <- vector('list', length(path_complete))
+  
+  for(i in seq_along(path_complete)){
+    dados[[i]] <- read.csv2(path_complete[i])
+    assign(paste0('dados', i), dados[[i]])
+  }
+  
+  all_data <- unlist(eapply(.GlobalEnv, is.data.frame))
+  dados <- do.call(rbind, mget(names(all_data)[all_data]))
+  rownames(dados) <- NULL
+  dados <- dados %>% filter(replications != 0)
+} else {
+  dados <- read.csv2("output/rep_1_finalresult.csv")
+  dados <- dados %>% filter(replications != 0)
+}
 
 #### TEST FAST ####
 colors <- c('#e7e1ef','#d4b9da','#fcc5c0','#fa9fb5','#f768a1','#dd3497','#ae017e','#7a0177','#49006a')
@@ -209,19 +225,3 @@ dev.off()
 #                 axis.title = element_text(size = 14)))
 #   dev.off()
 # }
-
-###### unification of the replicates #####
-path_general <- here('output/')
-path_files <- list.files(path_general, pattern = 'csv')
-path_complete <- paste0(path_general, "/", path_files)
-dados <- vector('list', length(path_complete))
-
-for(i in seq_along(path_complete)){
-  dados[[i]] <- read.csv2(path_complete[i])
-  assign(paste0('dados', i), dados[[i]])
-}
-
-all_data <- unlist(eapply(.GlobalEnv, is.data.frame))
-dados <- do.call(rbind, mget(names(all_data)[all_data]))
-rownames(dados) <- NULL
-dados <- dados %>% filter(replications != 0)

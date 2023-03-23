@@ -54,13 +54,13 @@ for(i in functions_path){
 }
 
 #### PREPARATION IN CONFIG - SPECIES AND SYSTEM ####
-config$gen3sis$general$start_time <- 50
+config$gen3sis$general$start_time <- 500
 
 config$gen3sis$general$end_time <- 1
 
 timesteps_total <- length(config$gen3sis$general$start_time:config$gen3sis$general$end_time)
 
-config$gen3sis$general$max_number_of_species <- 15000
+config$gen3sis$general$max_number_of_species <- 30000
 config$gen3sis$general$max_number_of_coexisting_species <- 200000
 
 rep <- 1
@@ -73,7 +73,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 config$gen3sis$speciation$divergence_threshold <- 10
 
 
-plasti <- c(0, 0.25, 1)
+plasti <- c(0)
 
 pos <- 0
 pos2 <- 0
@@ -87,26 +87,32 @@ finalresult <- data.frame(plasticidade = runif(quantitity_rep * length(plasti) *
                           timestep = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
                           timesimulation = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0))
 
-#### REMOVING TRAITS OF ANTERIOR SIMULATIONS ####
-traits_path <- paste0('traits', rep)
-caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", traits_path)
-listfiles <- list.files(paste0("data/raw/WorldCenter/output/config_worldcenter/", traits_path))
-filestoread <- length(listfiles)
-cam <- 0
-for(l in 1:filestoread){
-  cam[l] <- caminho
-}
-camatualizado <- 0
-for(k in 1:length(cam)){
-  camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
-}
-file.remove(camatualizado)
+
 
 #### EXECUTION SIMULATION ####
 
 for(p in 1:length(plasti)){
   
   for(r in rep:rep){
+    
+    #### REMOVING TRAITS OF ANTERIOR SIMULATIONS ####
+    
+    traits_path <- paste0('traits', r)
+    caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", traits_path)
+    listfiles <- list.files(paste0("data/raw/WorldCenter/output/config_worldcenter/", traits_path))
+    filestoread <- length(listfiles)
+    cam <- 0
+    for(l in 1:filestoread){
+      cam[l] <- caminho
+    }
+    camatualizado <- 0
+    for(k in 1:length(cam)){
+      camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
+    }
+    file.remove(camatualizado, showWarnings = FALSE)
+    
+    ####### CREATING INITIAL WORLD ######
+    
     val <- list(data = list(),
                 vars = list(),
                 config = config)
@@ -149,6 +155,7 @@ for(p in 1:length(plasti)){
     val <- modify_input_temperature(val$config, val$data, val$vars)
     
     for (ti in val$vars$steps) {
+      #browser()
       val$vars$n_new_sp_ti <- 0
       val$vars$n_ext_sp_ti <- 0
       val$vars$n_sp_added_ti <- 0
@@ -235,7 +242,7 @@ for(p in 1:length(plasti)){
       ################## TRAIT EVOLUTION #####################
       
       ##### PATHWAY TO TRAITS DATA ####
-      traits_path <- paste0('traits', rep)
+      traits_path <- paste0('traits', r)
       caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", traits_path)
       listfiles <- list.files(paste0("data/raw/WorldCenter/output/config_worldcenter/", traits_path))
       filestoread <- length(listfiles)
@@ -365,7 +372,7 @@ for(p in 1:length(plasti)){
   for(k in 1:length(cam)){
     camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
   }
-  file.remove(camatualizado)
+  file.remove(camatualizado, showWarnings = FALSE)
   rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, trait_ancient_less_last, trait_new_less_first, list_difference, position_list)
 }
 

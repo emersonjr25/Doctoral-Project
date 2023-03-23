@@ -4,8 +4,7 @@
 ##### Methods: Computational simulation #############
 ### FUNCTION: MODIFYING INPUT TEMPERATURE - + VARIATION ###
 
-modify_input_temperature <- function(config, data, vars, seed = 1){
-  set.seed(seed)
+modify_input_temperature <- function(config, data, vars){
   temp_ancient <- data[["inputs"]][["environments"]][['temp']]
   new_temp <- matrix(NA, 
                      nrow = nrow(temp_ancient),
