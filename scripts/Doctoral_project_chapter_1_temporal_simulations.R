@@ -4,7 +4,7 @@
 ### Main goal: Verify the effect of plasticity on adaptive evolution #####################
 ##### Diversification and Trait Evolution ~ Plasticity
 ##### Methods: Computational simulation #############
-##### Script to input,ko modify and run model #########
+##### Script to input, modify and run model #########
 
 #### PACKAGES ####
 library(gen3sis)
@@ -73,7 +73,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 config$gen3sis$speciation$divergence_threshold <- 10
 
 
-plasti <- c(0)
+plasti <- c(0, 0.25, 0.5, 0.75, 1)
 
 pos <- 0
 pos2 <- 0
@@ -87,8 +87,6 @@ finalresult <- data.frame(plasticidade = runif(quantitity_rep * length(plasti) *
                           timestep = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
                           timesimulation = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0))
 
-
-
 #### EXECUTION SIMULATION ####
 
 for(p in 1:length(plasti)){
@@ -96,20 +94,24 @@ for(p in 1:length(plasti)){
   for(r in rep:rep){
     
     #### REMOVING TRAITS OF ANTERIOR SIMULATIONS ####
-    
+    output_files <- here("data", "raw", "WorldCenter", "output", "config_worldcenter")
+    general_files <- list.files(output_files)
     traits_path <- paste0('traits', r)
-    caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", traits_path)
-    listfiles <- list.files(paste0("data/raw/WorldCenter/output/config_worldcenter/", traits_path))
-    filestoread <- length(listfiles)
-    cam <- 0
-    for(l in 1:filestoread){
-      cam[l] <- caminho
-    }
-    camatualizado <- 0
-    for(k in 1:length(cam)){
-      camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
-    }
-    file.remove(camatualizado, showWarnings = FALSE)
+    if(sum(traits_path == general_files) == 1){
+      caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", traits_path)
+      listfiles <- list.files(paste0("data/raw/WorldCenter/output/config_worldcenter/", traits_path))
+      filestoread <- length(listfiles)
+      cam <- 0
+      for(l in 1:filestoread){
+        cam[l] <- caminho
+      }
+      camatualizado <- 0
+      for(k in 1:length(cam)){
+        camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
+      }
+      file.remove(camatualizado, showWarnings = FALSE)
+    } 
+    
     
     ####### CREATING INITIAL WORLD ######
     
@@ -353,10 +355,6 @@ for(p in 1:length(plasti)){
         finalresult$timestep[pos] <- ti
         finalresult$timesimulation[pos] <- pos2
       }
-      # if(pos2 == 16){
-      #   # saveRDS(val, file = paste0(plasti, '_', pos2, 'simulation', '.rds'))
-      #   break
-      # }
     } 
   }
   pos2 <- 0
