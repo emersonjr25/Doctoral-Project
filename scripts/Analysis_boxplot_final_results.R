@@ -1,0 +1,152 @@
+#####################################################
+########### PLASTICITY AND EVOLUTION STUDY ##########
+#####################################################
+### Main goal: Verify the effect of plasticity on adaptive evolution #####################
+##### Diversification and Trait Evolution ~ Plasticity
+##### Methods: Computational simulation #############
+##### Script to analysis results from simulation ####
+
+#### packages ####
+
+library(dplyr)
+library(ggplot2)
+library(here)
+
+#### data ####
+path_general <- here('output/files_to_results/')
+path_files <- list.files(path_general, pattern = 'csv')
+
+if(length(path_files) >= 2){
+  path_complete <- paste0(path_general, "/", path_files)
+  data <- vector('list', length(path_complete))
+  
+  for(i in seq_along(path_complete)){
+    data[[i]] <- read.csv2(path_complete[i])
+    assign(paste0('data', i), data[[i]])
+  }
+  
+  all_data <- unlist(eapply(.GlobalEnv, is.data.frame))
+  data <- do.call(rbind, mget(names(all_data)[all_data]))
+  rownames(data) <- NULL
+  data <- data %>% filter(replications != 0)
+} else {
+  data <- read.csv2("output/rep_1_finalresult.csv")
+  data <- data %>% filter(replications != 0)
+  path <- here('output')
+}
+colnames(data)[1] <- c('plasticity')
+
+#### BOX PLOT OF MEAN PER PLASTICITY ####
+unique_plasticity <- unique(data$plasticity)
+unique_replications <- unique(data$replications)
+results_extinction <- data.frame(replications = rep(0, length(unique_replications) * length(unique_plasticity)),
+                      plasticity = 0,
+                      extinction = 0)
+
+results_speciation <- data.frame(replications = rep(0, length(unique_replications) * length(unique_plasticity)),
+                      plasticity = 0,
+                      speciation = 0)
+
+results_diversifcation <- data.frame(replications = rep(0, length(unique_replications) * length(unique_plasticity)),
+                                     plasticity = 0,
+                                     divers = 0)
+
+results_trait <- data.frame(replications = rep(0, length(unique_replications) * length(unique_plasticity)),
+                            plasticity = 0,
+                            trait = 0)
+
+
+i <- 1
+j <- 1
+count <- 0
+
+for(i in seq_along(unique_plasticity)){
+  for(j in seq_along(unique_replications)){
+    count <- count + 1
+    results_extinction$replications[count] <- unique_replications[j]
+    results_extinction$plasticity[count] <- unique_plasticity[i]
+    temp <- filter(data, plasticity == unique_plasticity[i], replications == unique_replications[j])
+    results_extinction$extinction[count] <- temp$extinction %>% mean() 
+  }
+}
+i <- 1
+j <- 1
+count <- 0
+for(i in seq_along(unique_plasticity)){
+  for(j in seq_along(unique_replications)){
+    count <- count + 1
+    results_speciation$replications[count] <- unique_replications[j]
+    results_speciation$plasticity[count] <- unique_plasticity[i]
+    temp <- filter(data, plasticity == unique_plasticity[i], replications == unique_replications[j])
+    results_speciation$speciation[count] <- temp$speciation %>% mean()
+  }
+}
+i <- 1
+j <- 1
+count <- 0
+
+for(i in seq_along(unique_plasticity)){
+  for(j in seq_along(unique_replications)){
+    count <- count + 1
+    results_diversifcation$replications[count] <- unique_replications[j]
+    results_diversifcation$plasticity[count] <- unique_plasticity[i]
+    temp <- filter(data, plasticity == unique_plasticity[i], replications == unique_replications[j])
+    results_diversifcation$divers[count] <- temp$divers[temp$divers > 0] %>% mean()
+  }
+}
+i <- 1
+j <- 1
+count <- 0
+for(i in seq_along(unique_plasticity)){
+  for(j in seq_along(unique_replications)){
+    count <- count + 1
+    results_trait$replications[count] <- unique_replications[j]
+    results_trait$plasticity[count] <- unique_plasticity[i]
+    temp <- filter(data, plasticity == unique_plasticity[i], replications == unique_replications[j])
+    results_trait$trait[count] <- temp$trait[temp$trait > 0] %>% mean()
+  }
+}
+
+#pos <- which(results_extinction$extinction == max(results_extinction$extinction))
+#results_extinction <- results_extinction[-pos, ]
+ggplot(results_extinction, aes(plasticity, extinction, group = plasticity)) +
+  geom_boxplot() +
+  geom_jitter()
+
+
+#pos_2 <- which(results_speciation$speciation == max(results_speciation$speciation))
+#results_speciation <- results_speciation[-pos_2, ]
+ggplot(results_speciation, aes(plasticity, speciation, group = plasticity)) +
+  geom_boxplot() + 
+  geom_jitter()
+
+#pos_3 <- which(results_diversifcation$divers == max(results_diversifcation$divers))
+#results_diversifcation <- results_diversifcation[-pos_2, ]
+ggplot(results_diversifcation, aes(plasticity, divers, group = plasticity)) +
+  geom_boxplot() + 
+  geom_jitter()
+
+#pos_4 <- which(results_trait$trait == max(results_trait$trait))
+#results_trait <- results_trait[-pos_2, ]
+ggplot(results_trait, aes(plasticity, trait, group = plasticity)) +
+  geom_boxplot() + 
+  geom_jitter()
+
+
+
+data %>% 
+  as_tibble() %>% 
+  select(-timestep, -timesimulation) %>% 
+  group_by(plasticity, replications) %>% 
+  summarize_all(mean) %>% 
+  filter(traitevolution < 0.00075) %>% 
+  pivot_longer(col = -c(plasticity, replications)) %>%
+  mutate(plasticity = as.factor(plasticity)) %>% 
+  ggplot(aes(x = plasticity, y = value)) + 
+  geom_boxplot() + 
+  geom_jitter() +
+  xlab("Plasticity") +
+  # scale_y_continuous(trans='log2') + 
+  theme_bw() +
+  facet_wrap(~name, scales = "free_y")
+

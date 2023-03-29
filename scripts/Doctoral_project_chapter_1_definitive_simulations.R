@@ -2,9 +2,9 @@
 ########### PLASTICITY AND EVOLUTION STUDY ##########
 #####################################################
 ### Main goal: Verify the effect of plasticity on adaptive evolution #####################
-##### Diversification and Trait Evolution ~ Plasticity
+##### Diversification and Trait Evolution ~ Plasticity ####
 ##### Methods: Computational simulation #############
-##### Script to input,ko modify and run model #########
+##### Script to input, modify and run model #########
 
 #### PACKAGES ####
 library(gen3sis)
@@ -46,66 +46,41 @@ if (!verify_config(config)) {
   stop("config verification failed")
 }
 
-#### CARRYING FUNCTIONS #####
+#### CARRYING NEW FUNCTIONS AND CONFIG CHANGES #####
 folder <- here('scripts', 'functions')
 functions_path <- paste0(folder, '/', list.files(folder))
 for(i in functions_path){
   source(i)
 }
 
-#### PREPARATION IN CONFIG - SPECIES AND SYSTEM ####
-config$gen3sis$general$start_time <- 50
-
-config$gen3sis$general$end_time <- 1
-
-timesteps_total <- length(config$gen3sis$general$start_time:config$gen3sis$general$end_time)
-
-config$gen3sis$general$max_number_of_species <- 50000
-config$gen3sis$general$max_number_of_coexisting_species <- 200000
-
-
-config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
-  save_traits()
-}
-
-config$gen3sis$speciation$divergence_threshold <- 10
-
-rep <- 1
-
-plasti <- c(0, 0.25, 0.5, 0.75, 1)
-
-pos <- 0
-pos2 <- 0
-
-finalresult <- data.frame(plasticidade = runif(rep * length(plasti) * timesteps_total, 0, 0),
-                          replications = runif(rep * length(plasti) * timesteps_total, 0, 0),
-                          speciation = runif(rep * length(plasti) * timesteps_total, 0, 0),
-                          extinction = runif(rep * length(plasti) * timesteps_total, 0, 0),
-                          diversif = runif(rep * length(plasti) * timesteps_total, 0, 0),
-                          traitevolution = runif(rep * length(plasti) * timesteps_total, 0, 0),
-                          timestep = runif(rep * length(plasti) * timesteps_total, 0, 0),
-                          timesimulation = runif(rep * length(plasti) * timesteps_total, 0, 0))
-
-#### REMOVING TRAITS OF ANTERIOR SIMULATIONS ####
-traits_path <- paste0('traits', rep)
-caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", traits_path)
-listfiles <- list.files(paste0("data/raw/WorldCenter/output/config_worldcenter/", traits_path))
-filestoread <- length(listfiles)
-cam <- 0
-for(l in 1:filestoread){
-  cam[l] <- caminho
-}
-camatualizado <- 0
-for(k in 1:length(cam)){
-  camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
-}
-file.remove(camatualizado)
-
 #### EXECUTION SIMULATION ####
 
 for(p in 1:length(plasti)){
   
   for(r in rep:rep){
+    
+    #### REMOVING TRAITS OF ANTERIOR SIMULATIONS ####
+    output_files <- here("data", "raw", "WorldCenter", "output", "config_worldcenter")
+    general_files <- list.files(output_files)
+    traits_path <- paste0('traits', r)
+    if(sum(traits_path == general_files) == 1){
+      general_path <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", traits_path)
+      listfiles <- list.files(paste0("data/raw/WorldCenter/output/config_worldcenter/", traits_path))
+      filestoread <- length(listfiles)
+      path_temporary <- 0
+      for(l in 1:filestoread){
+        path_temporary[l] <- general_path
+      }
+      path_update <- 0
+      for(k in 1:length(path_temporary)){
+        path_update[[k]] <- paste(path_temporary[k], listfiles[k], sep = "/", collapse = "--")
+      }
+      file.remove(path_update, showWarnings = FALSE)
+    } 
+    
+    
+    ####### CREATING INITIAL WORLD ######
+    
     val <- list(data = list(),
                 vars = list(),
                 config = config)
@@ -148,9 +123,6 @@ for(p in 1:length(plasti)){
     val <- modify_input_temperature(val$config, val$data, val$vars)
     
     for (ti in val$vars$steps) {
-      # if (ti == 192) {
-      #   break 
-      # }
       val$vars$n_new_sp_ti <- 0
       val$vars$n_ext_sp_ti <- 0
       val$vars$n_sp_added_ti <- 0
@@ -228,42 +200,40 @@ for(p in 1:length(plasti)){
       system_time_stop <- Sys.time()
       total_runtime <- difftime(system_time_stop, system_time_start,
                                 units = "hours")[[1]]
-      #write_runtime_statisitics(val$data, val$vars, val$config,
-      #                          total_runtime)
+
       sgen3sis <- make_summary(val$config, val$data, val$vars,
                                total_runtime, save_file = FALSE)
-      #plot_summary(sgen3sis)
       
       ################## TRAIT EVOLUTION #####################
       
       ##### PATHWAY TO TRAITS DATA ####
-      traits_path <- paste0('traits', rep)
-      caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", traits_path)
+      traits_path <- paste0('traits', r)
+      general_path <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", traits_path)
       listfiles <- list.files(paste0("data/raw/WorldCenter/output/config_worldcenter/", traits_path))
       filestoread <- length(listfiles)
       
       #### Organizing selection of trait files ####
-      cam <- 0
+      path_temporary <- 0
       for(l in 1:filestoread){
-        cam[l] <- caminho
+        path_temporary[l] <- general_path
       }
       
-      camatualizado <- 0
-      for(k in 1:length(cam)){
-        camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
+      path_update <- 0
+      for(k in 1:length(path_temporary)){
+        path_update[[k]] <- paste(path_temporary[k], listfiles[k], sep = "/", collapse = "--")
       }
       
       # SORT #
-      camatualizado <- camatualizado[order(as.numeric(gsub("[^0-9]+", "", camatualizado)), decreasing = TRUE)]
-      cam_length <- length(camatualizado)
-      if(cam_length >= 2) {
-        camatualizado <- camatualizado[c(cam_length - 1, cam_length)]
+      path_update <- path_update[order(as.numeric(gsub("[^0-9]+", "", path_update)), decreasing = TRUE)]
+      path_length <- length(path_update)
+      if(path_length >= 2) {
+        path_update <- path_update[c(path_length - 1, path_length)]
       }
       
       # READ FILES #
       datafinal <- list()
-      for(d in 1:length(camatualizado)){
-        datafinal[[d]] <- readRDS(camatualizado[[d]])
+      for(d in 1:length(path_update)){
+        datafinal[[d]] <- readRDS(path_update[[d]])
       }
       
       #### CALCULATING MEAN TRAIT PER TIME STEP #####
@@ -274,13 +244,13 @@ for(p in 1:length(plasti)){
       }
       
       #### function to return column ###
-      colunatemp <- function(dados){
-        return(dados[, 1])
+      col_temp <- function(x){
+        return(x[, 1])
       }
       
       ### only values of species temperature ###
       for(i in 1:length(datafinal)){
-        datafinal[[i]] <- lapply(datafinal[[i]], colunatemp)
+        datafinal[[i]] <- lapply(datafinal[[i]], col_temp)
       }
       
       for(i in 1:length(datafinal)){
@@ -301,11 +271,10 @@ for(p in 1:length(plasti)){
         time <- 0
         for(i in 1:length(trait_ancient_less_last)){
           for(k in seq_along(trait_ancient_less_last[[i]])){
-            #browser()
             time <- time + 1
-            posicao <- which(names(trait_ancient_less_last[[i]][k]) == names(trait_new_less_first[[i]]))
-            position_list[[time]] <- as.numeric(trait_ancient_less_last[[i]][posicao])
-            list_difference[[time]] <- abs(as.numeric(trait_ancient_less_last[[i]][k]) - as.numeric(trait_new_less_first[[i]][posicao]))
+            position <- which(names(trait_ancient_less_last[[i]][k]) == names(trait_new_less_first[[i]]))
+            position_list[[time]] <- as.numeric(trait_ancient_less_last[[i]][position])
+            list_difference[[time]] <- abs(as.numeric(trait_ancient_less_last[[i]][k]) - as.numeric(trait_new_less_first[[i]][position]))
           }
         }
         time <- 0
@@ -338,37 +307,32 @@ for(p in 1:length(plasti)){
       diversification <- ratespeciation - rateextinction
       
       
-      if(ti %% 2 == 1) {
-        finalresult$plasticidade[pos] <- plasti[[p]]
+    #  if(ti %% 2 == 1) {
+        finalresult$plasticity[pos] <- plasti[[p]]
         finalresult$replications[pos] <- r
         finalresult$speciation[pos] <- ratespeciation
         finalresult$extinction[pos] <- rateextinction
         finalresult$diversif[pos] <- diversification
         finalresult$traitevolution[pos] <- traitevolution
-        finalresult$timestep[pos] <- ti
         finalresult$timesimulation[pos] <- pos2
-      }
-      # if(pos2 == 16){
-      #   # saveRDS(val, file = paste0(plasti, '_', pos2, 'simulation', '.rds'))
-      #   break
-      # }
-      # pos2 <- 0
-      # traits_path <- paste0('traits', rep)
-      # caminho <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", traits_path)
-      # listfiles <- list.files(paste0("data/raw/WorldCenter/output/config_worldcenter/", traits_path))
-      # filestoread <- length(listfiles)
-      # cam <- 0
-      # for(l in 1:filestoread){
-      #   cam[l] <- caminho
-      # }
-      # camatualizado <- 0
-      # for(k in 1:length(cam)){
-      #   camatualizado[[k]] <- paste(cam[k], listfiles[k], sep = "/", collapse = "--")
-      # }
-      # file.remove(camatualizado)
-      # rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, trait_ancient_less_last, trait_new_less_first, list_difference, position_list)
+     # }
     } 
   }
+  pos2 <- 0
+  traits_path <- paste0('traits', rep)
+  general_path <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", traits_path)
+  listfiles <- list.files(paste0("data/raw/WorldCenter/output/config_worldcenter/", traits_path))
+  filestoread <- length(listfiles)
+  path_temporary <- 0
+  for(l in 1:filestoread){
+    path_temporary[l] <- general_path
+  }
+  path_update <- 0
+  for(k in 1:length(path_temporary)){
+    path_update[[k]] <- paste(path_temporary[k], listfiles[k], sep = "/", collapse = "--")
+  }
+  file.remove(path_update, showWarnings = FALSE)
+  rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, trait_ancient_less_last, trait_new_less_first, list_difference, position_list)
 }
 
 path <- here("output")

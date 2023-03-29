@@ -1,6 +1,6 @@
 #####################################################
 ### Main goal: Verify the effect of plasticity on adaptive evolution #####################
-##### Diversification and Trait Evolution ~ Plasticity
+##### Diversification and Trait Evolution ~ Plasticity #####
 ##### Methods: Computational simulation #############
 ### FUNCTION: MODIFYING INPUT TEMPERATURE - + VARIATION ###
 

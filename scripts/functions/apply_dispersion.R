@@ -1,14 +1,10 @@
 #####################################################
 ### Main goal: Verify the effect of plasticity on adaptive evolution #####################
-##### Diversification and Trait Evolution ~ Plasticity
+##### Diversification and Trait Evolution ~ Plasticity #####
 ##### Methods: Computational simulation #############
 ##### FUNCTION: APPLY DISPERSION WITH LIMIT #####
 
-disperse2 <- function (species, landscape, distance_matrix, config) 
-{
-  #if (ti == 45){
- #    browser()
- # }
+disperse2 <- function (species, landscape, distance_matrix, config) {
   if (!length(species[["abundance"]])) {
     return(species)
   }
@@ -54,8 +50,5 @@ disperse2 <- function (species, landscape, distance_matrix, config)
     species <- disperse_species(species, as.character(orig), 
                                 dest, config)
   }
-  #if (config$gen3sis$general$verbose >= 1){
-  #   cat(paste('free cells', length(free_cells)))
-  # }
   return(species)
 }

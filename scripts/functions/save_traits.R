@@ -1,10 +1,14 @@
-##### FUNCTION:CREATING FOLDER TO REPLICATION #####
+#####################################################
+### Main goal: Verify the effect of plasticity on adaptive evolution #####################
+##### Diversification and Trait Evolution ~ Plasticity #####
+##### Methods: Computational simulation #############
+### FUNCTION: CREATING FOLDER TO REPLICATION ###
+
 save_traits <- function() {
   save_extract("traits", rep)
 }
 
 save_extract <- function(element, replicate_number) {
-  #browser()
   config <- dynGet("config")
   data <- dynGet("data")
   vars <-  dynGet("vars")

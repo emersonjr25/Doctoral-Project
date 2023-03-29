@@ -1,8 +1,10 @@
 #####################################################
 ### Main goal: Verify the effect of plasticity on adaptive evolution #####################
-##### Diversification and Trait Evolution ~ Plasticity
+##### Diversification and Trait Evolution ~ Plasticity #####
 ##### Methods: Computational simulation #############
 ##### FUNCTION: ALTERING INITIAL TRAIT VALUES OF THE SPECIES #####
+
+# THIS FUNCTION WAS ONLY USE TO TEST MODEL PREMISES #
 
 # config$gen3sis$initialization$create_ancestor_species <- function(landscape, config) {
 # 

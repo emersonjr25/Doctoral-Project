@@ -1,13 +1,10 @@
 #####################################################
 ### Main goal: Verify the effect of plasticity on adaptive evolution #####################
-##### Diversification and Trait Evolution ~ Plasticity
+##### Diversification and Trait Evolution ~ Plasticity #####
 ##### Methods: Computational simulation #############
 ##### FUNCTION: LOOP ECOLOGY WITH PLASTICITY #####
 
-loop_ecology2 <- function (config, data, vars, plasticidade) {
-  #if(ti == 45){
-  # browser()
-  #     }
+loop_ecology2 <- function (config, data, vars, plast_value) {
   if (config$gen3sis$general$verbose >= 3) {
     cat(paste("entering ecology module @ time", vars$ti, 
               "\n"))
@@ -44,7 +41,7 @@ loop_ecology2 <- function (config, data, vars, plasticidade) {
     }
     rownames(traits) <- coo_sp
     names(abundance) <- coo_sp
-    NEW_abd <- config$gen3sis$ecology$apply_ecology(abundance, traits, local_environment, config, plasticidade)
+    NEW_abd <- config$gen3sis$ecology$apply_ecology(abundance, traits, local_environment, config, plast_value)
     names(NEW_abd) <- coo_sp
     shalldie <- NEW_abd == 0
     for (spi in coo_sp) {

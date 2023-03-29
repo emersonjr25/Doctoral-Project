@@ -1,11 +1,10 @@
 #####################################################
 ### Main goal: Verify the effect of plasticity on adaptive evolution #####################
-##### Diversification and Trait Evolution ~ Plasticity
+##### Diversification and Trait Evolution ~ Plasticity #####
 ##### Methods: Computational simulation #############
 ##### FUNCTION: APPLY ECOLOGY WITH PLASTICITY #####
 
-config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, config, plasticidade) {
-  #browser()
+config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, config, plast_value) {
   abundance_scale = 1.12
   abundance_threshold = 1
   #abundance threshold
@@ -26,26 +25,11 @@ config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, c
     min(abs(x - land))
   }
   
-  traits_sub <- lapply(traits[, 'temp'], plasticity, plasticidade)
+  traits_sub <- lapply(traits[, 'temp'], plasticity, plast_value)
   traits_sub2 <- mapply(plasticity2, traits_sub, landscape[,'temp'])
   abundance <- ((1 - traits_sub2)*abundance_scale)*as.numeric(survive)
   
   #abundance threshold
   abundance[abundance<abundance_threshold] <- 0
-  # k <- ((landscape[,'area']*(landscape[,'arid']+0.1)*(landscape[,'temp']+0.1))
-  #       *abundance_scale^2)
-  # total_ab <- sum(abundance)
-  # subtract <- total_ab-k
-  # if (subtract > 0) {
-  #   # print(paste("should:", k, "is:", total_ab, "DIFF:", round(subtract,0) ))
-  #   while (total_ab>k){
-  #     alive <- abundance>0
-  #     loose <- sample(1:length(abundance[alive]),1)
-  #     abundance[alive][loose] <- abundance[alive][loose]-1
-  #     total_ab <- sum(abundance)
-  #   }
-  #   #set negative abundances to zero
-  #   abundance[!alive] <- 0
-  # }
   return(abundance)
 }
