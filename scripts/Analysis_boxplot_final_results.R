@@ -8,7 +8,7 @@
 
 #### packages ####
 
-library(dplyr)
+library(tidyverse)
 library(ggplot2)
 library(here)
 
@@ -35,6 +35,46 @@ if(length(path_files) >= 2){
   path <- here('output')
 }
 colnames(data)[1] <- c('plasticity')
+
+
+
+
+
+
+
+
+  
+result <- data %>% 
+    as_tibble() %>% 
+    select(-timestep, -timesimulation) %>% 
+    group_by(plasticity, replications) %>% 
+    summarize_all(mean) %>% 
+    pivot_longer(col = -c(plasticity, replications)) %>%
+    mutate(plasticity = as.factor(plasticity)) %>% 
+    #filter(name == 'extinction') %>%
+    ggplot(aes(x = plasticity, y = value)) + 
+    geom_boxplot() + 
+    geom_jitter() +
+    facet_wrap(~name, scales = "free_y") + 
+    xlab("Plasticity") + ylab('Value') +
+    ggtitle('Effect of plasticity on adaptive evolution') + 
+    theme_bw() +
+    theme(plot.title = 
+            element_text(size = 16, 
+                        face = 2, 
+                        hjust = 0.5), 
+            axis.title.x = element_text(size = 14), 
+            axis.title.y = element_text(size = 14)) 
+    
+
+tiff(filename = file.path(here('output'), paste0("plot", "_", result[["labels"]][["y"]], "_", "plas", "all", ".tif")),
+     width = 800,
+     height = 600,
+     units = "px",
+     res = 100)
+print(result)
+dev.off()
+  
 
 #### BOX PLOT OF MEAN PER PLASTICITY ####
 unique_plasticity <- unique(data$plasticity)
@@ -134,19 +174,5 @@ ggplot(results_trait, aes(plasticity, trait, group = plasticity)) +
 
 
 
-data %>% 
-  as_tibble() %>% 
-  select(-timestep, -timesimulation) %>% 
-  group_by(plasticity, replications) %>% 
-  summarize_all(mean) %>% 
-  filter(traitevolution < 0.00075) %>% 
-  pivot_longer(col = -c(plasticity, replications)) %>%
-  mutate(plasticity = as.factor(plasticity)) %>% 
-  ggplot(aes(x = plasticity, y = value)) + 
-  geom_boxplot() + 
-  geom_jitter() +
-  xlab("Plasticity") +
-  # scale_y_continuous(trans='log2') + 
-  theme_bw() +
-  facet_wrap(~name, scales = "free_y")
+
 
