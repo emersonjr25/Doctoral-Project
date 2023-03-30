@@ -81,7 +81,7 @@ results_speciation <- data.frame(replications = rep(0, length(unique_replication
                       plasticity = 0,
                       speciation = 0)
 
-results_diversifcation <- data.frame(replications = rep(0, length(unique_replications) * length(unique_plasticity)),
+results_diversification <- data.frame(replications = rep(0, length(unique_replications) * length(unique_plasticity)),
                                      plasticity = 0,
                                      divers = 0)
 
@@ -115,10 +115,10 @@ count <- 0
 for(i in seq_along(unique_plasticity)){
   for(j in seq_along(unique_replications)){
     count <- count + 1
-    results_diversifcation$replications[count] <- unique_replications[j]
-    results_diversifcation$plasticity[count] <- unique_plasticity[i]
+    results_diversification$replications[count] <- unique_replications[j]
+    results_diversification$plasticity[count] <- unique_plasticity[i]
     temp <- filter(data, plasticity == unique_plasticity[i], replications == unique_replications[j])
-    results_diversifcation$divers[count] <- temp$divers %>% mean()
+    results_diversification$divers[count] <- temp$divers %>% mean()
   }
 }
 
@@ -141,7 +141,7 @@ ggplot(results_speciation, aes(plasticity, speciation, group = plasticity)) +
   geom_boxplot() + 
   geom_jitter()
 
-ggplot(results_diversifcation, aes(plasticity, divers, group = plasticity)) +
+ggplot(results_diversification, aes(plasticity, divers, group = plasticity)) +
   geom_boxplot() + 
   geom_jitter()
 
