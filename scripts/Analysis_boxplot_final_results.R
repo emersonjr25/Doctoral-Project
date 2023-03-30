@@ -34,16 +34,10 @@ if(length(path_files) >= 2){
   data <- data %>% filter(replications != 0)
   path <- here('output')
 }
+rm(list = ls()[(ls() == 'data') == FALSE])
 colnames(data)[1] <- c('plasticity')
 
-
-
-
-
-
-
-
-  
+#### RESULT FINAL USING TIDYVERSE ####
 result <- data %>% 
     as_tibble() %>% 
     select(-timestep, -timesimulation) %>% 
@@ -51,7 +45,6 @@ result <- data %>%
     summarize_all(mean) %>% 
     pivot_longer(col = -c(plasticity, replications)) %>%
     mutate(plasticity = as.factor(plasticity)) %>% 
-    #filter(name == 'extinction') %>%
     ggplot(aes(x = plasticity, y = value)) + 
     geom_boxplot() + 
     geom_jitter() +
@@ -74,11 +67,12 @@ tiff(filename = file.path(here('output'), paste0("plot", "_", result[["labels"]]
      res = 100)
 print(result)
 dev.off()
-  
 
-#### BOX PLOT OF MEAN PER PLASTICITY ####
+
+#### BOX PLOT OF MEAN PER PLASTICITY WITH LIST ####
 unique_plasticity <- unique(data$plasticity)
 unique_replications <- unique(data$replications)
+
 results_extinction <- data.frame(replications = rep(0, length(unique_replications) * length(unique_plasticity)),
                       plasticity = 0,
                       extinction = 0)
@@ -95,11 +89,7 @@ results_trait <- data.frame(replications = rep(0, length(unique_replications) * 
                             plasticity = 0,
                             trait = 0)
 
-
-i <- 1
-j <- 1
 count <- 0
-
 for(i in seq_along(unique_plasticity)){
   for(j in seq_along(unique_replications)){
     count <- count + 1
@@ -109,8 +99,7 @@ for(i in seq_along(unique_plasticity)){
     results_extinction$extinction[count] <- temp$extinction %>% mean() 
   }
 }
-i <- 1
-j <- 1
+
 count <- 0
 for(i in seq_along(unique_plasticity)){
   for(j in seq_along(unique_replications)){
@@ -121,21 +110,18 @@ for(i in seq_along(unique_plasticity)){
     results_speciation$speciation[count] <- temp$speciation %>% mean()
   }
 }
-i <- 1
-j <- 1
-count <- 0
 
+count <- 0
 for(i in seq_along(unique_plasticity)){
   for(j in seq_along(unique_replications)){
     count <- count + 1
     results_diversifcation$replications[count] <- unique_replications[j]
     results_diversifcation$plasticity[count] <- unique_plasticity[i]
     temp <- filter(data, plasticity == unique_plasticity[i], replications == unique_replications[j])
-    results_diversifcation$divers[count] <- temp$divers[temp$divers > 0] %>% mean()
+    results_diversifcation$divers[count] <- temp$divers %>% mean()
   }
 }
-i <- 1
-j <- 1
+
 count <- 0
 for(i in seq_along(unique_plasticity)){
   for(j in seq_along(unique_replications)){
@@ -143,36 +129,22 @@ for(i in seq_along(unique_plasticity)){
     results_trait$replications[count] <- unique_replications[j]
     results_trait$plasticity[count] <- unique_plasticity[i]
     temp <- filter(data, plasticity == unique_plasticity[i], replications == unique_replications[j])
-    results_trait$trait[count] <- temp$trait[temp$trait > 0] %>% mean()
+    results_trait$trait[count] <- temp$trait %>% mean()
   }
 }
 
-#pos <- which(results_extinction$extinction == max(results_extinction$extinction))
-#results_extinction <- results_extinction[-pos, ]
 ggplot(results_extinction, aes(plasticity, extinction, group = plasticity)) +
   geom_boxplot() +
   geom_jitter()
 
-
-#pos_2 <- which(results_speciation$speciation == max(results_speciation$speciation))
-#results_speciation <- results_speciation[-pos_2, ]
 ggplot(results_speciation, aes(plasticity, speciation, group = plasticity)) +
   geom_boxplot() + 
   geom_jitter()
 
-#pos_3 <- which(results_diversifcation$divers == max(results_diversifcation$divers))
-#results_diversifcation <- results_diversifcation[-pos_2, ]
 ggplot(results_diversifcation, aes(plasticity, divers, group = plasticity)) +
   geom_boxplot() + 
   geom_jitter()
 
-#pos_4 <- which(results_trait$trait == max(results_trait$trait))
-#results_trait <- results_trait[-pos_2, ]
 ggplot(results_trait, aes(plasticity, trait, group = plasticity)) +
   geom_boxplot() + 
   geom_jitter()
-
-
-
-
-
