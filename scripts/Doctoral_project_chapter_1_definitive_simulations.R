@@ -53,7 +53,7 @@ for(i in functions_path){
   source(i)
 }
 
-config$gen3sis$general$start_time <- 50
+config$gen3sis$general$start_time <- 1000
 
 config$gen3sis$general$end_time <- 1
 
@@ -72,7 +72,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 config$gen3sis$speciation$divergence_threshold <- 10
 
 
-plasti <- c(0, 0.25, 1)
+plasti <- c(0, 0.05, 0.1, 0.15, 0.25, 0.5, 0.75, 1)
 
 pos <- 0
 pos2 <- 0
@@ -338,16 +338,13 @@ for(p in 1:length(plasti)){
       
       diversification <- ratespeciation - rateextinction
       
-      
-    #  if(ti %% 2 == 1) {
-        finalresult$plasticity[pos] <- plasti[[p]]
-        finalresult$replications[pos] <- r
-        finalresult$speciation[pos] <- ratespeciation
-        finalresult$extinction[pos] <- rateextinction
-        finalresult$diversif[pos] <- diversification
-        finalresult$traitevolution[pos] <- traitevolution
-        finalresult$timesimulation[pos] <- pos2
-     # }
+      finalresult$plasticity[pos] <- plasti[[p]]
+      finalresult$replications[pos] <- r
+      finalresult$speciation[pos] <- ratespeciation
+      finalresult$extinction[pos] <- rateextinction
+      finalresult$diversif[pos] <- diversification
+      finalresult$traitevolution[pos] <- traitevolution
+      finalresult$timesimulation[pos] <- pos2
     } 
   }
   pos2 <- 0
