@@ -68,6 +68,27 @@ tiff(filename = file.path(here('output'), paste0("plot", "_", result[["labels"]]
 print(result)
 dev.off()
 
+#### ANOVA EXECUTION ####
+result_aov <- data %>% 
+  as_tibble() %>% 
+  filter(timesimulation >= 100) %>%
+  select(-timesimulation) %>% 
+  group_by(plasticity, replications) %>% 
+  summarize_all(mean) %>% 
+  mutate(plasticity = as.factor(plasticity))
+
+summary(aov(result_aov$speciation ~ result_aov$plasticity))
+summary(aov(result_aov$extinction ~ result_aov$plasticity))
+summary(aov(result_aov$diversif ~ result_aov$plasticity))
+summary(aov(result_aov$traitevolution ~ result_aov$plasticity))
+
+manova_result <- manova(cbind(traitevolution, 
+            extinction,
+            diversif,
+            speciation) ~ plasticity,
+       data = result_aov)
+
+summary(manova_result, tol = 0)
 
 #### BOX PLOT OF MEAN PER PLASTICITY WITH LIST ####
 unique_plasticity <- unique(data$plasticity)
