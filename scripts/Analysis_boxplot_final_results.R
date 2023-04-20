@@ -40,6 +40,7 @@ colnames(data)[1] <- c('plasticity')
 #### RESULT FINAL USING TIDYVERSE ####
 result <- data %>% 
     as_tibble() %>% 
+    filter(timesimulation > 100) %>%
     select(-timesimulation) %>% 
     group_by(plasticity, replications) %>% 
     summarize_all(mean) %>% 
