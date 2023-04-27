@@ -13,7 +13,7 @@ library(ggplot2)
 library(here)
 
 #### data ####
-path_general <- here('output/files_to_results/')
+path_general <- here('output')
 path_files <- list.files(path_general, pattern = 'csv')
 
 if(length(path_files) >= 2){
@@ -30,7 +30,7 @@ if(length(path_files) >= 2){
   rownames(data) <- NULL
   data <- data %>% filter(replications != 0)
 } else {
-  data <- read.csv2("output/rep_1_finalresult.csv")
+  data <- read.csv2("output/rep_10_finalresult.csv")
   data <- data %>% filter(replications != 0)
   path <- here('output')
 }
@@ -40,8 +40,8 @@ colnames(data)[1] <- c('plasticity')
 #### RESULT FINAL USING TIDYVERSE ####
 result <- data %>% 
     as_tibble() %>% 
-    filter(timesimulation > 100) %>%
-    select(-timesimulation) %>% 
+    #filter(timesimulation > 100) %>%
+    dplyr::select(-timesimulation) %>% 
     group_by(plasticity, replications) %>% 
     summarize_all(mean) %>% 
     pivot_longer(col = -c(plasticity, replications)) %>%
