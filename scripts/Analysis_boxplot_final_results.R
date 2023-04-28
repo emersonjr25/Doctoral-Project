@@ -13,7 +13,7 @@ library(ggplot2)
 library(here)
 
 #### data ####
-path_general <- here('output')
+path_general <- here('output/')
 path_files <- list.files(path_general, pattern = 'csv')
 
 if(length(path_files) >= 2){
@@ -37,6 +37,17 @@ if(length(path_files) >= 2){
 rm(list = ls()[(ls() == 'data') == FALSE])
 colnames(data)[1] <- c('plasticity')
 
+# data %>%
+#   filter(replications == 10) %>%
+#   select(plasticity, timesimulation) %>%
+#   group_by(plasticity) %>%
+#   summarise(max = max(timesimulation)) %>%
+#   arrange(max)
+
+# data %>%
+#   filter(extinction > 0, plasticity == 0.25, timesimulation <= 190) %>%
+#   summarise(mean(extinction))
+  
 #### RESULT FINAL USING TIDYVERSE ####
 result <- data %>% 
     as_tibble() %>% 

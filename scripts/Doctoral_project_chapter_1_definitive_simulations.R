@@ -73,7 +73,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 config$gen3sis$speciation$divergence_threshold <- 10
 
 
-plasti <- c(0.1, 0.25, 1)
+plasti <- c(0.1)
 
 pos <- 0
 pos2 <- 0
@@ -238,7 +238,7 @@ for(p in 1:length(plasti)){
                                 units = "hours")[[1]]
 
       sgen3sis <- make_summary(val$config, val$data, val$vars,
-                               total_runtime, save_file = FALSE)
+                                total_runtime, save_file = FALSE)
       # if(ti <= 999){
       #   ras <- rasterFromXYZ(sgen3sis$summary$`richness-final`)
       #   max_ras <- max(ras@data@values, na.rm=TRUE)
