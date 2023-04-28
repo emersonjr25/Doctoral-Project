@@ -5,9 +5,9 @@
 ##### FUNCTION: APPLY DISPERSION WITH LIMIT #####
 
 disperse2 <- function (species, landscape, distance_matrix, config) {
- # if(ti == 974){
+  #if(ti == 990){
  #  browser()
- # }
+ #}
   if (!length(species[["abundance"]])) {
     return(species)
   }

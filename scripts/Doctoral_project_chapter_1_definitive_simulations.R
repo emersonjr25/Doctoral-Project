@@ -86,8 +86,8 @@ finalresult <- data.frame(plasticity = runif(quantitity_rep * length(plasti) * t
                           traitevolution = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
                           timesimulation = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0))
 
-#### EXECUTION SIMULATION ####
 
+#### EXECUTION SIMULATION ####
 for(p in 1:length(plasti)){
   
   for(r in rep:rep){
@@ -383,7 +383,7 @@ for(p in 1:length(plasti)){
     path_update[[k]] <- paste(path_temporary[k], listfiles[k], sep = "/", collapse = "--")
   }
   file.remove(path_update, showWarnings = FALSE)
-  rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, trait_ancient_less_last, trait_new_less_first, list_difference, position_list)
+  #rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, trait_ancient_less_last, trait_new_less_first, list_difference, position_list)
 }
 
 path <- here("output")
