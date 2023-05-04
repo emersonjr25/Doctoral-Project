@@ -10,7 +10,7 @@
 library(gen3sis)
 library(here)
 library(dplyr)
-#library(raster)
+library(raster)
 
 ################## SIMULATION #########################
 #### CARRYING CONFIGURATIONS AND PATHS ####
@@ -239,6 +239,16 @@ for(p in 1:length(plasti)){
 
       sgen3sis <- make_summary(val$config, val$data, val$vars,
                                 total_runtime, save_file = FALSE)
+      
+      # raster <- cbind(val[["data"]][["landscape"]][["coordinates"]], 
+      #       val[["data"]][["landscape"]][["environment"]][, 1])
+      # colnames(raster) <- c('x', 'y', 'temp')
+      # ras <- rasterFromXYZ(raster)
+      # max_ras <- max(ras@data@values, na.rm=TRUE)
+      # min_ras <- min(ras@data@values, na.rm=TRUE)
+      # rc <- color_richness(max(ras@data@values, na.rm=TRUE) + 1)
+      # image(ras, col=rc, bty = "o", xlab = "", ylab = "", las=1, asp = 1)
+
       # if(ti <= 999){
       #   ras <- rasterFromXYZ(sgen3sis$summary$`richness-final`)
       #   max_ras <- max(ras@data@values, na.rm=TRUE)
@@ -257,7 +267,7 @@ for(p in 1:length(plasti)){
       #   image(ras, col=rc, bty = "o", xlab = "", ylab = "", las=1, asp = 1)
       #   mtext(4, text="Final \u03B1 richness", line=1, cex=1.2)
       #   raster::plot(rasterFromXYZ(sgen3sis$summary$`richness-final`), legend.only=TRUE, add=TRUE,col=rc)
-      # }
+      }
       ################## TRAIT EVOLUTION #####################
       
       ##### PATHWAY TO TRAITS DATA ####
