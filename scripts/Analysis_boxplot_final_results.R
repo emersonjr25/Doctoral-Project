@@ -85,6 +85,8 @@ result <- data %>%
     as_tibble() %>% 
     filter(timesimulation > 100) %>%
     select(-timesimulation) %>% 
+    rename('trait evolution' = traitevolution,
+           diversification = diversif) %>%
     group_by(plasticity, replications) %>% 
     summarize_all(mean) %>% 
     pivot_longer(col = -c(plasticity, replications)) %>%
@@ -101,7 +103,7 @@ result <- data %>%
                         face = 2, 
                         hjust = 0.5), 
             axis.title.x = element_text(size = 14), 
-            axis.title.y = element_text(size = 14)) 
+            axis.title.y = element_text(size = 14))
     
 
 tiff(filename = file.path(here('output'), paste0("plot", "_", result[["labels"]][["y"]], "_", "plas", "all", ".tif")),
