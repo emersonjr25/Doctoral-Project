@@ -117,7 +117,7 @@ dev.off()
 #### ANOVA EXECUTION ####
 result_aov <- data %>% 
   as_tibble() %>% 
-  filter(timesimulation >= 100) %>%
+  filter(timesimulation > 100) %>%
   select(-timesimulation) %>% 
   group_by(plasticity, replications) %>% 
   summarize_all(mean) %>% 
@@ -128,13 +128,19 @@ summary(aov(result_aov$extinction ~ result_aov$plasticity))
 summary(aov(result_aov$diversif ~ result_aov$plasticity))
 summary(aov(result_aov$traitevolution ~ result_aov$plasticity))
 
-manova_result <- manova(cbind(traitevolution, 
-            extinction,
-            diversif,
-            speciation) ~ plasticity,
-       data = result_aov)
+# manova_result <- manova(cbind(traitevolution, 
+#             extinction,
+#             diversif,
+#             speciation) ~ plasticity,
+#        data = result_aov)
+# 
+# summary(manova_result, tol = 0)
 
-summary(manova_result, tol = 0)
+### tukey test ###
+TukeyHSD(aov(result_aov$speciation ~ result_aov$plasticity))
+TukeyHSD(aov(result_aov$extinction ~ result_aov$plasticity))
+TukeyHSD(aov(result_aov$diversif ~ result_aov$plasticity))
+TukeyHSD(aov(result_aov$traitevolution ~ result_aov$plasticity))
 
 #### BOX PLOT OF MEAN PER PLASTICITY WITH LIST ####
 unique_plasticity <- unique(data$plasticity)
