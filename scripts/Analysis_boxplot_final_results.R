@@ -37,6 +37,49 @@ if(length(path_files) >= 2){
 rm(list = ls()[(ls() == 'data') == FALSE])
 colnames(data)[1] <- c('plasticity')
 
+#### EXPLORING RESULTS ####
+
+# Min of max timesteps #
+data %>%
+  as.tibble() %>%
+  group_by(plasticity, replications) %>%
+  summarise(max = max(timesimulation)) %>%
+  group_by(plasticity) %>%
+  summarise(min = min(max)) %>%
+  arrange(min)
+
+# max timesteps #
+data %>%
+  as.tibble() %>%
+  group_by(plasticity) %>%
+  summarise(max = max(timesimulation)) %>%
+  arrange(max)
+
+# events of speciation, extinction, trait evolution, and diversification #
+data %>%
+  as.tibble() %>%
+  filter(extinction > 0, timesimulation <= 172) %>%
+  group_by(plasticity) %>%
+  summarise(len = length(extinction) / 10) %>%
+  arrange(len)
+  
+# mean, per plasticity, maximum of timesteps in all replications #
+data %>%
+  as.tibble() %>%
+  group_by(plasticity, replications) %>%
+  summarise(max = max(timesimulation)) %>%
+  group_by(plasticity) %>%
+  summarise(mean = mean(max)) %>%
+  arrange(mean)
+
+# max speciation, extinction, trait, and diversify #
+data %>%
+  as.tibble() %>%
+  filter(timesimulation > 150) %>%
+  group_by(plasticity) %>%
+  summarise(max = max(speciation)) %>%
+  arrange(max)
+
 #### RESULT FINAL USING TIDYVERSE ####
 result <- data %>% 
     as_tibble() %>% 
