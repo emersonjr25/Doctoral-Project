@@ -85,8 +85,10 @@ result <- data %>%
     as_tibble() %>% 
     filter(timesimulation > 100) %>%
     select(-timesimulation) %>% 
-    rename('trait evolution' = traitevolution,
-           diversification = diversif) %>%
+    rename('Trait evolution' = traitevolution,
+           Diversification = diversif,
+           Speciation = speciation,
+           Extinction = extinction) %>%
     group_by(plasticity, replications) %>% 
     summarize_all(mean) %>% 
     pivot_longer(col = -c(plasticity, replications)) %>%
