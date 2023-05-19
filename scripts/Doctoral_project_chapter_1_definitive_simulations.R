@@ -10,7 +10,7 @@
 library(gen3sis)
 library(here)
 library(dplyr)
-#library(raster)
+library(raster)
 
 ################## SIMULATION #########################
 #### CARRYING CONFIGURATIONS AND PATHS ####
@@ -56,7 +56,7 @@ for(i in functions_path){
 
 config$gen3sis$general$start_time <- 1000
 
-config$gen3sis$general$end_time <- 980
+config$gen3sis$general$end_time <- 950
 
 timesteps_total <- length(config$gen3sis$general$start_time:config$gen3sis$general$end_time)
 
@@ -76,7 +76,7 @@ tolerance_environment <- c(1.12, 1.5, 2)
 
 environment_type <- c('random', 'stable_low', 'stable_fast')
 
-plasti <- c(0.1)
+plasti <- c(0.5)
 
 pos <- 0
 pos2 <- 0
@@ -160,10 +160,7 @@ for(p in 1:length(plasti)){
       val <- restore_state(val, timestep_restart)
     }
     pos2 <- 0
-    for(i in functions_path){
-      source(i)
-    }
-    val <- modify_input_temperature(val$config, val$data, val$vars, environment_type[3])
+    val <- modify_input_temperature(val$config, val$data, val$vars, environment_type[2])
    
      for (ti in val$vars$steps) {
       val$vars$n_new_sp_ti <- 0
@@ -247,14 +244,14 @@ for(p in 1:length(plasti)){
       sgen3sis <- make_summary(val$config, val$data, val$vars,
                                 total_runtime, save_file = FALSE)
       
-      # raster <- cbind(val[["data"]][["landscape"]][["coordinates"]], 
-      #       val[["data"]][["landscape"]][["environment"]][, 1])
-      # colnames(raster) <- c('x', 'y', 'temp')
-      # ras <- rasterFromXYZ(raster)
-      # max_ras <- max(ras@data@values, na.rm=TRUE)
-      # min_ras <- min(ras@data@values, na.rm=TRUE)
-      # rc <- color_richness(max(ras@data@values, na.rm=TRUE) + 1)
-      # image(ras, col=rc, bty = "o", xlab = "", ylab = "", las=1, asp = 1)
+      raster <- cbind(val[["data"]][["landscape"]][["coordinates"]],
+            val[["data"]][["landscape"]][["environment"]][, 1])
+      colnames(raster) <- c('x', 'y', 'temp')
+      ras <- rasterFromXYZ(raster)
+      max_ras <- max(ras@data@values, na.rm=TRUE)
+      min_ras <- min(ras@data@values, na.rm=TRUE)
+      rc <- color_richness(max(ras@data@values, na.rm=TRUE) + 1)
+      image(ras, col=rc, bty = "o", xlab = "", ylab = "", las=1, asp = 1)
 
       # if(ti <= 999){
       #   ras <- rasterFromXYZ(sgen3sis$summary$`richness-final`)
@@ -416,7 +413,7 @@ for(p in 1:length(plasti)){
     path_update[[k]] <- paste(path_temporary[k], listfiles[k], sep = "/", collapse = "--")
   }
   file.remove(path_update, showWarnings = FALSE)
-  #rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, trait_ancient_less_last, trait_new_less_first, list_difference, position_list)
+  rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, trait_ancient_less_last, trait_new_less_first, list_difference, position_list)
 }
 
 path <- here("output")
