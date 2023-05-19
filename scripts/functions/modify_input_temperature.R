@@ -5,9 +5,8 @@
 ### FUNCTION: MODIFYING INPUT TEMPERATURE - + VARIATION ###
 
 modify_input_temperature <- function(config, data, vars, type_envir = 'random'){
-  #browser()
   temp_ancient <- data[["inputs"]][["environments"]][['temp']]
-  #temp_ancient <- val[['data']][["inputs"]][["environments"]][['temp']]
+  temp_ancient <- val[['data']][["inputs"]][["environments"]][['temp']]
   new_temp <- matrix(NA, 
                      nrow = nrow(temp_ancient),
                      ncol = ncol(temp_ancient),
@@ -27,10 +26,13 @@ modify_input_temperature <- function(config, data, vars, type_envir = 'random'){
     data[["inputs"]][["environments"]][['temp']] <- new_temp
     return(list(config = config, data = data, vars = vars))
   } else if (type_envir == 'stable_low') {
-    temp_sequence <- seq( (1 / vars[['ti']]), 0.98, 0.001)
+    length_change_temp <- round(vars[['ti']] - (vars[['ti']] * 0.02))
+    time_begin_change <- round(vars[['ti']] * 0.02)
+    temp_sequence <- seq( (1 / vars[['ti']]), 1, 0.001)
+    temp_sequence <- temp_sequence[1:length_change_temp]
     count_to_sequence <- 0
     for(i in 1:ncol(temp_ancient)){
-      if(i >= 21){
+      if(i > time_begin_change){
         count_to_sequence <- 1 + count_to_sequence
         temp <- temp_ancient[, i]
         temp[!is.na(temp)] <- sapply(temp[!is.na(temp)], function(x){
@@ -48,10 +50,13 @@ modify_input_temperature <- function(config, data, vars, type_envir = 'random'){
     data[["inputs"]][["environments"]][['temp']] <- new_temp
     return(list(config = config, data = data, vars = vars))
   } else if (type_envir == 'stable_fast'){
-    temp_sequence <- rep(seq( (1 / vars[['ti']]), 0.98, 0.01), (vars[['ti']] - (vars[['ti']] * 0.02)) / 98)
+    length_change_temp <- round(vars[['ti']] - (vars[['ti']] * 0.02))
+    time_begin_change <- round(vars[['ti']] * 0.02)
+    temp_sequence <- seq( (1 / vars[['ti']]), 1, 0.01)
+    temp_sequence <- rep_len(temp_sequence, length_change_temp)
     count_to_sequence <- 0
     for(i in 1:ncol(temp_ancient)){
-      if(i >= 21){
+      if(i > time_begin_change){
         count_to_sequence <- 1 + count_to_sequence
         temp <- temp_ancient[, i]
         temp[!is.na(temp)] <- sapply(temp[!is.na(temp)], function(x){
