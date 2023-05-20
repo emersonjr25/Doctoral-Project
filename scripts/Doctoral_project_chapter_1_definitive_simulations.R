@@ -10,7 +10,7 @@
 library(gen3sis)
 library(here)
 library(dplyr)
-library(raster)
+#library(raster)
 
 ################## SIMULATION #########################
 #### CARRYING CONFIGURATIONS AND PATHS ####
@@ -76,7 +76,7 @@ tolerance_environment <- c(1.12, 1.5, 2)
 
 environment_type <- c('random', 'stable_low', 'stable_fast')
 
-plasti <- c(0.1)
+plasti <- c(0.5)
 
 pos <- 0
 pos2 <- 0
@@ -244,16 +244,20 @@ for(p in 1:length(plasti)){
       sgen3sis <- make_summary(val$config, val$data, val$vars,
                                 total_runtime, save_file = FALSE)
       
-      raster <- cbind(val[["data"]][["landscape"]][["coordinates"]],
-            val[["data"]][["landscape"]][["environment"]][, 1])
-      colnames(raster) <- c('x', 'y', 'temp')
-      ras <- rasterFromXYZ(raster)
-      max_ras <- max(ras@data@values, na.rm=TRUE)
-      min_ras <- min(ras@data@values, na.rm=TRUE)
-      rc <- color_richness(max(ras@data@values, na.rm=TRUE) + 1)
-      image(ras, col=rc, bty = "o", xlab = "", ylab = "", las=1, asp = 1)
-
-      # if(ti <= 999){
+      # raster_data <- cbind(val[["data"]][["landscape"]][["coordinates"]],
+      #       val[["data"]][["landscape"]][["environment"]][, 1])
+      # colnames(raster_data) <- c('x', 'y', 'temp')
+      # ras <- rasterFromXYZ(raster_data)
+      # max_ras <- 1
+      # min_ras <- 0
+      # #sequencia <- seq(0.1, 1, 0.1)
+      # rc <- c('#4f75e8', '#0A2F51', '#ffa600', '#fe9700', '#fc8700', '#f97600',
+      #   '#f66504', '#f2520e', '#ed3c16', '#e81f1c')
+      # image(ras, col=rc, bty = "o", xlab = "", ylab = "", las=1, asp = 1)
+      # mtext(4, text="Temperature", line=1, cex=1.2)
+      # raster::plot(rasterFromXYZ(raster_data), legend.only=TRUE, add=TRUE,col=rc)
+      
+      #  if(ti <= 999){
       #   ras <- rasterFromXYZ(sgen3sis$summary$`richness-final`)
       #   max_ras <- max(ras@data@values, na.rm=TRUE)
       #   min_ras <- min(ras@data@values, na.rm=TRUE)
@@ -271,7 +275,7 @@ for(p in 1:length(plasti)){
       #   image(ras, col=rc, bty = "o", xlab = "", ylab = "", las=1, asp = 1)
       #   mtext(4, text="Final \u03B1 richness", line=1, cex=1.2)
       #   raster::plot(rasterFromXYZ(sgen3sis$summary$`richness-final`), legend.only=TRUE, add=TRUE,col=rc)
-      #}
+      # }
       ################## TRAIT EVOLUTION #####################
       
       ##### PATHWAY TO TRAITS DATA ####
