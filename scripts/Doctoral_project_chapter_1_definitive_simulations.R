@@ -6,10 +6,11 @@
 ##### Methods: Computational simulation #############
 ##### Script to input, modify and run model #########
 
-#### PACKAGES ####
+#### PACKAGES
 library(gen3sis)
 library(here)
 library(dplyr)
+#library(raster)
 
 ################## SIMULATION #########################
 #### CARRYING CONFIGURATIONS AND PATHS ####
@@ -55,14 +56,14 @@ for(i in functions_path){
 
 config$gen3sis$general$start_time <- 1000
 
-config$gen3sis$general$end_time <- 1
+config$gen3sis$general$end_time <- 950
 
 timesteps_total <- length(config$gen3sis$general$start_time:config$gen3sis$general$end_time)
 
 config$gen3sis$general$max_number_of_species <- 50000
 config$gen3sis$general$max_number_of_coexisting_species <- 200000
 
-rep <- 1
+rep <- 10
 quantitity_rep <- 1
 
 config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
@@ -71,22 +72,31 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 
 config$gen3sis$speciation$divergence_threshold <- 10
 
+tolerance_environment_options <- c(1.12, 1.5, 2)
+tolerance_environment_chose <- tolerance_environment_options[1]
 
-plasti <- c(0, 0.05, 0.1, 0.15, 0.25, 0.5, 0.75, 1)
+environment_type <- c('random', 'stable_low', 'stable_fast')
+environment_type_chose <- environment_type[1]
+
+plasti <- c(0.1)
 
 pos <- 0
 pos2 <- 0
 
 finalresult <- data.frame(plasticity = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
                           replications = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
+                          tolerance = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
+                          enviroment_type = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
                           speciation = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
                           extinction = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
                           diversif = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
                           traitevolution = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
-                          timesimulation = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0))
+                          timesimulation = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
+                          abundance = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
+                          occupancy = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0))
+
 
 #### EXECUTION SIMULATION ####
-
 for(p in 1:length(plasti)){
   
   for(r in rep:rep){
@@ -152,9 +162,9 @@ for(p in 1:length(plasti)){
       val <- restore_state(val, timestep_restart)
     }
     pos2 <- 0
-    val <- modify_input_temperature(val$config, val$data, val$vars)
-    
-    for (ti in val$vars$steps) {
+    val <- modify_input_temperature(val$config, val$data, val$vars, environment_type_chose)
+   
+     for (ti in val$vars$steps) {
       val$vars$n_new_sp_ti <- 0
       val$vars$n_ext_sp_ti <- 0
       val$vars$n_sp_added_ti <- 0
@@ -217,7 +227,7 @@ for(p in 1:length(plasti)){
         print("max number of species reached, breaking loop")
         break
       }
-      val <- loop_ecology2(val$config, val$data, val$vars, plasti[p])
+      val <- loop_ecology2(val$config, val$data, val$vars, plasti[p], tolerance_environment_chose)
       
       if (verbose >= 0 & val$vars$flag == "OK") {
         cat("Simulation finished. All OK \n")
@@ -234,8 +244,40 @@ for(p in 1:length(plasti)){
                                 units = "hours")[[1]]
 
       sgen3sis <- make_summary(val$config, val$data, val$vars,
-                               total_runtime, save_file = FALSE)
+                                total_runtime, save_file = FALSE)
       
+      # raster_data <- cbind(val[["data"]][["landscape"]][["coordinates"]],
+      #       val[["data"]][["landscape"]][["environment"]][, 1])
+      # colnames(raster_data) <- c('x', 'y', 'temp')
+      # ras <- rasterFromXYZ(raster_data)
+      # max_ras <- 1
+      # min_ras <- 0
+      # #sequencia <- seq(0.1, 1, 0.1)
+      # rc <- c('#4f75e8', '#0A2F51', '#ffa600', '#fe9700', '#fc8700', '#f97600',
+      #   '#f66504', '#f2520e', '#ed3c16', '#e81f1c')
+      # image(ras, col=rc, bty = "o", xlab = "", ylab = "", las=1, asp = 1)
+      # mtext(4, text="Temperature", line=1, cex=1.2)
+      # raster::plot(rasterFromXYZ(raster_data), legend.only=TRUE, add=TRUE,col=rc)
+      
+      #  if(ti <= 999){
+      #   ras <- rasterFromXYZ(sgen3sis$summary$`richness-final`)
+      #   max_ras <- max(ras@data@values, na.rm=TRUE)
+      #   min_ras <- min(ras@data@values, na.rm=TRUE)
+      #   # rc <- color_richness(max(ras@data@values, na.rm=TRUE) + 1)
+      #   #terrain color
+      #   zerorichness_col <- "navajowhite3"
+      #   if (max_ras==0){ #if all extinct
+      #     rc <-  zerorichness_col
+      #   } else {
+      #     rc <- color_richness(max_ras)
+      #     if (min_ras==0){ #if there is zero-richness (i.e. inhabited sites)
+      #       rc <- c(zerorichness_col, rc)
+      #     }
+      #   }
+      #   image(ras, col=rc, bty = "o", xlab = "", ylab = "", las=1, asp = 1)
+      #   mtext(4, text="Final \u03B1 richness", line=1, cex=1.2)
+      #   raster::plot(rasterFromXYZ(sgen3sis$summary$`richness-final`), legend.only=TRUE, add=TRUE,col=rc)
+      # }
       ################## TRAIT EVOLUTION #####################
       
       ##### PATHWAY TO TRAITS DATA ####
@@ -324,6 +366,18 @@ for(p in 1:length(plasti)){
       } else {
         traitevolution <- 0
       }
+      ### extra results ###
+      count_loop <- 1
+      abundance_species <- vector(mode = 'integer', length(val[['data']][['all_species']]))
+      
+      for(i in seq_along(val[['data']][['all_species']])){
+        abundance_species[count_loop] <- length(val[['data']][['all_species']][[count_loop]]$abundance)
+        count_loop <- count_loop + 1
+      }
+ 
+      total_abundance <- sum(abundance_species)
+      
+      occupancy <- as.numeric(sgen3sis[["summary"]][["occupancy"]][length(sgen3sis[["summary"]][["occupancy"]])])
       
       ##### SPECIATION AND EXTINCTION ####
       pos <- pos + 1
@@ -340,11 +394,15 @@ for(p in 1:length(plasti)){
       
       finalresult$plasticity[pos] <- plasti[[p]]
       finalresult$replications[pos] <- r
+      finalresult$tolerance[pos] <- tolerance_environment_chose
+      finalresult$enviroment_type[pos] <- environment_type_chose
       finalresult$speciation[pos] <- ratespeciation
       finalresult$extinction[pos] <- rateextinction
       finalresult$diversif[pos] <- diversification
       finalresult$traitevolution[pos] <- traitevolution
       finalresult$timesimulation[pos] <- pos2
+      finalresult$abundance[pos] <- total_abundance
+      finalresult$occupancy[pos] <- occupancy
     } 
   }
   pos2 <- 0
