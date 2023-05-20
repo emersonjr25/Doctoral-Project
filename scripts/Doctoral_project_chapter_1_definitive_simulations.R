@@ -76,7 +76,7 @@ tolerance_environment_options <- c(1.12, 1.5, 2)
 tolerance_environment_chose <- tolerance_environment_options[1]
 
 environment_type <- c('random', 'stable_low', 'stable_fast')
-environment_type_chose <- environment_type[3]
+environment_type_chose <- environment_type[1]
 
 plasti <- c(0.1)
 
