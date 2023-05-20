@@ -5,7 +5,9 @@
 ### FUNCTION: MODIFYING INPUT TEMPERATURE - + VARIATION ###
 
 modify_input_temperature <- function(config, data, vars, type_envir = 'random'){
+  #browser()
   temp_ancient <- data[["inputs"]][["environments"]][['temp']]
+  #temp_ancient <- val[['data']][["inputs"]][["environments"]][['temp']]
   new_temp <- matrix(NA, 
                      nrow = nrow(temp_ancient),
                      ncol = ncol(temp_ancient),
@@ -25,51 +27,39 @@ modify_input_temperature <- function(config, data, vars, type_envir = 'random'){
     data[["inputs"]][["environments"]][['temp']] <- new_temp
     return(list(config = config, data = data, vars = vars))
   } else if (type_envir == 'stable_low') {
-    length_change_temp <- round(vars[['ti']] - (vars[['ti']] * 0.05))
-    time_begin_change <- round(vars[['ti']] * 0.05)
-    temp_sequence <- seq( (1 / vars[['ti']]), 1, 0.001)
-    temp_sequence <- temp_sequence[1:ncol(temp_ancient)]
-    count_to_sequence <- 0
+    temp_sequence <- seq(mean(temp_ancient[!is.na(temp_ancient)]), 0, -0.001)
+    temp_sequence2 <- seq(0, 1, 0.001)
+    temp_sequence3 <- seq(1, mean(temp_ancient[!is.na(temp_ancient)]), -0.001)
+    temp_sequence_final <- round(c(temp_sequence, temp_sequence2, temp_sequence3), 3)
+    temp_sequence_final <- rep_len(temp_sequence_final, ncol(temp_ancient))
     for(i in 1:ncol(temp_ancient)){
-      if(i > time_begin_change){
-        count_to_sequence <- 1 + count_to_sequence
-        temp <- temp_ancient[, i]
-        temp[!is.na(temp)] <- sapply(temp[!is.na(temp)], function(x){
-          x <- rnorm(1, temp_sequence[count_to_sequence], 0.001)
-        })
-        temp[!is.na(temp) & temp >= 1] <- temp_sequence[count_to_sequence]
-        temp[!is.na(temp) & temp <= 0] <- temp_sequence[count_to_sequence]
-        new_temp[, i] <- temp
-        temp <- 0
-      } 
-      else {
-        new_temp[, i] <- temp_ancient[, i]
-      }
-    }
+      temp <- temp_ancient[, i]
+      temp[!is.na(temp)] <- sapply(temp[!is.na(temp)], function(x){
+        x <- temp_sequence_final[i]
+      })
+      temp[!is.na(temp) & temp >= 1] <- temp_sequence_final[i]
+      temp[!is.na(temp) & temp <= 0] <- temp_sequence_final[i]
+      new_temp[, i] <- temp
+      temp <- 0
+    } 
     data[["inputs"]][["environments"]][['temp']] <- new_temp
     return(list(config = config, data = data, vars = vars))
   } else if (type_envir == 'stable_fast'){
-    length_change_temp <- round(vars[['ti']] - (vars[['ti']] * 0.05))
-    time_begin_change <- round(vars[['ti']] * 0.05)
-    temp_sequence <- seq( (1 / vars[['ti']]), 1, 0.01)
-    temp_sequence <- rep_len(temp_sequence, ncol(temp_ancient))
-    count_to_sequence <- 0
+    temp_sequence <- seq(mean(temp_ancient[!is.na(temp_ancient)]), 0, -0.01)
+    temp_sequence2 <- seq(0, 1, 0.01)
+    temp_sequence3 <- seq(1, mean(temp_ancient[!is.na(temp_ancient)]), -0.01)
+    temp_sequence_final <- round(c(temp_sequence, temp_sequence2, temp_sequence3), 3)
+    temp_sequence_final <- rep_len(temp_sequence_final, ncol(temp_ancient))
     for(i in 1:ncol(temp_ancient)){
-      if(i > time_begin_change){
-        count_to_sequence <- 1 + count_to_sequence
-        temp <- temp_ancient[, i]
-        temp[!is.na(temp)] <- sapply(temp[!is.na(temp)], function(x){
-          x <-  rnorm(1, temp_sequence[count_to_sequence], 0.001)
-        })
-        temp[!is.na(temp) & temp >= 1] <- temp_sequence[count_to_sequence]
-        temp[!is.na(temp) & temp <= 0] <- temp_sequence[count_to_sequence]
-        new_temp[, i] <- temp
-        temp <- 0
-      } 
-      else {
-        new_temp[, i] <- temp_ancient[, i]
-      }
-    }
+      temp <- temp_ancient[, i]
+      temp[!is.na(temp)] <- sapply(temp[!is.na(temp)], function(x){
+        x <-  temp_sequence_final[i]
+      })
+      temp[!is.na(temp) & temp >= 1] <- temp_sequence_final[i]
+      temp[!is.na(temp) & temp <= 0] <- temp_sequence_final[i]
+      new_temp[, i] <- temp
+      temp <- 0
+    } 
     data[["inputs"]][["environments"]][['temp']] <- new_temp
     return(list(config = config, data = data, vars = vars))
   } else {

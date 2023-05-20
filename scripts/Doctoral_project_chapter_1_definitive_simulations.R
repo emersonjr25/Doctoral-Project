@@ -76,7 +76,7 @@ tolerance_environment <- c(1.12, 1.5, 2)
 
 environment_type <- c('random', 'stable_low', 'stable_fast')
 
-plasti <- c(0.5)
+plasti <- c(0.1)
 
 pos <- 0
 pos2 <- 0
@@ -160,7 +160,7 @@ for(p in 1:length(plasti)){
       val <- restore_state(val, timestep_restart)
     }
     pos2 <- 0
-    val <- modify_input_temperature(val$config, val$data, val$vars, environment_type[2])
+    val <- modify_input_temperature(val$config, val$data, val$vars, environment_type[3])
    
      for (ti in val$vars$steps) {
       val$vars$n_new_sp_ti <- 0
