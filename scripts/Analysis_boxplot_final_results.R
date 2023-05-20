@@ -13,7 +13,7 @@ library(ggplot2)
 library(here)
 
 #### data ####
-path_general <- here('output/')
+path_general <- here('output/files_to_results/')
 path_files <- list.files(path_general, pattern = 'csv')
 
 if(length(path_files) >= 2){
@@ -30,61 +30,33 @@ if(length(path_files) >= 2){
   rownames(data) <- NULL
   data <- data %>% filter(replications != 0)
 } else {
-  data <- read.csv2("output/rep_10_finalresult.csv")
+  data <- read.csv2("output/rep_1_finalresult.csv")
   data <- data %>% filter(replications != 0)
   path <- here('output')
 }
 rm(list = ls()[(ls() == 'data') == FALSE])
 colnames(data)[1] <- c('plasticity')
 
-#### EXPLORING RESULTS ####
+# data %>%
+#   filter(replications == 10) %>%
+#   select(plasticity, timesimulation) %>%
+#   group_by(plasticity) %>%
+#   summarise(max = max(timesimulation)) %>%
+#   arrange(max)
 
-# Min of max timesteps #
-data %>%
-  as.tibble() %>%
-  group_by(plasticity, replications) %>%
-  summarise(max = max(timesimulation)) %>%
-  group_by(plasticity) %>%
-  summarise(min = min(max)) %>%
-  arrange(min)
+# data %>%
+#   filter(extinction > 0, plasticity == 0.25, timesimulation <= 190) %>%
+#   summarise(mean(extinction))
 
-# max timesteps #
-data %>%
-  as.tibble() %>%
-  group_by(plasticity) %>%
-  summarise(max = max(timesimulation)) %>%
-  arrange(max)
-
-# events of speciation, extinction, trait evolution, and diversification #
-data %>%
-  as.tibble() %>%
-  filter(extinction > 0, timesimulation <= 172) %>%
-  group_by(plasticity) %>%
-  summarise(len = length(extinction) / 10) %>%
-  arrange(len)
-
-# mean, per plasticity, maximum of timesteps in all replications #
-data %>%
-  as.tibble() %>%
-  group_by(plasticity, replications) %>%
-  summarise(max = max(timesimulation)) %>%
-  group_by(plasticity) %>%
-  summarise(mean = mean(max)) %>%
-  arrange(mean)
-
-# max speciation, extinction, trait, and diversify #
-data %>%
-  as.tibble() %>%
-  filter(timesimulation > 150) %>%
-  group_by(plasticity) %>%
-  summarise(max = max(speciation)) %>%
-  arrange(max)
-  
 #### RESULT FINAL USING TIDYVERSE ####
 result <- data %>% 
     as_tibble() %>% 
-    #filter(timesimulation > 100) %>%
-    dplyr::select(-timesimulation) %>% 
+    filter(timesimulation > 100) %>%
+    select(-timesimulation) %>% 
+    rename('Trait evolution' = traitevolution,
+           Diversification = diversif,
+           Speciation = speciation,
+           Extinction = extinction) %>%
     group_by(plasticity, replications) %>% 
     summarize_all(mean) %>% 
     pivot_longer(col = -c(plasticity, replications)) %>%
@@ -101,7 +73,7 @@ result <- data %>%
                         face = 2, 
                         hjust = 0.5), 
             axis.title.x = element_text(size = 14), 
-            axis.title.y = element_text(size = 14)) 
+            axis.title.y = element_text(size = 14))
     
 
 tiff(filename = file.path(here('output'), paste0("plot", "_", result[["labels"]][["y"]], "_", "plas", "all", ".tif")),
@@ -115,7 +87,7 @@ dev.off()
 #### ANOVA EXECUTION ####
 result_aov <- data %>% 
   as_tibble() %>% 
-  filter(timesimulation >= 100) %>%
+  filter(timesimulation > 100) %>%
   select(-timesimulation) %>% 
   group_by(plasticity, replications) %>% 
   summarize_all(mean) %>% 
@@ -126,13 +98,19 @@ summary(aov(result_aov$extinction ~ result_aov$plasticity))
 summary(aov(result_aov$diversif ~ result_aov$plasticity))
 summary(aov(result_aov$traitevolution ~ result_aov$plasticity))
 
-manova_result <- manova(cbind(traitevolution, 
-            extinction,
-            diversif,
-            speciation) ~ plasticity,
-       data = result_aov)
+# manova_result <- manova(cbind(traitevolution, 
+#             extinction,
+#             diversif,
+#             speciation) ~ plasticity,
+#        data = result_aov)
+# 
+# summary(manova_result, tol = 0)
 
-summary(manova_result, tol = 0)
+### tukey test ###
+TukeyHSD(aov(result_aov$speciation ~ result_aov$plasticity))
+TukeyHSD(aov(result_aov$extinction ~ result_aov$plasticity))
+TukeyHSD(aov(result_aov$diversif ~ result_aov$plasticity))
+TukeyHSD(aov(result_aov$traitevolution ~ result_aov$plasticity))
 
 #### BOX PLOT OF MEAN PER PLASTICITY WITH LIST ####
 unique_plasticity <- unique(data$plasticity)
