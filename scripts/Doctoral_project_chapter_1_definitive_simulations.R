@@ -72,11 +72,13 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 
 config$gen3sis$speciation$divergence_threshold <- 10
 
-tolerance_environment <- c(1.12, 1.5, 2)
+tolerance_environment_options <- c(1.12, 1.5, 2)
+tolerance_environment_chose <- tolerance_environment_options[1]
 
 environment_type <- c('random', 'stable_low', 'stable_fast')
+environment_type_chose <- environment_type[3]
 
-plasti <- c(0.5)
+plasti <- c(0.1)
 
 pos <- 0
 pos2 <- 0
@@ -160,7 +162,7 @@ for(p in 1:length(plasti)){
       val <- restore_state(val, timestep_restart)
     }
     pos2 <- 0
-    val <- modify_input_temperature(val$config, val$data, val$vars, environment_type[3])
+    val <- modify_input_temperature(val$config, val$data, val$vars, environment_type_chose)
    
      for (ti in val$vars$steps) {
       val$vars$n_new_sp_ti <- 0
@@ -225,7 +227,7 @@ for(p in 1:length(plasti)){
         print("max number of species reached, breaking loop")
         break
       }
-      val <- loop_ecology2(val$config, val$data, val$vars, plasti[p], tolerance_environment[1])
+      val <- loop_ecology2(val$config, val$data, val$vars, plasti[p], tolerance_environment_chose)
       
       if (verbose >= 0 & val$vars$flag == "OK") {
         cat("Simulation finished. All OK \n")
@@ -392,8 +394,8 @@ for(p in 1:length(plasti)){
       
       finalresult$plasticity[pos] <- plasti[[p]]
       finalresult$replications[pos] <- r
-      finalresult$tolerance <- 1
-      finalresult$enviroment_type <- 'NA'
+      finalresult$tolerance[pos] <- tolerance_environment_chose
+      finalresult$enviroment_type[pos] <- environment_type_chose
       finalresult$speciation[pos] <- ratespeciation
       finalresult$extinction[pos] <- rateextinction
       finalresult$diversif[pos] <- diversification
