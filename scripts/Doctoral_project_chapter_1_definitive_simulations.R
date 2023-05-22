@@ -56,7 +56,7 @@ for(i in functions_path){
 
 config$gen3sis$general$start_time <- 1000
 
-config$gen3sis$general$end_time <- 950
+config$gen3sis$general$end_time <- 990
 
 timesteps_total <- length(config$gen3sis$general$start_time:config$gen3sis$general$end_time)
 
@@ -375,7 +375,7 @@ for(p in 1:length(plasti)){
         count_loop <- count_loop + 1
       }
  
-      total_abundance <- sum(abundance_species)
+      total_abundance <- (sum(abundance_species) / as.numeric(sgen3sis[["summary"]][["phylo_summary"]][, 2][length(sgen3sis[["summary"]][["phylo_summary"]][, 2])]))
       
       occupancy <- as.numeric(sgen3sis[["summary"]][["occupancy"]][length(sgen3sis[["summary"]][["occupancy"]])])
       
