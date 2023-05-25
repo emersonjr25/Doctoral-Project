@@ -5,8 +5,8 @@
 ##### FUNCTION: APPLY ECOLOGY WITH PLASTICITY #####
 
 config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, 
-                                                 config, plast_value, tolerance) {
-  abundance_scale = tolerance
+                                                 config, plast_value) {
+  abundance_scale = 1.12
   abundance_threshold = 1
   #abundance threshold
   survive <- abundance>=abundance_threshold
