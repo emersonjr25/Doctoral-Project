@@ -56,14 +56,14 @@ for(i in functions_path){
 
 config$gen3sis$general$start_time <- 1000
 
-config$gen3sis$general$end_time <- 950
+config$gen3sis$general$end_time <- 1
 
 timesteps_total <- length(config$gen3sis$general$start_time:config$gen3sis$general$end_time)
 
 config$gen3sis$general$max_number_of_species <- 50000
 config$gen3sis$general$max_number_of_coexisting_species <- 200000
 
-rep <- 10
+rep <- 1
 quantitity_rep <- 1
 
 config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
@@ -73,7 +73,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 config$gen3sis$speciation$divergence_threshold <- 10
 
 environment_type <- c('random', 'stable_low', 'stable_fast')
-environment_type_chose <- environment_type[3]
+environment_type_chose <- environment_type[2]
 
 plasti <- c(0, 0.05, 0.1, 0.15, 0.25, 0.5, 0.75, 1)
 

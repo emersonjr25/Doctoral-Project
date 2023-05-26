@@ -55,9 +55,9 @@ modify_input_temperature <- function(config, data, vars, type_envir = 'random'){
   } else if (type_envir == 'stable_fast'){
     ### creating the temperature sequence from media ###
     mean_temp <- round(mean(temp_ancient[!is.na(temp_ancient)]), 3)
-    temp_sequence1 <- seq(mean_temp, 0, -0.003)
-    temp_sequence2 <- seq(0, 1, 0.003)
-    temp_sequence3 <- seq(1, mean_temp, -0.003)
+    temp_sequence1 <- seq(mean_temp, 0, -0.0015)
+    temp_sequence2 <- seq(0, 1, 0.0015)
+    temp_sequence3 <- seq(1, mean_temp, -0.0015)
     temp_without_right_len <- round(c(temp_sequence1, temp_sequence2, temp_sequence3), 3)
     temp_sequence_ended <- rep_len(temp_without_right_len, ncol(temp_ancient))
     ### organizing in way that function setup_landscape read ###
