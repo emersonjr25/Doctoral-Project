@@ -10,7 +10,7 @@
 library(gen3sis)
 library(here)
 library(dplyr)
-library(raster)
+#library(raster)
 
 ################## SIMULATION #########################
 #### CARRYING CONFIGURATIONS AND PATHS ####
@@ -73,16 +73,15 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 config$gen3sis$speciation$divergence_threshold <- 10
 
 environment_type <- c('random', 'stable_low', 'stable_fast')
-environment_type_chose <- environment_type[3]
+environment_type_chose <- environment_type[2]
 
-plasti <- c(1)
+plasti <- c(0)
 
 pos <- 0
 pos2 <- 0
 
 finalresult <- data.frame(plasticity = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
                           replications = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
-                          tolerance = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
                           enviroment_type = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
                           speciation = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
                           extinction = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
@@ -243,18 +242,18 @@ for(p in 1:length(plasti)){
       sgen3sis <- make_summary(val$config, val$data, val$vars,
                                 total_runtime, save_file = FALSE)
       
-      raster_data <- cbind(val[["data"]][["landscape"]][["coordinates"]],
-            val[["data"]][["landscape"]][["environment"]][, 1])
-      colnames(raster_data) <- c('x', 'y', 'temp')
-      ras <- rasterFromXYZ(raster_data)
-      max_ras <- 1
-      min_ras <- 0
-      #sequencia <- seq(0.1, 1, 0.1)
-      rc <- c('#4f75e8', '#0A2F51', '#ffa600', '#fe9700', '#fc8700', '#f97600',
-        '#f66504', '#f2520e', '#ed3c16', '#e81f1c')
-      image(ras, col=rc, bty = "o", xlab = "", ylab = "", las=1, asp = 1)
-      mtext(4, text="Temperature", line=1, cex=1.2)
-      raster::plot(rasterFromXYZ(raster_data), legend.only=TRUE, add=TRUE,col=rc)
+      # raster_data <- cbind(val[["data"]][["landscape"]][["coordinates"]],
+      #       val[["data"]][["landscape"]][["environment"]][, 1])
+      # colnames(raster_data) <- c('x', 'y', 'temp')
+      # ras <- rasterFromXYZ(raster_data)
+      # max_ras <- 1
+      # min_ras <- 0
+      # #sequencia <- seq(0.1, 1, 0.1)
+      # rc <- c('#4f75e8', '#0A2F51', '#ffa600', '#fe9700', '#fc8700', '#f97600',
+      #   '#f66504', '#f2520e', '#ed3c16', '#e81f1c')
+      # image(ras, col=rc, bty = "o", xlab = "", ylab = "", las=1, asp = 1)
+      # mtext(4, text="Temperature", line=1, cex=1.2)
+      # raster::plot(rasterFromXYZ(raster_data), legend.only=TRUE, add=TRUE,col=rc)
       
       #  if(ti <= 999){
       #   ras <- rasterFromXYZ(sgen3sis$summary$`richness-final`)
@@ -391,7 +390,6 @@ for(p in 1:length(plasti)){
       
       finalresult$plasticity[pos] <- plasti[[p]]
       finalresult$replications[pos] <- r
-      finalresult$tolerance[pos] <- environment_type_chose
       finalresult$enviroment_type[pos] <- environment_type_chose
       finalresult$speciation[pos] <- ratespeciation
       finalresult$extinction[pos] <- rateextinction
@@ -421,4 +419,3 @@ for(p in 1:length(plasti)){
 
 path <- here("output")
 write.csv2(finalresult, file.path(path, paste0('rep_', rep, "_finalresult.csv")), row.names = FALSE)
-
