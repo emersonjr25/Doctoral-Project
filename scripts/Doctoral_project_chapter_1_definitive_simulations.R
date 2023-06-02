@@ -89,7 +89,8 @@ finalresult <- data.frame(plasticity = runif(quantitity_rep * length(plasti) * t
                           traitevolution = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
                           timesimulation = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
                           abundance = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
-                          occupancy = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0))
+                          occupancy = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
+                          alive_spec = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0))
 
 
 #### EXECUTION SIMULATION ####
@@ -375,6 +376,8 @@ for(p in 1:length(plasti)){
       
       occupancy <- as.numeric(sgen3sis[["summary"]][["occupancy"]][length(sgen3sis[["summary"]][["occupancy"]])])
       
+      alive_species <- as.numeric(sgen3sis[["summary"]][["phylo_summary"]][, 2][length(sgen3sis[["summary"]][["phylo_summary"]][, 2])])
+      
       ##### SPECIATION AND EXTINCTION ####
       pos <- pos + 1
       pos2 <- pos2 + 1
@@ -398,6 +401,7 @@ for(p in 1:length(plasti)){
       finalresult$timesimulation[pos] <- pos2
       finalresult$abundance[pos] <- total_abundance
       finalresult$occupancy[pos] <- occupancy
+      finalresult$alive_spec[pos] <- alive_species
     } 
   }
   pos2 <- 0
