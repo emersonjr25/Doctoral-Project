@@ -73,7 +73,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 config$gen3sis$speciation$divergence_threshold <- 10
 
 environment_type <- c('random', 'stable_low', 'stable_fast')
-environment_type_chose <- environment_type[2]
+environment_type_chose <- environment_type[3]
 
 plasti <- c(0, 0.05, 0.1, 0.15, 0.25, 0.5, 0.75, 1)
 
