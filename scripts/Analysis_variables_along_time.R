@@ -30,7 +30,7 @@ if(length(path_files) >= 2){
   rownames(data) <- NULL
   data <- data %>% filter(replications != 0)
 } else {
-  data <- read.csv2("output/rep_10_finalresult.csv")
+  data <- read.csv2("output/rep_4_finalresult.csv")
   data <- data %>% filter(replications != 0)
   path <- here('output')
 }

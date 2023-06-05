@@ -13,7 +13,7 @@ library(ggplot2)
 library(here)
 
 #### data ####
-path_general <- here('output/files_to_results/')
+path_general <- here('output/files_to_results/stable_low_envi')
 path_files <- list.files(path_general, pattern = 'csv')
 
 if(length(path_files) >= 2){
@@ -37,54 +37,12 @@ if(length(path_files) >= 2){
 rm(list = ls()[(ls() == 'data') == FALSE])
 colnames(data)[1] <- c('plasticity')
 
-#### EXPLORING RESULTS ####
-
-# Min of max timesteps #
-data %>%
-  as.tibble() %>%
-  group_by(plasticity, replications) %>%
-  summarise(max = max(timesimulation)) %>%
-  group_by(plasticity) %>%
-  summarise(min = min(max)) %>%
-  arrange(min)
-
-# max timesteps #
-data %>%
-  as.tibble() %>%
-  group_by(plasticity) %>%
-  summarise(max = max(timesimulation)) %>%
-  arrange(max)
-
-# events of speciation, extinction, trait evolution, and diversification #
-data %>%
-  as.tibble() %>%
-  filter(extinction > 0, timesimulation <= 172) %>%
-  group_by(plasticity) %>%
-  summarise(len = length(extinction) / 10) %>%
-  arrange(len)
-  
-# mean, per plasticity, maximum of timesteps in all replications #
-data %>%
-  as.tibble() %>%
-  group_by(plasticity, replications) %>%
-  summarise(max = max(timesimulation)) %>%
-  group_by(plasticity) %>%
-  summarise(mean = mean(max)) %>%
-  arrange(mean)
-
-# max speciation, extinction, trait, and diversify #
-data %>%
-  as.tibble() %>%
-  filter(timesimulation > 150) %>%
-  group_by(plasticity) %>%
-  summarise(max = max(speciation)) %>%
-  arrange(max)
 
 #### RESULT FINAL USING TIDYVERSE ####
 result <- data %>% 
     as_tibble() %>% 
     filter(timesimulation > 100) %>%
-    select(-timesimulation) %>% 
+    select(-c(timesimulation, enviroment_type)) %>% 
     rename('Trait evolution' = traitevolution,
            Diversification = diversif,
            Speciation = speciation,
@@ -109,7 +67,8 @@ result <- data %>%
     
 
 tiff(filename = file.path(here('output'), paste0("plot", "_", result[["labels"]][["y"]], "_", "plas", "all", ".tif")),
-     width = 800,
+     width = 1000,
+     #width = 800, #without abundance and occupancy
      height = 600,
      units = "px",
      res = 100)
@@ -223,3 +182,46 @@ ggplot(results_diversification, aes(plasticity, divers, group = plasticity)) +
 ggplot(results_trait, aes(plasticity, trait, group = plasticity)) +
   geom_boxplot() + 
   geom_jitter()
+
+#### EXPLORING RESULTS ####
+
+# Min of max timesteps #
+data %>%
+  as.tibble() %>%
+  group_by(plasticity, replications) %>%
+  summarise(max = max(timesimulation)) %>%
+  group_by(plasticity) %>%
+  summarise(min = min(max)) %>%
+  arrange(min)
+
+# max timesteps #
+data %>%
+  as.tibble() %>%
+  group_by(plasticity) %>%
+  summarise(max = max(timesimulation)) %>%
+  arrange(max)
+
+# events of speciation, extinction, trait evolution, and diversification #
+data %>%
+  as.tibble() %>%
+  filter(extinction > 0, timesimulation <= 172) %>%
+  group_by(plasticity) %>%
+  summarise(len = length(extinction) / 10) %>%
+  arrange(len)
+
+# mean, per plasticity, maximum of timesteps in all replications #
+data %>%
+  as.tibble() %>%
+  group_by(plasticity, replications) %>%
+  summarise(max = max(timesimulation)) %>%
+  group_by(plasticity) %>%
+  summarise(mean = mean(max)) %>%
+  arrange(mean)
+
+# max speciation, extinction, trait, and diversify #
+data %>%
+  as.tibble() %>%
+  filter(timesimulation > 150) %>%
+  group_by(plasticity) %>%
+  summarise(max = max(speciation)) %>%
+  arrange(max)
