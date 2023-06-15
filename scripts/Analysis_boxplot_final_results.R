@@ -39,20 +39,6 @@ if(length(path_files) >= 2){
 rm(list = ls()[(ls() == 'data') == FALSE])
 colnames(data)[1] <- c('plasticity')
 
-### test to verify species alives major than 0 in stable fast simulations ###
-
-plasticity_which_species_die <- data %>%
-  filter(alive_spec == 0) %>%
-  select(plasticity) %>%
-  group_by(plasticity) %>%
-  summarise(count = n()) %>%
-  filter(count == 10) %>% 
-  select(plasticity)
-
-plasticity_which_species_die <- as.numeric(unlist(plasticity_which_species_die))
-
-data_with_alives <- data[!data$plasticity %in% plasticity_which_species_die, ]
-
 #### RESULT FINAL USING TIDYVERSE ####
 if('enviroment_type' %in% colnames(data) == FALSE){
   result <- data %>% 
@@ -107,7 +93,23 @@ if('enviroment_type' %in% colnames(data) == FALSE){
           axis.title.x = element_text(size = 14), 
           axis.title.y = element_text(size = 14))
 } else if (data[1, 'enviroment_type'] == 'stable_fast'){
+  ### test to verify species alives major than 0 in stable fast simulations ###
+  
+  plasticity_which_species_die <- data %>%
+    filter(alive_spec == 0) %>%
+    select(plasticity) %>%
+    group_by(plasticity) %>%
+    summarise(count = n()) %>%
+    filter(count == 10) %>% 
+    select(plasticity)
+  
+  plasticity_which_species_die <- as.numeric(unlist(plasticity_which_species_die))
+  
+  data_with_alives <- data[!data$plasticity %in% plasticity_which_species_die, ]
+  
+  
   data[is.na(data)] <- 0
+  
   result <- data %>% 
     as_tibble() %>% 
     filter(timesimulation > 50) %>%
