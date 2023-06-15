@@ -30,7 +30,7 @@ if(length(path_files) >= 2){
   rownames(data) <- NULL
   data <- data %>% filter(replications != 0)
 } else {
-  data <- read.csv2("output/rep_4_finalresult.csv")
+  data <- read.csv2("output/rep_10_finalresult.csv")
   data <- data %>% filter(replications != 0)
   path <- here('output')
 }
@@ -78,6 +78,43 @@ ggplot(data = data, aes(timesimulation, traitevolution, colour = plasticity, gro
   scale_color_gradientn(colours = colors, na.value = NA) +
   geom_smooth(se = FALSE)
 
+if(data[1, 'enviroment_type'] == "stable_low" || data[1, 'enviroment_type'] == "stable_fast"){
+  ggplot(data = data, aes(timesimulation, abundance, colour = plasticity, group = plasticity)) + 
+    labs(title = paste("Abundance along time with plasticity - all data")) + theme_bw() +
+    theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
+          plot.title = element_text(size = 16, hjust = 0.5),
+          axis.text = element_text(size = 12),
+          axis.title = element_text(size = 14)) + 
+    scale_color_gradientn(colours = colors, na.value = NA) +
+    geom_smooth(se = FALSE)
+}
+
+if(data[1, 'enviroment_type'] == "stable_low" || data[1, 'enviroment_type'] == "stable_fast"){
+  ggplot(data = data, aes(timesimulation, occupancy, colour = plasticity, group = plasticity)) + 
+    labs(title = paste("Occupancy along time with plasticity - all data")) + theme_bw() +
+    theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
+          plot.title = element_text(size = 16, hjust = 0.5),
+          axis.text = element_text(size = 12),
+          axis.title = element_text(size = 14)) + 
+    scale_color_gradientn(colours = colors, na.value = NA) +
+    geom_smooth(se = FALSE)
+}
+
+if(data[1, 'enviroment_type'] == "stable_fast"){
+  data_alive <- data %>%
+    filter(alive_spec < 3200)
+  ggplot(data = data_alive, aes(timesimulation, alive_spec, colour = plasticity, group = plasticity)) + 
+    labs(title = paste("Alive species along time with plasticity - all data")) + theme_bw() +
+    theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
+          plot.title = element_text(size = 16, hjust = 0.5),
+          axis.text = element_text(size = 12),
+          axis.title = element_text(size = 14)) + 
+    scale_color_gradientn(colours = colors, na.value = NA) +
+    geom_smooth(se = FALSE)
+}
 
 #### plot speciation ####
 colors <- c('#e7e1ef','#d4b9da','#fcc5c0','#fa9fb5','#f768a1','#dd3497','#ae017e','#7a0177','#49006a')
@@ -101,7 +138,6 @@ print(general_plot_1)
 dev.off()
 
 #### plot extinction ####
-
 general_plot_2 <- ggplot(data = data, aes(timesimulation, extinction, colour = plasticity, group = plasticity)) + 
   labs(title = paste("Extinction along time with plasticity")) + theme_bw() +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
@@ -120,9 +156,7 @@ tiff(filename = file.path(path, paste0("plot", "_", general_plot_2[["labels"]][[
 print(general_plot_2)
 dev.off()
 
-
 #### plot diversification ####
-
 general_plot_3 <- ggplot(data = data, aes(timesimulation, diversif, colour = plasticity, group = plasticity)) + 
   labs(title = paste("Diversification along time with plasticity - all data")) + theme_bw() +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
@@ -142,7 +176,6 @@ print(general_plot_3)
 dev.off()
 
 #### plot trait evolution ####
-
 general_plot_4 <- ggplot(data = data, aes(timesimulation, traitevolution, colour = plasticity, group = plasticity)) + 
   labs(title = paste("Trait evolution along time with plasticity - all data")) + theme_bw() +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
@@ -160,3 +193,67 @@ tiff(filename = file.path(path, paste0("plot", "_", general_plot_4[["labels"]][[
      res = 100)
 print(general_plot_4)
 dev.off()
+
+### plot abundance ###
+if(data[1, 'enviroment_type'] == "stable_low" || data[1, 'enviroment_type'] == "stable_fast"){
+  general_plot_5 <- ggplot(data = data, aes(timesimulation, abundance, colour = plasticity, group = plasticity)) + 
+    labs(title = paste("Abundance along time with plasticity - all data")) + theme_bw() +
+    theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
+          plot.title = element_text(size = 16, hjust = 0.5),
+          axis.text = element_text(size = 12),
+          axis.title = element_text(size = 14)) + 
+    scale_color_gradientn(colours = colors, na.value = NA) +
+    geom_smooth(se = FALSE)
+  
+  tiff(filename = file.path(path, paste0("plot", "_", general_plot_5[["labels"]][["y"]], "_", "plas", "all", ".tif")),
+       width = 15,
+       height = 15,
+       units = "cm",
+       res = 100)
+  print(general_plot_5)
+  dev.off()
+  
+}
+
+### plot occupancy ###
+if(data[1, 'enviroment_type'] == "stable_low" || data[1, 'enviroment_type'] == "stable_fast"){
+  general_plot_6 <- ggplot(data = data, aes(timesimulation, occupancy, colour = plasticity, group = plasticity)) + 
+    labs(title = paste("Occupancy along time with plasticity - all data")) + theme_bw() +
+    theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
+          plot.title = element_text(size = 16, hjust = 0.5),
+          axis.text = element_text(size = 12),
+          axis.title = element_text(size = 14)) + 
+    scale_color_gradientn(colours = colors, na.value = NA) +
+    geom_smooth(se = FALSE)
+  
+  tiff(filename = file.path(path, paste0("plot", "_", general_plot_6[["labels"]][["y"]], "_", "plas", "all", ".tif")),
+       width = 15,
+       height = 15,
+       units = "cm",
+       res = 100)
+  print(general_plot_6)
+  dev.off()
+}
+
+### plot alive species ###
+if(data[1, 'enviroment_type'] == "stable_fast"){
+  general_plot_7 <- ggplot(data = data_alive, aes(timesimulation, alive_spec, colour = plasticity, group = plasticity)) + 
+    labs(title = paste("Alive species along time with plasticity - all data")) + theme_bw() +
+    theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
+          plot.title = element_text(size = 16, hjust = 0.5),
+          axis.text = element_text(size = 12),
+          axis.title = element_text(size = 14)) + 
+    scale_color_gradientn(colours = colors, na.value = NA) +
+    geom_smooth(se = FALSE)
+  
+  tiff(filename = file.path(path, paste0("plot", "_", general_plot_7[["labels"]][["y"]], "_", "plas", "all", ".tif")),
+       width = 15,
+       height = 15,
+       units = "cm",
+       res = 100)
+  print(general_plot_7)
+  dev.off()
+}
