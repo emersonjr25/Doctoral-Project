@@ -39,6 +39,12 @@ if(length(path_files) >= 2){
 rm(list = ls()[(ls() == 'data') == FALSE])
 colnames(data)[1] <- c('plasticity')
 
+### test to verify species alives major than 0 in stable fast simulations ###
+
+data %>%
+  filter(alive_spec == 0) %>%
+  select(plasticity, replications) %>%
+  count(plasticity == 0)
 
 #### RESULT FINAL USING TIDYVERSE ####
 if('enviroment_type' %in% colnames(data) == FALSE){
@@ -94,9 +100,10 @@ if('enviroment_type' %in% colnames(data) == FALSE){
           axis.title.x = element_text(size = 14), 
           axis.title.y = element_text(size = 14))
 } else if (data[1, 'enviroment_type'] == 'stable_fast'){
+  data[is.na(data)] <- 0
   result <- data %>% 
     as_tibble() %>% 
-    filter(timesimulation > 100) %>%
+    filter(timesimulation > 50) %>%
     select(-c(timesimulation, enviroment_type)) %>% 
     rename('Trait evolution' = traitevolution,
            Diversification = diversif,
@@ -122,7 +129,6 @@ if('enviroment_type' %in% colnames(data) == FALSE){
 } else {
   message('Error: this environmental type does not exist')
 }
-    
 
 tiff(filename = file.path(here('output'), paste0("plot", "_", result[["labels"]][["y"]], "_", "plas", "all", ".tif")),
      width = 1000,
