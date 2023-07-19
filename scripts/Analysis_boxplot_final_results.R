@@ -14,8 +14,8 @@ library(here)
 
 #### data ####
 #path_general <- here('output/files_to_results/random_envi')
-#path_general <- here('output/files_to_results/stable_low_envi')
-path_general <- here('output/files_to_results/stable_fast_envi')
+path_general <- here('output/files_to_results/stable_low_envi')
+#path_general <- here('output/files_to_results/stable_fast_envi')
 path_files <- list.files(path_general, pattern = 'csv')
 
 if(length(path_files) >= 2){
@@ -92,6 +92,31 @@ if('enviroment_type' %in% colnames(data) == FALSE){
                          hjust = 0.5), 
           axis.title.x = element_text(size = 14), 
           axis.title.y = element_text(size = 14))
+  
+  # ##### mechanisms ####
+  # result <- data %>% 
+  #   as_tibble() %>% 
+  #   filter(timesimulation > 50, abundance > 0) %>%
+  #   select(-c(timesimulation, enviroment_type, traitevolution, diversif, speciation, extinction)) %>% 
+  #   rename(Abundance = abundance,
+  #          Occupancy = occupancy) %>%
+  #   group_by(plasticity, replications) %>% 
+  #   summarize_all(mean) %>% 
+  #   pivot_longer(col = -c(plasticity, replications)) %>%
+  #   mutate(plasticity = as.factor(plasticity)) %>% 
+  #   ggplot(aes(x = plasticity, y = value)) + 
+  #   geom_boxplot() + 
+  #   geom_jitter() +
+  #   facet_wrap(~name, scales = "free_y") + 
+  #   xlab("Plasticity") + ylab('Value') +
+  #   ggtitle('Effect of plasticity on adaptive evolution - mechanisms') + 
+  #   theme_bw() +
+  #   theme(plot.title = 
+  #           element_text(size = 16, 
+  #                        face = 2, 
+  #                        hjust = 0.5), 
+  #         axis.title.x = element_text(size = 14), 
+  #         axis.title.y = element_text(size = 14))
 } else if (data[1, 'enviroment_type'] == 'stable_fast'){
   ### test to verify species alives major than 0 in stable fast simulations ###
   
@@ -135,14 +160,41 @@ if('enviroment_type' %in% colnames(data) == FALSE){
                          hjust = 0.5), 
           axis.title.x = element_text(size = 14), 
           axis.title.y = element_text(size = 14))
+  
+  # ##### mechanisms ####
+  # result <- data %>% 
+  #   as_tibble() %>% 
+  #   filter(timesimulation > 50, abundance > 0) %>%
+  #   select(-c(timesimulation, enviroment_type, traitevolution, diversif, speciation, extinction)) %>% 
+  #   rename(Abundance = abundance,
+  #          Occupancy = occupancy) %>%
+  #   group_by(plasticity, replications) %>% 
+  #   summarize_all(mean) %>% 
+  #   pivot_longer(col = -c(plasticity, replications, alive_spec)) %>%
+  #   mutate(plasticity = as.factor(plasticity)) %>% 
+  #   ggplot(aes(x = plasticity, y = value)) + 
+  #   geom_boxplot() + 
+  #   geom_jitter() +
+  #   facet_wrap(~name, scales = "free_y") + 
+  #   xlab("Plasticity") + ylab('Value') +
+  #   ggtitle('Effect of plasticity on adaptive evolution - mechanisms') + 
+  #   theme_bw() +
+  #   theme(plot.title = 
+  #           element_text(size = 16, 
+  #                        face = 2, 
+  #                        hjust = 0.5), 
+  #         axis.title.x = element_text(size = 14), 
+  #         axis.title.y = element_text(size = 14))
+  
 } else {
   message('Error: this environmental type does not exist')
 }
 
 tiff(filename = file.path(here('output'), paste0("plot", "_", result[["labels"]][["y"]], "_", "plas", "all", ".tif")),
-     width = 1000,
-     #width = 800, #without abundance and occupancy
-     height = 600,
+     #width = 1000,
+     width = 800, #without abundance and occupancy
+     #height = 600,
+     height = 400, #abundance and occupancy
      units = "px",
      res = 100)
 print(result)
