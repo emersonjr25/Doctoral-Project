@@ -10,7 +10,7 @@
 library(gen3sis)
 library(here)
 library(dplyr)
-#library(raster)
+library(raster)
 
 ################## SIMULATION #########################
 #### CARRYING CONFIGURATIONS AND PATHS ####
@@ -73,7 +73,7 @@ config$gen3sis$general$end_of_timestep_observer <- function(data, vars, config){
 config$gen3sis$speciation$divergence_threshold <- 10
 
 environment_type <- c('random', 'stable_low', 'stable_fast')
-environment_type_chose <- environment_type[3]
+environment_type_chose <- environment_type[2]
 
 plasti <- c(0, 0.05, 0.1, 0.15, 0.25, 0.5, 0.75, 1)
 
@@ -243,38 +243,38 @@ for(p in 1:length(plasti)){
       sgen3sis <- make_summary(val$config, val$data, val$vars,
                                 total_runtime, save_file = FALSE)
       
-      # raster_data <- cbind(val[["data"]][["landscape"]][["coordinates"]],
-      #       val[["data"]][["landscape"]][["environment"]][, 1])
-      # colnames(raster_data) <- c('x', 'y', 'temp')
-      # ras <- rasterFromXYZ(raster_data)
-      # max_ras <- 1
-      # min_ras <- 0
-      # #sequencia <- seq(0.1, 1, 0.1)
-      # rc <- c('#4f75e8', '#0A2F51', '#ffa600', '#fe9700', '#fc8700', '#f97600',
-      #   '#f66504', '#f2520e', '#ed3c16', '#e81f1c')
-      # image(ras, col=rc, bty = "o", xlab = "", ylab = "", las=1, asp = 1)
-      # mtext(4, text="Temperature", line=1, cex=1.2)
-      # raster::plot(rasterFromXYZ(raster_data), legend.only=TRUE, add=TRUE,col=rc)
+       raster_data <- cbind(val[["data"]][["landscape"]][["coordinates"]],
+             val[["data"]][["landscape"]][["environment"]][, 1])
+       colnames(raster_data) <- c('x', 'y', 'temp')
+       ras <- rasterFromXYZ(raster_data)
+       max_ras <- 1
+       min_ras <- 0
+       sequencia <- seq(0.1, 1, 0.1)
+       rc <- c('#4f75e8', '#0A2F51', '#ffa600', '#fe9700', '#fc8700', '#f97600',
+         '#f66504', '#f2520e', '#ed3c16', '#e81f1c')
+       image(ras, col=rc, bty = "o", xlab = "", ylab = "", las=1, asp = 1)
+       mtext(4, text="Temperature", line=1, cex=1.2)
+       raster::plot(rasterFromXYZ(raster_data), legend.only=TRUE, add=TRUE,col=rc)
       
-      #  if(ti <= 999){
-      #   ras <- rasterFromXYZ(sgen3sis$summary$`richness-final`)
-      #   max_ras <- max(ras@data@values, na.rm=TRUE)
-      #   min_ras <- min(ras@data@values, na.rm=TRUE)
-      #   # rc <- color_richness(max(ras@data@values, na.rm=TRUE) + 1)
-      #   #terrain color
-      #   zerorichness_col <- "navajowhite3"
-      #   if (max_ras==0){ #if all extinct
-      #     rc <-  zerorichness_col
-      #   } else {
-      #     rc <- color_richness(max_ras)
-      #     if (min_ras==0){ #if there is zero-richness (i.e. inhabited sites)
-      #       rc <- c(zerorichness_col, rc)
-      #     }
-      #   }
-      #   image(ras, col=rc, bty = "o", xlab = "", ylab = "", las=1, asp = 1)
-      #   mtext(4, text="Final \u03B1 richness", line=1, cex=1.2)
-      #   raster::plot(rasterFromXYZ(sgen3sis$summary$`richness-final`), legend.only=TRUE, add=TRUE,col=rc)
-      # }
+       #  if(ti <= 999){
+       #   ras <- rasterFromXYZ(sgen3sis$summary$`richness-final`)
+       #   max_ras <- max(ras@data@values, na.rm=TRUE)
+       #   min_ras <- min(ras@data@values, na.rm=TRUE)
+       #   # rc <- color_richness(max(ras@data@values, na.rm=TRUE) + 1)
+       #   #terrain color
+       #   zerorichness_col <- "navajowhite3"
+       #   if (max_ras==0){ #if all extinct
+       #     rc <-  zerorichness_col
+       #   } else {
+       #     rc <- color_richness(max_ras)
+       #     if (min_ras==0){ #if there is zero-richness (i.e. inhabited sites)
+       #       rc <- c(zerorichness_col, rc)
+       #     }
+       #   }
+       #   image(ras, col=rc, bty = "o", xlab = "", ylab = "", las=1, asp = 1)
+       #   mtext(4, text="Final \u03B1 richness", line=1, cex=1.2)
+       #   raster::plot(rasterFromXYZ(sgen3sis$summary$`richness-final`), legend.only=TRUE, add=TRUE,col=rc)
+       # }
       ################## TRAIT EVOLUTION #####################
       
       ##### PATHWAY TO TRAITS DATA ####
