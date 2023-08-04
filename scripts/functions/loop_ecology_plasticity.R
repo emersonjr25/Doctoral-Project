@@ -4,7 +4,7 @@
 ##### Methods: Computational simulation #############
 ##### FUNCTION: LOOP ECOLOGY WITH PLASTICITY #####
 
-loop_ecology2 <- function (config, data, vars, plast_value) {
+loop_ecology2 <- function (config, data, vars, plast_value, cost_plast) {
   if (config$gen3sis$general$verbose >= 3) {
     cat(paste("entering ecology module @ time", vars$ti, 
               "\n"))
@@ -41,7 +41,7 @@ loop_ecology2 <- function (config, data, vars, plast_value) {
     }
     rownames(traits) <- coo_sp
     names(abundance) <- coo_sp
-    NEW_abd <- config$gen3sis$ecology$apply_ecology(abundance, traits, local_environment, config, plast_value)
+    NEW_abd <- config$gen3sis$ecology$apply_ecology(abundance, traits, local_environment, config, plast_value, cost_plast)
     names(NEW_abd) <- coo_sp
     shalldie <- NEW_abd == 0
     for (spi in coo_sp) {

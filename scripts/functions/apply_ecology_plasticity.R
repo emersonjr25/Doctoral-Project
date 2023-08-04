@@ -5,7 +5,7 @@
 ##### FUNCTION: APPLY ECOLOGY WITH PLASTICITY #####
 
 config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape, 
-                                                 config, plast_value) {
+                                                 config, plast_value, cost_plast) {
   abundance_scale = 1.12
   abundance_threshold = 1
   #abundance threshold
@@ -30,6 +30,12 @@ config$gen3sis$ecology$apply_ecology <- function(abundance, traits, landscape,
   traits_sub2 <- mapply(plasticity2, traits_sub, landscape[,'temp'])
   abundance <- ((1 - traits_sub2)*abundance_scale)*as.numeric(survive)
   
+  ### plasticity cost ###
+  cost_degree <- 0.1
+  if(cost_plast == TRUE){
+    cost_pl <- (plast_value * cost_degree)
+    abundance <- abundance - cost_pl
+  }
   #abundance threshold
   abundance[abundance<abundance_threshold] <- 0
   return(abundance)
