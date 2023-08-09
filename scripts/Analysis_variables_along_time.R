@@ -30,7 +30,7 @@ if(length(path_files) >= 2){
   rownames(data) <- NULL
   data <- data %>% filter(replications != 0)
 } else {
-  data <- read.csv2("output/rep_8_finalresult.csv")
+  data <- read.csv2("output/rep_4_finalresult.csv")
   data <- data %>% filter(replications != 0)
   path <- here('output')
 }
@@ -102,7 +102,7 @@ if(data[1, 'enviroment_type'] == "stable_low" || data[1, 'enviroment_type'] == "
     geom_smooth(se = FALSE)
 }
 
-if(data[1, 'enviroment_type'] == "stable_fast"){
+if(data[1, 'enviroment_type'] == "stable_low" || data[1, 'enviroment_type'] == "stable_fast"){
   data_alive <- data %>%
     filter(alive_spec < 3200)
   ggplot(data = data_alive, aes(timesimulation, alive_spec, colour = plasticity, group = plasticity)) + 
@@ -238,7 +238,7 @@ if(data[1, 'enviroment_type'] == "stable_low" || data[1, 'enviroment_type'] == "
 }
 
 ### plot alive species ###
-if(data[1, 'enviroment_type'] == "stable_fast"){
+if(data[1, 'enviroment_type'] == "stable_low" || data[1, 'enviroment_type'] == "stable_fast"){
   general_plot_7 <- ggplot(data = data_alive, aes(timesimulation, alive_spec, colour = plasticity, group = plasticity)) + 
     labs(title = paste("Alive species along time with plasticity - all data")) + theme_bw() +
     theme(panel.border = element_blank(), panel.grid.major = element_blank(),

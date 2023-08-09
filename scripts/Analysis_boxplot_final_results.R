@@ -13,8 +13,8 @@ library(ggplot2)
 library(here)
 
 #### data ####
-#path_general <- here('output/files_to_results/stable_low_envi')
-path_general <- here('output/files_to_results/stable_fast_envi_with_cost')
+path_general <- here('output/files_to_results/stable_slow_envi_without_cost')
+#path_general <- here('output/files_to_results/stable_fast_envi_with_cost')
 #path_general <- here('output/files_to_results/stable_fast_envi_without_cost')
 path_files <- list.files(path_general, pattern = 'csv')
 
@@ -67,10 +67,25 @@ if('enviroment_type' %in% colnames(data) == FALSE){
           axis.title.x = element_text(size = 14), 
           axis.title.y = element_text(size = 14))
 } else if (data[1, 'enviroment_type'] == 'stable_low') {
+  plasticity_which_species_die <- data %>%
+    filter(alive_spec == 0) %>%
+    select(plasticity) %>%
+    group_by(plasticity) %>%
+    summarise(count = n()) %>%
+    filter(count == 10) %>% 
+    select(plasticity)
+  
+  plasticity_which_species_die <- as.numeric(unlist(plasticity_which_species_die))
+  
+  data_with_alives <- data[!data$plasticity %in% plasticity_which_species_die, ]
+  
+  
+  data[is.na(data)] <- 0
+  
   result <- data %>% 
     as_tibble() %>% 
-    filter(timesimulation > 100) %>%
-    select(-c(timesimulation, enviroment_type)) %>% 
+    filter(timesimulation > 40) %>%
+    select(-c(timesimulation, enviroment_type, alive_spec)) %>% 
     rename('Trait evolution' = traitevolution,
            Diversification = diversif,
            Speciation = speciation,
@@ -145,7 +160,7 @@ if('enviroment_type' %in% colnames(data) == FALSE){
            Extinction = extinction) %>%
     group_by(plasticity, replications) %>% 
     summarize_all(mean) %>% 
-    pivot_longer(col = -c(plasticity, replications, alive_spec)) %>%
+    pivot_longer(col = -c(plasticity, replications) %>%
     mutate(plasticity = as.factor(plasticity)) %>% 
     ggplot(aes(x = plasticity, y = value)) + 
     geom_boxplot() + 
@@ -185,7 +200,7 @@ if('enviroment_type' %in% colnames(data) == FALSE){
   #                        hjust = 0.5),
   #         axis.title.x = element_text(size = 14),
   #         axis.title.y = element_text(size = 14))
-  # 
+
 } else {
   message('Error: this environmental type does not exist')
 }
