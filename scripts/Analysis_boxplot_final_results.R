@@ -160,7 +160,7 @@ if('enviroment_type' %in% colnames(data) == FALSE){
            Extinction = extinction) %>%
     group_by(plasticity, replications) %>% 
     summarize_all(mean) %>% 
-    pivot_longer(col = -c(plasticity, replications) %>%
+    pivot_longer(col = -c(plasticity, replications)) %>%
     mutate(plasticity = as.factor(plasticity)) %>% 
     ggplot(aes(x = plasticity, y = value)) + 
     geom_boxplot() + 
