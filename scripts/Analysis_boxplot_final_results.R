@@ -13,10 +13,10 @@ library(ggplot2)
 library(here)
 
 #### data ####
-path_general <- here('output/files_to_results/stable_slow_envi_with_cost')
+#path_general <- here('output/files_to_results/stable_slow_envi_with_cost')
 #path_general <- here('output/files_to_results/stable_slow_envi_without_cost')
 #path_general <- here('output/files_to_results/stable_fast_envi_with_cost')
-#path_general <- here('output/files_to_results/stable_fast_envi_without_cost')
+path_general <- here('output/files_to_results/stable_fast_envi_without_cost')
 path_files <- list.files(path_general, pattern = 'csv')
 
 if(length(path_files) >= 2){
@@ -154,7 +154,7 @@ if('enviroment_type' %in% colnames(data) == FALSE){
   result <- data %>% 
     as_tibble() %>% 
     filter(timesimulation > 40) %>%
-    select(-c(timesimulation, enviroment_type)) %>% 
+    select(-c(timesimulation, enviroment_type, abundance, alive_spec, occupancy)) %>% 
     rename('Trait evolution' = traitevolution,
            Diversification = diversif,
            Speciation = speciation,
@@ -209,8 +209,8 @@ if('enviroment_type' %in% colnames(data) == FALSE){
 tiff(filename = file.path(here('output'), paste0("plot", "_", result[["labels"]][["y"]], "_", "plas", "all", ".tif")),
      #width = 1000,
      width = 800, #without abundance and occupancy
-     #height = 600,
-     height = 400, #abundance and occupancy
+     height = 600,
+     #height = 400, #abundance and occupancy
      units = "px",
      res = 100)
 print(result)

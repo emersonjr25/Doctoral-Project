@@ -255,7 +255,16 @@ for(p in 1:length(plasti)){
        # image(ras, col=rc, bty = "o", xlab = "", ylab = "", las=1, asp = 1)
        # mtext(4, text="Temperature", line=1, cex=1.2)
        # raster::plot(rasterFromXYZ(raster_data), legend.only=TRUE, add=TRUE,col=rc)
-      
+       # # png(paste0(ti, 'raster.png'), width=600, height=350)
+       # # max_ras <- 1
+       # # min_ras <- 0
+       # # sequencia <- seq(0.1, 1, 0.1)
+       # # rc <- c('#0A2F51', '#4f75e8', '#ffa600', '#fe9700', '#fc8700', '#f97600',
+       # #         '#f66504', '#f2520e', '#ed3c16', '#e81f1c')
+       # # image(ras, col=rc, bty = "o", xlab = "", ylab = "", las=1, asp = 1)
+       # # mtext(4, text="Temperature", line=1, cex=1.2)
+       # # raster::plot(rasterFromXYZ(raster_data), legend.only=TRUE, add=TRUE,col=rc)
+       # # dev.off()
        #  if(ti <= 999){
        #   ras <- rasterFromXYZ(sgen3sis$summary$`richness-final`)
        #   max_ras <- max(ras@data@values, na.rm=TRUE)
