@@ -110,28 +110,28 @@ if('enviroment_type' %in% colnames(data) == FALSE){
           axis.title.y = element_text(size = 14))
   
   # ##### mechanisms ####
-  # result <- data %>% 
-  #   as_tibble() %>% 
-  #   filter(timesimulation > 50, abundance > 0) %>%
-  #   select(-c(timesimulation, enviroment_type, traitevolution, diversif, speciation, extinction)) %>% 
+  # result <- data %>%
+  #   as_tibble() %>%
+  #   filter(timesimulation > 40, abundance > 0) %>%
+  #   select(-c(timesimulation, enviroment_type, traitevolution, diversif, speciation, extinction, alive_spec)) %>%
   #   rename(Abundance = abundance,
   #          Occupancy = occupancy) %>%
-  #   group_by(plasticity, replications) %>% 
-  #   summarize_all(mean) %>% 
+  #   group_by(plasticity, replications) %>%
+  #   summarize_all(mean) %>%
   #   pivot_longer(col = -c(plasticity, replications)) %>%
-  #   mutate(plasticity = as.factor(plasticity)) %>% 
-  #   ggplot(aes(x = plasticity, y = value)) + 
-  #   geom_boxplot() + 
+  #   mutate(plasticity = as.factor(plasticity)) %>%
+  #   ggplot(aes(x = plasticity, y = value)) +
+  #   geom_boxplot() +
   #   geom_jitter() +
-  #   facet_wrap(~name, scales = "free_y") + 
+  #   facet_wrap(~name, scales = "free_y") +
   #   xlab("Plasticity") + ylab('Value') +
-  #   ggtitle('Effect of plasticity on adaptive evolution - mechanisms') + 
+  #   ggtitle('Effect of plasticity on adaptive evolution - mechanisms') +
   #   theme_bw() +
-  #   theme(plot.title = 
-  #           element_text(size = 16, 
-  #                        face = 2, 
-  #                        hjust = 0.5), 
-  #         axis.title.x = element_text(size = 14), 
+  #   theme(plot.title =
+  #           element_text(size = 16,
+  #                        face = 2,
+  #                        hjust = 0.5),
+  #         axis.title.x = element_text(size = 14),
   #         axis.title.y = element_text(size = 14))
 } else if (data[1, 'enviroment_type'] == 'stable_fast'){
   ### test to verify species alives major than 0 in stable fast simulations ###
@@ -178,29 +178,29 @@ if('enviroment_type' %in% colnames(data) == FALSE){
           axis.title.y = element_text(size = 14))
   
   ##### mechanisms ####
-  result <- data %>%
-    as_tibble() %>%
-    filter(timesimulation > 40, abundance > 0) %>%
-    select(-c(timesimulation, enviroment_type, traitevolution, diversif, speciation, extinction)) %>%
-    rename(Abundance = abundance,
-           Occupancy = occupancy) %>%
-    group_by(plasticity, replications) %>%
-    summarize_all(mean) %>%
-    pivot_longer(col = -c(plasticity, replications, alive_spec)) %>%
-    mutate(plasticity = as.factor(plasticity)) %>%
-    ggplot(aes(x = plasticity, y = value)) +
-    geom_boxplot() +
-    geom_jitter() +
-    facet_wrap(~name, scales = "free_y") +
-    xlab("Plasticity") + ylab('Value') +
-    ggtitle('Effect of plasticity on adaptive evolution - mechanisms') +
-    theme_bw() +
-    theme(plot.title =
-            element_text(size = 16,
-                         face = 2,
-                         hjust = 0.5),
-          axis.title.x = element_text(size = 14),
-          axis.title.y = element_text(size = 14))
+  # result <- data %>%
+  #   as_tibble() %>%
+  #   filter(timesimulation > 40, abundance > 0) %>%
+  #   select(-c(timesimulation, enviroment_type, traitevolution, diversif, speciation, extinction)) %>%
+  #   rename(Abundance = abundance,
+  #          Occupancy = occupancy) %>%
+  #   group_by(plasticity, replications) %>%
+  #   summarize_all(mean) %>%
+  #   pivot_longer(col = -c(plasticity, replications, alive_spec)) %>%
+  #   mutate(plasticity = as.factor(plasticity)) %>%
+  #   ggplot(aes(x = plasticity, y = value)) +
+  #   geom_boxplot() +
+  #   geom_jitter() +
+  #   facet_wrap(~name, scales = "free_y") +
+  #   xlab("Plasticity") + ylab('Value') +
+  #   ggtitle('Effect of plasticity on adaptive evolution - mechanisms') +
+  #   theme_bw() +
+  #   theme(plot.title =
+  #           element_text(size = 16,
+  #                        face = 2,
+  #                        hjust = 0.5),
+  #         axis.title.x = element_text(size = 14),
+  #         axis.title.y = element_text(size = 14))
 
 } else {
   message('Error: this environmental type does not exist')
@@ -219,7 +219,7 @@ dev.off()
 #### ANOVA EXECUTION ####
 result_aov <- data %>% 
   as_tibble() %>% 
-  filter(timesimulation > 100) %>%
+  filter(timesimulation > 40) %>%
   select(-timesimulation) %>% 
   group_by(plasticity, replications) %>% 
   summarize_all(mean) %>% 
