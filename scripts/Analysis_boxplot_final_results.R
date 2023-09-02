@@ -14,9 +14,9 @@ library(here)
 
 #### data ####
 #path_general <- here('output/files_to_results/stable_slow_envi_with_cost')
-#path_general <- here('output/files_to_results/stable_slow_envi_without_cost')
+path_general <- here('output/files_to_results/stable_slow_envi_without_cost')
 #path_general <- here('output/files_to_results/stable_fast_envi_with_cost')
-path_general <- here('output/files_to_results/stable_fast_envi_without_cost')
+#path_general <- here('output/files_to_results/stable_fast_envi_without_cost')
 path_files <- list.files(path_general, pattern = 'csv')
 
 if(length(path_files) >= 2){
@@ -220,7 +220,8 @@ dev.off()
 result_aov <- data %>% 
   as_tibble() %>% 
   filter(timesimulation > 40) %>%
-  select(-timesimulation) %>% 
+  select(-c(timesimulation, enviroment_type, abundance,
+            occupancy, alive_spec)) %>% 
   group_by(plasticity, replications) %>% 
   summarize_all(mean) %>% 
   mutate(plasticity = as.factor(plasticity))
