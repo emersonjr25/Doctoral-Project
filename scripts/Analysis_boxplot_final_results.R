@@ -13,10 +13,10 @@ library(ggplot2)
 library(here)
 
 #### data ####
+#path_general <- here('output/files_to_results/stable_slow_envi_without_cost')
 #path_general <- here('output/files_to_results/stable_slow_envi_with_cost')
-path_general <- here('output/files_to_results/stable_slow_envi_without_cost')
-#path_general <- here('output/files_to_results/stable_fast_envi_with_cost')
 #path_general <- here('output/files_to_results/stable_fast_envi_without_cost')
+path_general <- here('output/files_to_results/stable_fast_envi_with_cost')
 path_files <- list.files(path_general, pattern = 'csv')
 
 if(length(path_files) >= 2){
@@ -226,10 +226,10 @@ result_aov <- data %>%
   summarize_all(mean) %>% 
   mutate(plasticity = as.factor(plasticity))
 
-summary(aov(result_aov$speciation ~ result_aov$plasticity))
 summary(aov(result_aov$extinction ~ result_aov$plasticity))
-summary(aov(result_aov$diversif ~ result_aov$plasticity))
 summary(aov(result_aov$traitevolution ~ result_aov$plasticity))
+summary(aov(result_aov$speciation ~ result_aov$plasticity))
+summary(aov(result_aov$diversif ~ result_aov$plasticity))
 
 # manova_result <- manova(cbind(traitevolution, 
 #             extinction,
@@ -240,10 +240,10 @@ summary(aov(result_aov$traitevolution ~ result_aov$plasticity))
 # summary(manova_result, tol = 0)
 
 ### tukey test ###
+TukeyHSD(aov(result_aov$traitevolution ~ result_aov$plasticity))
 TukeyHSD(aov(result_aov$speciation ~ result_aov$plasticity))
 TukeyHSD(aov(result_aov$extinction ~ result_aov$plasticity))
 TukeyHSD(aov(result_aov$diversif ~ result_aov$plasticity))
-TukeyHSD(aov(result_aov$traitevolution ~ result_aov$plasticity))
 
 #### BOX PLOT OF MEAN PER PLASTICITY WITH LIST ####
 unique_plasticity <- unique(data$plasticity)
