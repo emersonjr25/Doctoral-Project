@@ -13,10 +13,10 @@ library(ggplot2)
 library(here)
 
 #### data ####
-#path_general <- here('output/files_to_results/stable_slow_envi_without_cost')
+path_general <- here('output/files_to_results/stable_slow_envi_without_cost')
 #path_general <- here('output/files_to_results/stable_slow_envi_with_cost')
 #path_general <- here('output/files_to_results/stable_fast_envi_without_cost')
-path_general <- here('output/files_to_results/stable_fast_envi_with_cost')
+#path_general <- here('output/files_to_results/stable_fast_envi_with_cost')
 path_files <- list.files(path_general, pattern = 'csv')
 
 if(length(path_files) >= 2){
@@ -83,30 +83,30 @@ if('enviroment_type' %in% colnames(data) == FALSE){
   
   data[is.na(data)] <- 0
   
-  result <- data %>% 
-    as_tibble() %>% 
+  result <- data %>%
+    as_tibble() %>%
     filter(timesimulation > 40) %>%
-    select(-c(timesimulation, enviroment_type, alive_spec)) %>% 
+    select(-c(timesimulation, enviroment_type, abundance, alive_spec, occupancy)) %>%
     rename('Trait evolution' = traitevolution,
            Diversification = diversif,
            Speciation = speciation,
            Extinction = extinction) %>%
-    group_by(plasticity, replications) %>% 
-    summarize_all(mean) %>% 
+    group_by(plasticity, replications) %>%
+    summarize_all(mean) %>%
     pivot_longer(col = -c(plasticity, replications)) %>%
-    mutate(plasticity = as.factor(plasticity)) %>% 
-    ggplot(aes(x = plasticity, y = value)) + 
-    geom_boxplot() + 
+    mutate(plasticity = as.factor(plasticity)) %>%
+    ggplot(aes(x = plasticity, y = value)) +
+    geom_boxplot() +
     geom_jitter() +
-    facet_wrap(~name, scales = "free_y") + 
+    facet_wrap(~name, scales = "free_y") +
     xlab("Plasticity") + ylab('Value') +
-    ggtitle('Effect of plasticity on adaptive evolution') + 
+    ggtitle('Effect of plasticity on adaptive evolution - slow climatic changes & cost absence') +
     theme_bw() +
-    theme(plot.title = 
-            element_text(size = 16, 
-                         face = 2, 
-                         hjust = 0.5), 
-          axis.title.x = element_text(size = 14), 
+    theme(plot.title =
+            element_text(size = 14,
+                         face = 2,
+                         hjust = 0.5),
+          axis.title.x = element_text(size = 14),
           axis.title.y = element_text(size = 14))
   
   # ##### mechanisms ####
@@ -125,10 +125,10 @@ if('enviroment_type' %in% colnames(data) == FALSE){
   #   geom_jitter() +
   #   facet_wrap(~name, scales = "free_y") +
   #   xlab("Plasticity") + ylab('Value') +
-  #   ggtitle('Effect of plasticity on adaptive evolution - mechanisms') +
+  #   ggtitle('Effect of plasticity on adaptive evolution - slow climatic changes & cost presence') +
   #   theme_bw() +
   #   theme(plot.title =
-  #           element_text(size = 16,
+  #           element_text(size = 14,
   #                        face = 2,
   #                        hjust = 0.5),
   #         axis.title.x = element_text(size = 14),
@@ -168,10 +168,10 @@ if('enviroment_type' %in% colnames(data) == FALSE){
     geom_jitter() +
     facet_wrap(~name, scales = "free_y") + 
     xlab("Plasticity") + ylab('Value') +
-    ggtitle('Effect of plasticity on adaptive evolution') + 
+    ggtitle('Effect of plasticity on adaptive evolution - fast climatic changes & cost absence') + 
     theme_bw() +
     theme(plot.title = 
-            element_text(size = 16, 
+            element_text(size = 14, 
                          face = 2, 
                          hjust = 0.5), 
           axis.title.x = element_text(size = 14), 
