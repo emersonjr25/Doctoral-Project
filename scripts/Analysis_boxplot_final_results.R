@@ -96,6 +96,8 @@ data_general_three$cost <- "without"
 data_general_four$cost <- "with"
 new_data <- rbind(data_general_one, data_general_two,
                   data_general_three, data_general_four)
+new_data$enviroment_type[new_data$enviroment_type == "stable_fast"] <- "fast"
+new_data$enviroment_type[new_data$enviroment_type == "stable_low"] <- "low"
 
 plasticity_which_species_die <- new_data %>%
   filter(alive_spec == 0) %>%
@@ -111,7 +113,8 @@ data_with_alives <- new_data[!new_data$plasticity %in% plasticity_which_species_
 
 new_data[is.na(new_data)] <- 0
 
-result <- new_data %>%
+#result <- 
+  new_data %>%
   as_tibble() %>%
   filter(timesimulation > 40) %>%
   select(-c(timesimulation, abundance, alive_spec, occupancy)) %>%
@@ -123,14 +126,16 @@ result <- new_data %>%
   summarize_all(mean) %>%
   pivot_longer(col = -c(plasticity, enviroment_type, cost, replications)) %>%
   mutate(plasticity = as.factor(plasticity)) %>%
-  ggplot(aes(x = plasticity, y = value, color=enviroment_type, shape=cost)) +
+  ggplot(aes(x = plasticity, y = value, color=enviroment_type, size=cost)) +
   geom_boxplot() +
-  geom_jitter() +
+  scale_size_manual(values = c("with" = 1, "without" = 0)) +
+  #scale_fill_manual(values=c("blue", "white")) +
+  #geom_jitter() +
   facet_wrap(~name, scales = "free_y") +
   xlab("Plasticity") +
-  ggtitle('Effect of plasticity on adaptive evolution - climatic changes & cost context') +
+  #ggtitle('Effect of plasticity on adaptive evolution - climatic changes & cost context') +
   theme_bw() +
-  scale_color_manual(values=c("#990000", "#0077cc"),
+  scale_color_manual(values=c("#542788", "#b35806"),
                      name = "climatic change") +
   theme(plot.title =
           element_text(size = 14,
@@ -138,7 +143,7 @@ result <- new_data %>%
                        hjust = 0.5),
         axis.title.x = element_text(size = 14),
         axis.title.y = element_blank(),
-        legend.position = "top")
+        legend.position = "bottom") 
 
 tiff(filename = file.path(here('output'), paste0("plot", "_", result[["labels"]][["y"]], "_", "plas", "all", ".tif")),
      width = 800, 
