@@ -113,8 +113,7 @@ data_with_alives <- new_data[!new_data$plasticity %in% plasticity_which_species_
 
 new_data[is.na(new_data)] <- 0
 
-#result <- 
-  new_data %>%
+result <- new_data %>%
   as_tibble() %>%
   filter(timesimulation > 40) %>%
   select(-c(timesimulation, abundance, alive_spec, occupancy)) %>%
@@ -129,7 +128,6 @@ new_data[is.na(new_data)] <- 0
   ggplot(aes(x = plasticity, y = value, color=enviroment_type, size=cost)) +
   geom_boxplot() +
   scale_size_manual(values = c("with" = 1, "without" = 0)) +
-  #scale_fill_manual(values=c("blue", "white")) +
   #geom_jitter() +
   facet_wrap(~name, scales = "free_y") +
   xlab("Plasticity") +
@@ -163,14 +161,15 @@ mechanism <- new_data %>%
   summarize_all(mean) %>%
   pivot_longer(col = -c(plasticity, enviroment_type, cost, replications)) %>%
   mutate(plasticity = as.factor(plasticity)) %>%
-  ggplot(aes(x = plasticity, y = value, color=enviroment_type, shape=cost)) +
+  ggplot(aes(x = plasticity, y = value, color=enviroment_type, size=cost)) +
   geom_boxplot() +
-  geom_jitter() +
+  #geom_jitter() +
+  scale_size_manual(values = c("with" = 1, "without" = 0)) +
   facet_wrap(~name, scales = "free_y") +
   xlab("Plasticity") +
-  ggtitle('Mechanisms: abundance and occupancy in climatic changes & cost context') +
+  #ggtitle('Mechanisms: abundance and occupancy in climatic changes & cost context') +
   theme_bw() +
-  scale_color_manual(values=c("#990000", "#0077cc"),
+  scale_color_manual(values=c("#542788", "#b35806"),
                      name = "climatic change") +
   theme(plot.title =
           element_text(size = 14,
@@ -178,7 +177,7 @@ mechanism <- new_data %>%
                        hjust = 0.5),
         axis.title.x = element_text(size = 14),
         axis.title.y = element_blank(),
-        legend.position = "top")
+        legend.position = "bottom") 
 
 tiff(filename = file.path(here('output'), paste0("mechanism_plot", "_", result[["labels"]][["y"]], "_", "plas", "all", ".tif")),
      width = 800, 
@@ -188,7 +187,39 @@ tiff(filename = file.path(here('output'), paste0("mechanism_plot", "_", result[[
 print(mechanism)
 dev.off()
 
+#### testing cost differences ####
+new_data %>%
+  as_tibble() %>%
+  filter(timesimulation > 40) %>%
+  select(-c(timesimulation, abundance, alive_spec, occupancy)) %>%
+  rename('Trait evolution' = traitevolution,
+         Diversification = diversif,
+         Speciation = speciation,
+         Extinction = extinction) %>%
+  group_by(plasticity, enviroment_type, cost, replications) %>%
+  summarize_all(mean) %>%
+  pivot_longer(col = -c(plasticity, enviroment_type, cost, replications)) %>%
+  mutate(plasticity = as.factor(plasticity)) %>%
+  ggplot(aes(x = cost, y = value)) + #cost in x as well
+  geom_boxplot() +
+  scale_size_manual(values = c("with" = 1, "without" = 0)) +
+  #geom_jitter() +
+  facet_wrap(~name, scales = "free_y") +
+  xlab("Plasticity") +
+  #ggtitle('Effect of plasticity on adaptive evolution - climatic changes & cost context') +
+  theme_bw() +
+  #scale_color_manual(values=c("#542788", "#b35806"),
+                   #  name = "climatic change") +
+  theme(plot.title =
+          element_text(size = 14,
+                       face = 2,
+                       hjust = 0.5),
+        axis.title.x = element_text(size = 14),
+        axis.title.y = element_blank(),
+        legend.position = "bottom") 
+
 ########################################################
+#### ANOVA EXECUTION ####
 #### data to analysis ####
 path_general <- here('output/files_to_results/stable_slow_envi_without_cost')
 #path_general <- here('output/files_to_results/stable_slow_envi_with_cost')
@@ -217,182 +248,21 @@ if(length(path_files) >= 2){
 rm(list = ls()[(ls() == 'data') == FALSE])
 colnames(data)[1] <- c('plasticity')
 
-#### RESULT FINAL USING TIDYVERSE ####
-if('enviroment_type' %in% colnames(data) == FALSE){
-  result <- data %>% 
-    as_tibble() %>% 
-    filter(timesimulation > 100) %>%
-    select(-c(timesimulation)) %>% 
-    rename('Trait evolution' = traitevolution,
-           Diversification = diversif,
-           Speciation = speciation,
-           Extinction = extinction) %>%
-    group_by(plasticity, replications) %>% 
-    summarize_all(mean) %>% 
-    pivot_longer(col = -c(plasticity, replications)) %>%
-    mutate(plasticity = as.factor(plasticity)) %>% 
-    ggplot(aes(x = plasticity, y = value)) + 
-    geom_boxplot() + 
-    geom_jitter() +
-    facet_wrap(~name, scales = "free_y") + 
-    xlab("Plasticity") + ylab('Value') +
-    ggtitle('Effect of plasticity on adaptive evolution') + 
-    theme_bw() +
-    theme(plot.title = 
-            element_text(size = 16, 
-                         face = 2, 
-                         hjust = 0.5), 
-          axis.title.x = element_text(size = 14), 
-          axis.title.y = element_text(size = 14))
-} else if (data[1, 'enviroment_type'] == 'stable_low') {
-  plasticity_which_species_die <- data %>%
-    filter(alive_spec == 0) %>%
-    select(plasticity) %>%
-    group_by(plasticity) %>%
-    summarise(count = n()) %>%
-    filter(count == 10) %>% 
-    select(plasticity)
-  
-  plasticity_which_species_die <- as.numeric(unlist(plasticity_which_species_die))
-  
-  data_with_alives <- data[!data$plasticity %in% plasticity_which_species_die, ]
-  
-  data[is.na(data)] <- 0
-  
-  result <- data %>%
-    as_tibble() %>%
-    filter(timesimulation > 40) %>%
-    select(-c(timesimulation, enviroment_type, abundance, alive_spec, occupancy)) %>%
-    rename('Trait evolution' = traitevolution,
-           Diversification = diversif,
-           Speciation = speciation,
-           Extinction = extinction) %>%
-    group_by(plasticity, replications) %>%
-    summarize_all(mean) %>%
-    pivot_longer(col = -c(plasticity, replications)) %>%
-    mutate(plasticity = as.factor(plasticity)) %>%
-    ggplot(aes(x = plasticity, y = value)) +
-    geom_boxplot() +
-    geom_jitter() +
-    facet_wrap(~name, scales = "free_y") +
-    xlab("Plasticity") +
-    ggtitle('Effect of plasticity on adaptive evolution - slow climatic changes & cost presence') +
-    theme_bw() +
-    theme(plot.title =
-            element_text(size = 14,
-                         face = 2,
-                         hjust = 0.5),
-          axis.title.x = element_text(size = 14),
-          axis.title.y = element_blank())
-  
-  # ##### mechanisms ####
-  # result <- data %>%
-  #   as_tibble() %>%
-  #   filter(timesimulation > 40, abundance > 0) %>%
-  #   select(-c(timesimulation, enviroment_type, traitevolution, diversif, speciation, extinction, alive_spec)) %>%
-  #   rename(Abundance = abundance,
-  #          Occupancy = occupancy) %>%
-  #   group_by(plasticity, replications) %>%
-  #   summarize_all(mean) %>%
-  #   pivot_longer(col = -c(plasticity, replications)) %>%
-  #   mutate(plasticity = as.factor(plasticity)) %>%
-  #   ggplot(aes(x = plasticity, y = value)) +
-  #   geom_boxplot() +
-  #   geom_jitter() +
-  #   facet_wrap(~name, scales = "free_y") +
-  #   xlab("Plasticity") +
-  #   ggtitle('Mechanisms: Abundance and Occupancy in slow climatic changes & cost presence') +
-  #   theme_bw() +
-  #   theme(plot.title =
-  #           element_text(size = 14,
-  #                        face = 2,
-  #                        hjust = 0.5),
-  #         axis.title.x = element_text(size = 14),
-  #         axis.title.y = element_blank())
-} else if (data[1, 'enviroment_type'] == 'stable_fast'){
-  ### test to verify species alives major than 0 in stable fast simulations ###
-  
-  plasticity_which_species_die <- data %>%
-    filter(alive_spec == 0) %>%
-    select(plasticity) %>%
-    group_by(plasticity) %>%
-    summarise(count = n()) %>%
-    filter(count == 10) %>% 
-    select(plasticity)
-  
-  plasticity_which_species_die <- as.numeric(unlist(plasticity_which_species_die))
-  
-  data_with_alives <- data[!data$plasticity %in% plasticity_which_species_die, ]
-  
-  
-  data[is.na(data)] <- 0
-  
-  result <- data %>%
-    as_tibble() %>%
-    filter(timesimulation > 40) %>%
-    select(-c(timesimulation, enviroment_type, abundance, alive_spec, occupancy)) %>%
-    rename('Trait evolution' = traitevolution,
-           Diversification = diversif,
-           Speciation = speciation,
-           Extinction = extinction) %>%
-    group_by(plasticity, replications) %>%
-    summarize_all(mean) %>%
-    pivot_longer(col = -c(plasticity, replications)) %>%
-    mutate(plasticity = as.factor(plasticity)) %>%
-    ggplot(aes(x = plasticity, y = value)) +
-    geom_boxplot() +
-    geom_jitter() +
-    facet_wrap(~name, scales = "free_y") +
-    xlab("Plasticity") +
-    ggtitle('Effect of plasticity on adaptive evolution - fast climatic changes & cost presence') +
-    theme_bw() +
-    theme(plot.title =
-            element_text(size = 14,
-                         face = 2,
-                         hjust = 0.5),
-          axis.title.x = element_text(size = 14),
-          axis.title.y = element_blank())
-  
-  ##### mechanisms ####
-  # result <- data %>%
-  #   as_tibble() %>%
-  #   filter(timesimulation > 40, abundance > 0) %>%
-  #   select(-c(timesimulation, enviroment_type, traitevolution, diversif, speciation, extinction)) %>%
-  #   rename(Abundance = abundance,
-  #          Occupancy = occupancy) %>%
-  #   group_by(plasticity, replications) %>%
-  #   summarize_all(mean) %>%
-  #   pivot_longer(col = -c(plasticity, replications, alive_spec)) %>%
-  #   mutate(plasticity = as.factor(plasticity)) %>%
-  #   ggplot(aes(x = plasticity, y = value)) +
-  #   geom_boxplot() +
-  #   geom_jitter() +
-  #   facet_wrap(~name, scales = "free_y") +
-  #   xlab("Plasticity") +
-  #   ggtitle('Mechanisms: Abundance and Occupancy in fast climatic changes & cost presence') +
-  #   theme_bw() +
-  #   theme(plot.title =
-  #           element_text(size = 14,
-  #                        face = 2,
-  #                        hjust = 0.5),
-  #         axis.title.x = element_text(size = 14),
-  #         axis.title.y = element_blank())
 
-} else {
-  message('Error: this environmental type does not exist')
-}
+plasticity_which_species_die <- data %>%
+  filter(alive_spec == 0) %>%
+  select(plasticity) %>%
+  group_by(plasticity) %>%
+  summarise(count = n()) %>%
+  filter(count == 10) %>% 
+  select(plasticity)
 
-tiff(filename = file.path(here('output'), paste0("plot", "_", result[["labels"]][["y"]], "_", "plas", "all", ".tif")),
-     #width = 1000,
-     width = 800, #without abundance and occupancy
-     #height = 600,
-     height = 400, #abundance and occupancy
-     units = "px",
-     res = 100)
-print(result)
-dev.off()
+plasticity_which_species_die <- as.numeric(unlist(plasticity_which_species_die))
 
-#### ANOVA EXECUTION ####
+data_with_alives <- data[!data$plasticity %in% plasticity_which_species_die, ]
+
+data[is.na(data)] <- 0
+
 result_aov <- data %>% 
   as_tibble() %>% 
   filter(timesimulation > 40) %>%
@@ -407,19 +277,35 @@ summary(aov(result_aov$traitevolution ~ result_aov$plasticity))
 summary(aov(result_aov$speciation ~ result_aov$plasticity))
 summary(aov(result_aov$diversif ~ result_aov$plasticity))
 
-# manova_result <- manova(cbind(traitevolution, 
-#             extinction,
-#             diversif,
-#             speciation) ~ plasticity,
-#        data = result_aov)
-# 
-# summary(manova_result, tol = 0)
-
 ### tukey test ###
 TukeyHSD(aov(result_aov$traitevolution ~ result_aov$plasticity))
 TukeyHSD(aov(result_aov$speciation ~ result_aov$plasticity))
 TukeyHSD(aov(result_aov$extinction ~ result_aov$plasticity))
 TukeyHSD(aov(result_aov$diversif ~ result_aov$plasticity))
+
+### cost anova ###
+cost_aov <- new_data %>%
+  as_tibble() %>%
+  filter(timesimulation > 40) %>%
+  select(-c(timesimulation, abundance, alive_spec, occupancy)) %>%
+  rename('Trait evolution' = traitevolution,
+         Diversification = diversif,
+         Speciation = speciation,
+         Extinction = extinction) %>%
+  group_by(plasticity, enviroment_type, cost, replications) %>%
+  summarize_all(mean) %>%
+  pivot_longer(col = -c(plasticity, enviroment_type, cost, replications)) %>%
+  mutate(plasticity = as.factor(plasticity))
+
+spec <- cost_aov[cost_aov$name == "Speciation",]
+Ext <- cost_aov[cost_aov$name == "Extinction",]
+Div <- cost_aov[cost_aov$name == "Diversification",]
+Tra <- cost_aov[cost_aov$name == "Trait evolution",]
+
+summary(aov(spec$value ~ spec$cost))
+summary(aov(Ext$value ~ spec$cost))
+summary(aov(Div$value ~ spec$cost))
+summary(aov(Tra$value ~ spec$cost))
 
 #### BOX PLOT OF MEAN PER PLASTICITY WITH LIST ####
 unique_plasticity <- unique(data$plasticity)
