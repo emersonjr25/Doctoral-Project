@@ -75,8 +75,8 @@ config$gen3sis$speciation$divergence_threshold <- 10
 environment_type <- c('random', 'stable_low', 'stable_fast')
 environment_type_chose <- environment_type[2]
 
-plasti <- c(0, 0.05, 0.1, 0.15, 0.25, 0.5, 0.75, 1)
-cost_plasticity <- FALSE
+plasti <- 0.5
+cost_plasticity <- TRUE
 pos <- 0
 pos2 <- 0
 
@@ -162,6 +162,7 @@ for(p in 1:length(plasti)){
     val <- modify_input_temperature(val$config, val$data, val$vars, environment_type_chose)
    
      for (ti in val$vars$steps) {
+      if (ti == 970) break
       val$vars$n_new_sp_ti <- 0
       val$vars$n_ext_sp_ti <- 0
       val$vars$n_sp_added_ti <- 0
@@ -243,52 +244,23 @@ for(p in 1:length(plasti)){
       sgen3sis <- make_summary(val$config, val$data, val$vars,
                                 total_runtime, save_file = FALSE)
       
-       # raster_data <- cbind(val[["data"]][["landscape"]][["coordinates"]],
-       #       val[["data"]][["landscape"]][["environment"]][, 1])
-       # colnames(raster_data) <- c('x', 'y', 'temp')
-       # ras <- rasterFromXYZ(raster_data)
-       # max_ras <- 1
-       # min_ras <- 0
-       # sequencia <- seq(0.1, 1, 0.1)
-       # rc <- c('#0A2F51', '#4f75e8', '#ffa600', '#fe9700', '#fc8700', '#f97600',
-       #   '#f66504', '#f2520e', '#ed3c16', '#e81f1c')
-       # image(ras, col=rc, bty = "o", xlab = "", ylab = "", las=1, asp = 1)
-       # mtext(4, text="Temperature", line=1, cex=1.2)
-       # raster::plot(rasterFromXYZ(raster_data), legend.only=TRUE, add=TRUE,col=rc)
-       # # png(paste0(ti, 'raster.png'), width=600, height=350)
-       # # max_ras <- 1
-       # # min_ras <- 0
-       # # sequencia <- seq(0.1, 1, 0.1)
-       # # rc <- c('#0A2F51', '#4f75e8', '#ffa600', '#fe9700', '#fc8700', '#f97600',
-       # #         '#f66504', '#f2520e', '#ed3c16', '#e81f1c')
-       # # image(ras, col=rc, bty = "o", xlab = "", ylab = "", las=1, asp = 1)
-       # # mtext(4, text="Temperature", line=1, cex=1.2)
-       # # raster::plot(rasterFromXYZ(raster_data), legend.only=TRUE, add=TRUE,col=rc)
-       # # dev.off()
-       #  if(ti <= 999){
-       #   ras <- rasterFromXYZ(sgen3sis$summary$`richness-final`)
-       #   max_ras <- max(ras@data@values, na.rm=TRUE)
-       #   min_ras <- min(ras@data@values, na.rm=TRUE)
-       #   # rc <- color_richness(max(ras@data@values, na.rm=TRUE) + 1)
-       #   #terrain color
-       #   zerorichness_col <- "navajowhite3"
-       #   if (max_ras==0){ #if all extinct
-       #     rc <-  zerorichness_col
-       #   } else {
-       #     rc <- color_richness(max_ras)
-       #     if (min_ras==0){ #if there is zero-richness (i.e. inhabited sites)
-       #       rc <- c(zerorichness_col, rc)
-       #     }
-       #   }
-       #   image(ras, col=rc, bty = "o", xlab = "", ylab = "", las=1, asp = 1)
-       #   mtext(4, text="Final \u03B1 richness", line=1, cex=1.2)
-       #   raster::plot(rasterFromXYZ(sgen3sis$summary$`richness-final`), legend.only=TRUE, add=TRUE,col=rc)
-       # }
+       raster_data <- cbind(val[["data"]][["landscape"]][["coordinates"]],
+             val[["data"]][["landscape"]][["environment"]][, 1])
+       colnames(raster_data) <- c('x', 'y', 'temp')
+       ras <- rasterFromXYZ(raster_data)
+       max_ras <- 1
+       min_ras <- 0
+       sequencia <- seq(0.1, 1, 0.1)
+       rc <- c('#0A2F51', '#4f75e8', '#ffa600', '#fe9700', '#fc8700', '#f97600',
+         '#f66504', '#f2520e', '#ed3c16', '#e81f1c')
+       image(ras, col=rc, bty = "o", xlab = "", ylab = "", las=1, asp = 1)
+       mtext(4, text="Temperature", line=1, cex=1.2)
+       raster::plot(rasterFromXYZ(raster_data), legend.only=TRUE, add=TRUE,col=rc)
       
-      #plot_richness(data$all_species, data$landscape)
+      plot_richness(val$data$all_species, val$data$landscape)
       # example 1 plot over simulation
       # par(mfrow=c(2,3))
-      # plot_raster_single(data$landscape$environment[,"temp"], data$landscape, "temp", NA)
+      plot_raster_single(val$data$landscape$environment[,"temp"], val$data$landscape, "temp", NA)
       # plot_raster_single(data$landscape$environment[,"prec"], data$landscape, "prec", NA)
       # plot_raster_single(data$landscape$environment[,"area"], data$landscape, "area", NA)
       # plot_richness(data$all_species, data$landscape)
@@ -427,22 +399,22 @@ for(p in 1:length(plasti)){
       finalresult$alive_spec[pos] <- alive_species
     } 
   }
-  pos2 <- 0
-  traits_path <- paste0('traits', rep)
-  general_path <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", traits_path)
-  listfiles <- list.files(paste0("data/raw/WorldCenter/output/config_worldcenter/", traits_path))
-  filestoread <- length(listfiles)
-  path_temporary <- 0
-  for(l in 1:filestoread){
-    path_temporary[l] <- general_path
-  }
-  path_update <- 0
-  for(k in 1:length(path_temporary)){
-    path_update[[k]] <- paste(path_temporary[k], listfiles[k], sep = "/", collapse = "--")
-  }
-  file.remove(path_update, showWarnings = FALSE)
-  rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, trait_ancient_less_last, trait_new_less_first, list_difference, position_list)
+  # pos2 <- 0
+  # traits_path <- paste0('traits', rep)
+  # general_path <- here("data", "raw", "WorldCenter", "output", "config_worldcenter", traits_path)
+  # listfiles <- list.files(paste0("data/raw/WorldCenter/output/config_worldcenter/", traits_path))
+  # filestoread <- length(listfiles)
+  # path_temporary <- 0
+  # for(l in 1:filestoread){
+  #   path_temporary[l] <- general_path
+  # }
+  # path_update <- 0
+  # for(k in 1:length(path_temporary)){
+  #   path_update[[k]] <- paste(path_temporary[k], listfiles[k], sep = "/", collapse = "--")
+  # }
+  #file.remove(path_update, showWarnings = FALSE)
+ # rm(val, sgen3sis, rateextinction, ratespeciation, diversification, traitevolution, result, datafinal, trait_ancient_less_last, trait_new_less_first, list_difference, position_list)
 }
 
-path <- here("output")
-write.csv2(finalresult, file.path(path, paste0('rep_', rep, "_finalresult.csv")), row.names = FALSE)
+#path <- here("output")
+#write.csv2(finalresult, file.path(path, paste0('rep_', rep, "_finalresult.csv")), row.names = FALSE)
