@@ -10,6 +10,7 @@
 library(tidyverse)
 library(ggplot2)
 library(here)
+library(ggh4x)
 
 #### data to graph ####
 path_general <- here('output/files_to_results/stable_slow_envi_without_cost')
@@ -141,7 +142,16 @@ result <- new_data %>%
                        hjust = 0.5),
         axis.title.x = element_text(size = 14),
         axis.title.y = element_blank(),
-        legend.position = "bottom") 
+        legend.position = "bottom")  
+
+result <- result + ggh4x::facetted_pos_scales(
+  y = list(
+    scale_y_continuous(limits = c(-0.20, 0.05)),
+    scale_y_continuous(limits = c(0, 0.20)),
+    scale_y_continuous(limits = c(0, 0.05)),
+    scale_y_continuous(limits = c(0.00025, 0.00125))
+  )
+)
 
 tiff(filename = file.path(here('output'), paste0("plot", "_", result[["labels"]][["y"]], "_", "plas", "all", ".tif")),
      width = 800, 
@@ -178,6 +188,13 @@ mechanism <- new_data %>%
         axis.title.x = element_text(size = 14),
         axis.title.y = element_blank(),
         legend.position = "bottom") 
+
+mechanism <- mechanism + ggh4x::facetted_pos_scales(
+  y = list(
+    scale_y_continuous(limits = c(0, 100)),
+    scale_y_continuous(limits = c(0, 1))
+  )
+)
 
 tiff(filename = file.path(here('output'), paste0("mechanism_plot", "_", result[["labels"]][["y"]], "_", "plas", "all", ".tif")),
      width = 800, 
