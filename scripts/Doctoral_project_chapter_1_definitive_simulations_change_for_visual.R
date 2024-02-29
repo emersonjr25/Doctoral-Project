@@ -162,7 +162,7 @@ for(p in 1:length(plasti)){
     val <- modify_input_temperature(val$config, val$data, val$vars, environment_type_chose)
    
      for (ti in val$vars$steps) {
-      if (ti == 970) break
+      if (ti == 969) break
       val$vars$n_new_sp_ti <- 0
       val$vars$n_ext_sp_ti <- 0
       val$vars$n_sp_added_ti <- 0
@@ -244,32 +244,70 @@ for(p in 1:length(plasti)){
       sgen3sis <- make_summary(val$config, val$data, val$vars,
                                 total_runtime, save_file = FALSE)
       
-       raster_data <- cbind(val[["data"]][["landscape"]][["coordinates"]],
-             val[["data"]][["landscape"]][["environment"]][, 1])
-       colnames(raster_data) <- c('x', 'y', 'temp')
-       ras <- rasterFromXYZ(raster_data)
-       max_ras <- 1
-       min_ras <- 0
-       sequencia <- seq(0.1, 1, 0.1)
-       rc <- c('#0A2F51', '#4f75e8', '#ffa600', '#fe9700', '#fc8700', '#f97600',
-         '#f66504', '#f2520e', '#ed3c16', '#e81f1c')
-       image(ras, col=rc, bty = "o", xlab = "", ylab = "", las=1, asp = 1)
-       mtext(4, text="Temperature", line=1, cex=1.2)
-       raster::plot(rasterFromXYZ(raster_data), legend.only=TRUE, add=TRUE,col=rc)
-      
-      plot_richness(val$data$all_species, val$data$landscape)
-      # example 1 plot over simulation
-      # par(mfrow=c(2,3))
-      plot_raster_single(val$data$landscape$environment[,"temp"], val$data$landscape, "temp", NA)
-      # plot_raster_single(data$landscape$environment[,"prec"], data$landscape, "prec", NA)
-      # plot_raster_single(data$landscape$environment[,"area"], data$landscape, "area", NA)
-      # plot_richness(data$all_species, data$landscape)
-      # plot_species_presence(data$all_species[[1]], data$landscape)
-      # plot(0,type='n',axes=FALSE,ann=FALSE)
-      # mtext("STATUS",1)
-      # example 2 plot over simulations saving plots
-      # plot_richness(data$all_species, data$landscape)
-      # plot_landscape(data$landscape)
+      #### visualization ####
+    if(ti == 970){
+      tiff(filename = file.path(here('output'), paste0("temperature.tif")),
+           width = 1000, 
+           height = 600,
+           units = "px",
+           res = 150)
+      raster_data <- cbind(val[["data"]][["landscape"]][["coordinates"]],
+                           val[["data"]][["landscape"]][["environment"]][, 1])
+      colnames(raster_data) <- c('x', 'y', 'temp')
+      ras <- rasterFromXYZ(raster_data)
+      max_ras <- 1
+      min_ras <- 0
+      sequencia <- seq(0.1, 1, 0.1)
+      rc <- c('#0A2F51', '#4f75e8', '#ffa600', '#fe9700', '#fc8700', '#f97600',
+              '#f66504', '#f2520e', '#ed3c16', '#e81f1c')
+      image(ras, col=rc, bty = "o", xlab = "", ylab = "", las=1, asp = 1)
+      mtext(4, text="Temperature", line=1, cex=1.2)
+      raster::plot(rasterFromXYZ(raster_data), legend.only=TRUE, add=TRUE,col=rc)
+      dev.off()
+      ##plot_raster_single(val$data$landscape$environment[,"temp"], val$data$landscape, "temp", NA)
+      tiff(filename = file.path(here('output'), paste0("richness.tif")),
+           width = 800, 
+           height = 600,
+           units = "px",
+           res = 100)
+      print(plot_richness(val$data$all_species, val$data$landscape))
+      dev.off()
+      tiff(filename = file.path(here('output'), paste0("individual1.tif")),
+           width = 800, 
+           height = 600,
+           units = "px",
+           res = 100)
+      print(plot_species_presence(val$data$all_species[[1]], val$data$landscape))
+      dev.off()
+      tiff(filename = file.path(here('output'), paste0("individidual2.tif")),
+           width = 800, 
+           height = 600,
+           units = "px",
+           res = 100)
+      print(plot_species_presence(val$data$all_species[[2]], val$data$landscape))
+      dev.off()
+      tiff(filename = file.path(here('output'), paste0("individual3.tif")),
+           width = 800, 
+           height = 600,
+           units = "px",
+           res = 100)
+      print(plot_species_presence(val$data$all_species[[8]], val$data$landscape))
+      dev.off()
+      tiff(filename = file.path(here('output'), paste0("individual_and_abundance.tif")),
+           width = 800, 
+           height = 600,
+           units = "px",
+           res = 100)
+      print(plot_ranges(val$data$all_species, val$data$landscape, disturb=1))
+      dev.off()
+      tiff(filename = file.path(here('output'), paste0("summary.tif")),
+           width = 800, 
+           height = 600,
+           units = "px",
+           res = 100)
+      print(plot_summary(sgen3sis))
+      dev.off()
+    }
       ################## TRAIT EVOLUTION #####################
       
       ##### PATHWAY TO TRAITS DATA ####
