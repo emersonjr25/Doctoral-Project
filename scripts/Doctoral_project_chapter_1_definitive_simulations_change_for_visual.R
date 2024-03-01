@@ -247,10 +247,10 @@ for(p in 1:length(plasti)){
       #### visualization ####
     if(ti == 970){
       tiff(filename = file.path(here('output'), paste0("temperature.tif")),
-           width = 1000, 
+           width = 1200, 
            height = 600,
            units = "px",
-           res = 150)
+           res = 100)
       raster_data <- cbind(val[["data"]][["landscape"]][["coordinates"]],
                            val[["data"]][["landscape"]][["environment"]][, 1])
       colnames(raster_data) <- c('x', 'y', 'temp')
@@ -294,10 +294,10 @@ for(p in 1:length(plasti)){
       print(plot_species_presence(val$data$all_species[[8]], val$data$landscape))
       dev.off()
       tiff(filename = file.path(here('output'), paste0("individual_and_abundance.tif")),
-           width = 800, 
+           width = 1000, 
            height = 600,
            units = "px",
-           res = 100)
+           res = 180)
       print(plot_ranges(val$data$all_species, val$data$landscape, disturb=1))
       dev.off()
       tiff(filename = file.path(here('output'), paste0("summary.tif")),
