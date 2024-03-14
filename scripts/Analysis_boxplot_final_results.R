@@ -98,7 +98,7 @@ data_general_four$cost <- "with"
 new_data <- rbind(data_general_one, data_general_two,
                   data_general_three, data_general_four)
 new_data$enviroment_type[new_data$enviroment_type == "stable_fast"] <- "fast"
-new_data$enviroment_type[new_data$enviroment_type == "stable_low"] <- "low"
+new_data$enviroment_type[new_data$enviroment_type == "stable_low"] <- "slow"
 
 plasticity_which_species_die <- new_data %>%
   filter(alive_spec == 0) %>%
