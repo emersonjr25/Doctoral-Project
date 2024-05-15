@@ -36,10 +36,11 @@ if(length(path_files) >= 2){
 }
 colnames(data)[1] <- c('plasticity')
 
-#### VISUALIZATION GRAPH BEFORE SAVE ####
-colors <- c('#e7e1ef','#d4b9da','#fcc5c0','#fa9fb5','#f768a1','#dd3497','#ae017e','#7a0177','#49006a')
-ggplot(data = data, aes(timesimulation, speciation, colour = plasticity, group = plasticity)) + 
-  labs(title = paste("Speciation along time with plasticity")) + theme_bw() +
+plasticity_1 <- data |> 
+  filter(plasticity == 0.5)
+
+ggplot(data = plasticity_1, aes(timesimulation, speciation, colour = replications, group = replications)) + 
+  labs(title = paste("Speciation along time with 0.5 plasticity")) + theme_bw() +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
         plot.title = element_text(size = 16, hjust = 0.5),
@@ -48,8 +49,8 @@ ggplot(data = data, aes(timesimulation, speciation, colour = plasticity, group =
   scale_color_gradientn(colours = colors, na.value = NA) +
   geom_smooth(se = FALSE)
 
-ggplot(data = data, aes(timesimulation, extinction, colour = plasticity, group = plasticity)) + 
-  labs(title = paste("Extinction along time with plasticity")) + theme_bw() +
+ggplot(data = plasticity_1, aes(timesimulation, extinction, colour = replications, group = replications)) + 
+  labs(title = paste("Extinction along time with 0.5 plasticity")) + theme_bw() +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
         plot.title = element_text(size = 16, hjust = 0.5),
@@ -58,18 +59,8 @@ ggplot(data = data, aes(timesimulation, extinction, colour = plasticity, group =
   scale_color_gradientn(colours = colors, na.value = NA) +
   geom_smooth(se = FALSE)
 
-ggplot(data = data, aes(timesimulation, diversif, colour = plasticity, group = plasticity)) + 
-  labs(title = paste("Diversification along time with plasticity - all data")) + theme_bw() +
-  theme(panel.border = element_blank(), panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
-        plot.title = element_text(size = 16, hjust = 0.5),
-        axis.text = element_text(size = 12),
-        axis.title = element_text(size = 14)) + 
-  scale_color_gradientn(colours = colors, na.value = NA) +
-  geom_smooth(se = FALSE)
-
-ggplot(data = data, aes(timesimulation, traitevolution, colour = plasticity, group = plasticity)) + 
-  labs(title = paste("Trait evolution along time with plasticity - all data")) + theme_bw() +
+ggplot(data = plasticity_1, aes(timesimulation, traitevolution, colour = replications, group = replications)) + 
+  labs(title = paste("Trait Evolution along time with 0.5 plasticity")) + theme_bw() +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
         plot.title = element_text(size = 16, hjust = 0.5),
