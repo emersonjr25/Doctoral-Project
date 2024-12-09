@@ -92,6 +92,37 @@ finalresult <- data.frame(plasticity = runif(quantitity_rep * length(plasti) * t
                           occupancy = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0),
                           alive_spec = runif(quantitity_rep * length(plasti) * timesteps_total, 0, 0))
 
+init_attribute_ancestor_distribution <- function (config, data, vars) {
+  browser()
+  oldpar <- par(no.readonly = TRUE)
+  on.exit(par(oldpar))
+  all_species <- config$gen3sis$initialization$create_ancestor_species(data$landscape, 
+                                                                       config)
+  for (i in 1:length(all_species)) {
+    force(i)
+    all_species[[i]][["id"]] <- as.character(i)
+  }
+  data$all_species <- all_species
+  grDevices::pdf(file = file.path(config$directories$output, 
+                                  "starting_richness.pdf"), width = 10, height = 6)
+  par(mfrow = c(1, 1))
+  plot_richness(all_species, data$landscape)
+  grDevices::dev.off()
+  grDevices::pdf(file = file.path(config$directories$output, 
+                                  "starting_ranges.pdf"), width = 10, height = 6)
+  par(mfrow = c(1, 1))
+  plot_ranges(all_species, data$landscape)
+  grDevices::dev.off()
+  n_sp <- length(data$all_species)
+  vars$n_sp <- n_sp
+  vars$n_sp_alive <- n_sp
+  data$phy <- data.frame(Ancestor = rep(1, n_sp), Descendent = c(1:n_sp), 
+                         Speciation.Time = config$gen3sis$general$start_time, 
+                         Extinction.Time = rep(config$gen3sis$general$start_time, 
+                                               n_sp), Speciation.Type = c("ROOT", rep("GENETIC", 
+                                                                                      n_sp - 1)))
+  return(list(config = config, data = data, vars = vars))
+}
 
 #### EXECUTION SIMULATION ####
 for(p in 1:length(plasti)){

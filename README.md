@@ -1,5 +1,8 @@
 # Plasticity and Evolution Study Readme
 
+## Article
+This work has been published in the journal Ecological Modelling (https://doi.org/10.1016/j.ecolmodel.2024.110983). I invite you to read the conclusions of this article.
+
 ## Overview
 This code is part of a computational simulation aimed at investigating the effect of plasticity on adaptive evolution. The study focuses on diversification and trait evolution in the context of plasticity. The simulation utilizes the `gen3sis` package and employs methods to input, modify, and run the model.
 

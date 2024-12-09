@@ -74,6 +74,7 @@ initial_abundance = 1
 # defines the initial species traits and ranges
 # place species within rectangle, our case entire globe
 create_ancestor_species <- function(landscape, config) {
+  browser()
    range <- c(-180, 180, -90, 90)
   co <- landscape$coordinates
   selection <- co[, "x"] >= range[1] &
